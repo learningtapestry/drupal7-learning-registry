@@ -85,17 +85,44 @@ function learningregistry_content_form_submit($form, $form_state) {
   );
   // file_put_contents("/tmp/foo.json", $json);
   curl_setopt_array($ch, $curl_options);
-  $result=curl_exec($ch);
-  $error = curl_error($ch);
+  // $result=curl_exec($ch);
+  // $error = curl_error($ch);
   curl_close($ch);
   
-  dsm($result);
+  //dsm($result);
   $result_array = json_decode($result);
   // dsm($result_array);
   
-  dsm($error);
+  //dsm($error);
+  
+  $header = array();
+  $header[] = 'test';
+  $header[] = 'test 2';
+  $header[] = 'test 3';
+  
+  $rows = array(
+    // Simple row
+    array(
+      'Cell 1', 'Cell 2', 'Cell 3'
+    ),
+    // Row with attributes on the row and some of its cells.
+    array(
+      'data' => array('Cell 1', array('data' => 'Cell 2', 'colspan' => 2)), 'class' => 'funky'
+    )
+  );
+  
+  
+  $output = theme_table($header, $rows);
+  //theme('table', $headers, $result_array);
+  
+  //drupal_render($output);
+  //echo $output;
+  
+  // I'd like to output results here!!
   
 }
+
+
 
 
 // from - YYYY-MM-DD
