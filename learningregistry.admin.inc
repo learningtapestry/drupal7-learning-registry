@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Administration callbacks for the lr_publish module
+ * Administration callbacks for the learningregistry module
  */
 
 // much of this is lifted from the "Creating Drupal 6.x modules" docs on the
@@ -11,12 +11,12 @@
 // 978-1430209898
 
 /**
- * Form builder. Configure lr_publish module.
+ * Form builder. Configure learningregistry module.
  *
  * @ingroup forms
  * @see system_settings_form().
  */
-function lr_publish_admin_settings() {
+function learningregistry_admin_settings() {
   // Get node types with internal names as keys and "friendly" names as
   // values.
   // $options = node_get_types('names');
@@ -33,60 +33,60 @@ function lr_publish_admin_settings() {
 
   $form = array();
 
-  $form['lr_publish_node_url'] = array(
+  $form['learningregistry_node_url'] = array(
     '#type' => 'textfield',
     '#title' => t('Learning Registry node URL'),
     '#size' => 128,
     '#maxlength' => 1024,
-    '#default_value' => variable_get('lr_publish_node_url', NULL),
-    '#description' => t('The URL of the Learning Registry node where data will be published.'),
+    '#default_value' => variable_get('learningregistry_node_url', NULL),
+    '#description' => t('The URL of the Learning Registry node.'),
     '#required' => TRUE,
   );
 
   // TODO: figure out if we need to validate this information.
-  $form['lr_publish_submitter'] = array(
+  $form['learningregistry_submitter'] = array(
     '#type' => 'textfield',
     '#title' => t('Submitter'),
     '#size' => 128,
     '#maxlength' => 1024,
-    '#default_value' => variable_get('lr_publish_submitter', NULL),
+    '#default_value' => variable_get('learningregistry_submitter', NULL),
     '#description' => t('Identifies the submitter of a Learning Registry resource document.'),
     '#required' => TRUE,
   );
   
-  $form['lr_publish_tos'] = array(
+  $form['learningregistry_tos'] = array(
     '#type' => 'textfield',
     '#title' => t('Terms of Service URL'),
     '#size' => 128,
     '#maxlength' => 1024,
-    '#default_value' => variable_get('lr_publish_tos', NULL),
+    '#default_value' => variable_get('learningregistry_tos', NULL),
     '#description' => t('Specifies the terms of service URL for the items submitted to the Learning Registry.'),
     '#required' => TRUE,
   );
 
-  $form['lr_publish_queuing'] = array(
+  $form['learningregistry_queuing'] = array(
     '#type' => 'radios',
     '#title' => t('Immediate or Queued Publishing'),
-    '#default_value' => variable_get('lr_publish_queuing', 0),
+    '#default_value' => variable_get('learningregistry_queuing', 0),
     '#description' => t('Selects if submissions to the Learning Registry will publish immediately or queued in a batch to publish when cron executes.'),
     '#options' => array(t('Immediate'), t('Queued')),
     '#required' => TRUE,
   );
   
-  $form['lr_publish_url_type'] = array(
+  $form['learningregistry_url_type'] = array(
     '#type' => 'radios',
     '#title' => t('Publish URL Type'),
-    '#default_value' => variable_get('lr_publish_url_type', 0),
+    '#default_value' => variable_get('learningregistry_url_type', 0),
     '#description' => t('Determines the URL to the published Drupal node.  Node ID is the internal Drupal node (node/1234).  Node alias is the alias provided for the node (blog/this-is-a-test).'),
     '#options' => array(t('Node ID'), t('Node alias')),
     '#required' => TRUE,
   );
   
-  $form['lr_publish_node_types'] = array(
+  $form['learningregistry_node_types'] = array(
     '#type' => 'checkboxes',
     '#title' => t('Publish metadata for these content types'),
     '#options' => $type_names,
-    '#default_value' => variable_get('lr_publish_node_types', array()),
+    '#default_value' => variable_get('learningregistry_node_types', array()),
     '#description' => t('Metadata for these node types will be published to the specified Learning Registry node.'),
   );
 
@@ -102,7 +102,7 @@ function lr_publish_admin_settings() {
             $cck_checkboxes[$cck_field['field_name']] = $cck_field['widget']['label'];
           }
 
-        $form['lr_publish_node_type_fieldset_' . $type_key] = array(
+        $form['learningregistry_node_type_fieldset_' . $type_key] = array(
           '#type' => 'fieldset',
           '#title' => t($type_name),
           '#description' => t('Metadata for these CCK fields will be published to the specified Learning Registry node.'),
@@ -112,11 +112,11 @@ function lr_publish_admin_settings() {
 
 
 
-        $form['lr_publish_node_type_fieldset_' . $type_key]['lr_publish_node_type_option_' . $type_key] = array(
+        $form['learningregistry_node_type_fieldset_' . $type_key]['learningregistry_node_type_option_' . $type_key] = array(
           '#type' => 'checkboxes',
           '#title' => t('Publish these CCK fields for ' . $type_name),
           '#options' => $cck_checkboxes,
-          '#default_value' => variable_get('lr_publish_node_type_option_' . $type_key, array()),
+          '#default_value' => variable_get('learningregistry_node_type_option_' . $type_key, array()),
         );
       }
     }
@@ -126,16 +126,16 @@ function lr_publish_admin_settings() {
 
 
 /**
- * Validate the lr_publish configuration form.
+ * Validate the learningregistry configuration form.
  *
  * @param array $form
  *   The array that describes the configuration form.
  * @param array $form_state
  *   The values of the array.
  */
-function lr_publish_admin_settings_validate($form, $form_state) {
-  $lr_node_url = $form_state['values']['lr_publish_node_url'];
+function learningregistry_admin_settings_validate($form, $form_state) {
+  $lr_node_url = $form_state['values']['learningregistry_node_url'];
   if (!valid_url($lr_node_url, TRUE)) {
-    form_set_error('lr_publish_node_url', t('Please provide a valid URL.'));
+    form_set_error('learningregistry_node_url', t('Please provide a valid URL.'));
   }
 }

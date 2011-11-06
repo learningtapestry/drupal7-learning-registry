@@ -20,42 +20,42 @@
  * @return string $help
  *   A string that contains the help text for the specified path.
  */
-function lr_publish_help($path, $arg) {
+function learningregistry_help($path, $arg) {
   $output = '';
   switch ($path) {
-    case "admin/help#lr_publish":
+    case "admin/help#learningregistry":
       $output = '<p>' .
         t("Pushes Drupal node data to the specified Learning Registry node.") .
         '<p>';
       break;
   }
   return $output;
-} // function lr_publish_help
+} // function learningregistry_help
 
 
 /**
  * Valid permissions for this module
  *
  * @return array
- *   An array of valid permissions for the lr_publish module.
+ *   An array of valid permissions for the learningregistry module.
  */
-function lr_publish_perm() {
-  return array('administer lr_publish_perm');
-} // function lr_publish_perm
+function learningregistry_perm() {
+  return array('administer learningregistry_perm');
+} // function learningregistry_perm
 
 
 /**
  * Implementation of hook_menu().
  */
-function lr_publish_menu() {
-  $items['admin/settings/lr_publish'] = array(
-    'title' => t('LR publish settings'),
-    'description' => t('Publish selected node metadata to a Learning Registry node.'),
+function learningregistry_menu() {
+  $items['admin/settings/learningregistry'] = array(
+    'title' => t('Learning Registry settings'),
+    'description' => t('Settings for publishing and receiving metadata to a Learning Registry node.'),
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('lr_publish_admin_settings'),
+    'page arguments' => array('learningregistry_admin_settings'),
     'access arguments' => array('access administration pages'),
     'type' => MENU_NORMAL_ITEM,
-    'file' => 'lr_publish.admin.inc',
+    'file' => 'learningregistry.admin.inc',
   );
 
   return $items;
@@ -65,31 +65,31 @@ function lr_publish_menu() {
 /**
  * Implementation of hook_nodeapi()
  */
-function lr_publish_nodeapi(&$node, $op) {
-  $nodes_to_publish = variable_get('lr_publish_node_types', array());
+function learningregistry_nodeapi(&$node, $op) {
+  $nodes_to_publish = variable_get('learningregistry_node_types', array());
   if (in_array($node->type, $nodes_to_publish) &&
     $node->nid);
   switch($op) {
     case 'insert':
       if ($node->status == 1) {
         
-        if (variable_get('lr_publish_queuing', 0) == 1) {
+        if (variable_get('learningregistry_queuing', 0) == 1) {
          _lr_queue_node($node->nid); 
         } else {
-          _lr_publish_publish($node);
+          _learningregistry_publish($node);
         }
       }
       break;
     // case 'update':
     //   if ($node->status == 0) {
-    //     _lr_publish_set_deleted($node);
+    //     _learningregistry_set_deleted($node);
     //   }
     //   else if ($node->status == 1) {
-    //     _lr_publish_update($node);
+    //     _learningregistry_update($node);
     //   }
     //   break;
     // case 'delete':
-    //   _lr_publish_set_deleted($node);
+    //   _learningregistry_set_deleted($node);
     //   break;
   }
 }
@@ -98,16 +98,16 @@ function lr_publish_nodeapi(&$node, $op) {
 /**
  * Implementation of hook_cron()
  * 
- * Reads unprocessed nodes from lr_publish table and attempts to push them to
+ * Reads unprocessed nodes from learningregistry table and attempts to push them to
  * the Learning Registry.
  */
-function lr_publish_cron() {
+function learningregistry_cron() {
   // Pull node IDs of records queued for processing
-  $records = db_query('SELECT nid FROM {lr_publish} WHERE queued = 1');
+  $records = db_query('SELECT nid FROM {learningregistry} WHERE queued = 1');
 
   while ($record = db_fetch_array($records)) {
     $node = node_load($record["nid"], NULL, TRUE);
-    _lr_publish_publish($node, TRUE);
+    _learningregistry_publish($node, TRUE);
   }
   
 }
@@ -117,32 +117,32 @@ function lr_publish_cron() {
  * 
  * Allows for publishing using the bulk operations content page.
  */
-function lr_publish_node_operations() {
+function learningregistry_node_operations() {
   return array(
     'process_orders' => array(
     'label' => 'Publish to Learning Registry',
-    'callback' => '_lr_publish_bulk_operations_publish',
+    'callback' => '_learningregistry_bulk_operations_publish',
     'disabled' => TRUE,
   ));
 }
 
 /**
- * Callback function for lr_publish_node_operations()
+ * Callback function for learningregistry_node_operations()
  */
-function _lr_publish_bulk_operations_publish($nids) {
+function _learningregistry_bulk_operations_publish($nids) {
   $success = 0; $failure = 0;
   
   foreach ($nids as $nid) {
     // Load the node
     $node = node_load($nid);
     // Send it to the Learning Registry
-    $result = _lr_publish_publish($node, TRUE);
+    $result = _learningregistry_publish($node, TRUE);
     
     // If successful, update the count.
     if ($result) { $success++; } 
   }
   
-  if (variable_get('lr_publish_queuing', 0) == 1)
+  if (variable_get('learningregistry_queuing', 0) == 1)
     drupal_set_message($success.' nodes queued to the registry. '.$failure.' nodes failed.' );
  else
     drupal_set_message($success.' nodes published to the registry. '.$failure.' nodes failed.' );
@@ -162,15 +162,15 @@ function _lr_publish_bulk_operations_publish($nids) {
  * @return bool $result
  *   Returns TRUE if operation was successful, FALSE if not.
  */
-function _lr_publish_publish(&$node, $headless = FALSE) {
+function _learningregistry_publish(&$node, $headless = FALSE) {
   $content_info = _lr_get_content_info(&$node);
   $resource_data = _lr_def_resource_data($content_info);
   $empty_submission = _lr_build_envelope();
-  //watchdog('lr_publish', json_encode($empty_submission));
+  //watchdog('learningregistry', json_encode($empty_submission));
   $prepared_submission =
     _lr_add_resource_data_to_submission($empty_submission, $resource_data);
   $resource_post_payload = json_encode($prepared_submission);
-  //watchdog('lr_publish', $resource_post_payload, array(), WATCHDOG_DEBUG);
+  //watchdog('learningregistry', $resource_post_payload, array(), WATCHDOG_DEBUG);
 
   $result = _lr_send_to_registry($node->nid, $resource_post_payload, 0, $headless);
   return $result;
@@ -185,7 +185,7 @@ function _lr_publish_publish(&$node, $headless = FALSE) {
  *   anything, only read from the node object reference since the node
  *   reference allows us to edit the node content.
  */
-function _lr_publish_set_deleted(&$node) {
+function _learningregistry_set_deleted(&$node) {
   return;
 }
 
@@ -198,7 +198,7 @@ function _lr_publish_set_deleted(&$node) {
  *   anything, only read from the node object reference since the node
  *   reference allows us to edit the node content.
  */
-function _lr_publish_update(&$node) {
+function _learningregistry_update(&$node) {
   return;
 }
 
@@ -216,8 +216,8 @@ function _lr_get_content_info(&$node) {
   // TODO: correctly specify resource data type
   // resource_data_type is currently hardcoded, will be fixed in a later version
   $content_info['resource_data_type'] = 'metadata';
-  $content_info['submitter'] = variable_get('lr_publish_submitter', NULL);
-  $content_info['tos'] = variable_get('lr_publish_tos', NULL);
+  $content_info['submitter'] = variable_get('learningregistry_submitter', NULL);
+  $content_info['tos'] = variable_get('learningregistry_tos', NULL);
   
   // currently set curator and submitter the same, once we get a better sense
   // of what each field means, this will change
@@ -246,7 +246,7 @@ function _lr_get_content_info(&$node) {
 function _lr_get_node_url(&$node) {
   
   // URL Type is an admin setting.  Return either alias or node ID.
-  if (variable_get('lr_publish_url_type', 0) == 1)
+  if (variable_get('learningregistry_url_type', 0) == 1)
     return url("node/".$node->nid, array("absolute" => TRUE, "alias" => FALSE));
   else
     return url("node/".$node->nid, array("absolute" => TRUE, "alias" => TRUE));
@@ -288,7 +288,7 @@ function _lr_send_to_registry($nid, $json, $service_num = 0, $headless = FALSE) 
     // TODO: allow more than publish! Currently hardcoding the publish
     // bit. this function needs to take an argument to add the appropriate
     // service at the end of the curl URL
-    CURLOPT_URL => variable_get('lr_publish_node_url', NULL) . "/publish",
+    CURLOPT_URL => variable_get('learningregistry_node_url', NULL) . "/publish",
     CURLOPT_POST => TRUE,
     CURLOPT_POSTFIELDS => $json,
     CURLOPT_RETURNTRANSFER => 1,
@@ -308,7 +308,7 @@ function _lr_send_to_registry($nid, $json, $service_num = 0, $headless = FALSE) 
     $result = _lr_update_submission_status($nid, $result);
     
     if (!$headless) {
-      $submissionURL = variable_get('lr_publish_node_url', NULL)."/harvest/getrecord?by_doc_ID=TRUE&request_ID=".$result;
+      $submissionURL = variable_get('learningregistry_node_url', NULL)."/harvest/getrecord?by_doc_ID=TRUE&request_ID=".$result;
       drupal_set_message(sprintf( 'Node ID %d published to the registry. <a href="%s" target="_new">(View node on registry.)</a>', $nid, $submissionURL), "status");
     }
     
@@ -459,7 +459,7 @@ function _lr_add_resource_data_to_submission($submission, $resource_data) {
 
 
 /**
- * Adds a status record in the lr_publish table to record submission
+ * Adds a status record in the learningregistry table to record submission
  *
  * @param int $nid
  *    Drupal node ID of item to submit.
@@ -469,23 +469,23 @@ function _lr_add_resource_data_to_submission($submission, $resource_data) {
  */
 function _lr_update_submission_status($nid, $result) {
   //TODO:  Refactor candidate.  This method has two responsiblities:  a.) to determine if the node was published to
-  // the Learning Registry, b.) then to update that status to the lr_publish table.  The first step should stand on its own.
+  // the Learning Registry, b.) then to update that status to the learningregistry table.  The first step should stand on its own.
   if ($result) {
 
     $result_array = json_decode($result);
 
     if ($result_array->document_results[0]->OK) {
     // check to see if submission already in database
-      $submission_check_result = db_query('SELECT * FROM {lr_publish} WHERE nid = %d', $nid);
+      $submission_check_result = db_query('SELECT * FROM {learningregistry} WHERE nid = %d', $nid);
       $submission_record = db_fetch_object($submission_check_result);
       
       // Check if this has been published before.  If no, set the published timestamp.  Else,
       // the updated timestamp.
       if ($submission_record) {
         if ($submission_record->published==0) {
-          $sql = 'UPDATE {lr_publish} SET published=%d, docid=\'%s\', queued=0 WHERE nid = %d';
+          $sql = 'UPDATE {learningregistry} SET published=%d, docid=\'%s\', queued=0 WHERE nid = %d';
         } else {
-          $sql = 'UPDATE {lr_publish} SET updated=%d, docid=\'%s\', queued=0 WHERE nid = %d';
+          $sql = 'UPDATE {learningregistry} SET updated=%d, docid=\'%s\', queued=0 WHERE nid = %d';
         }
         
         db_query($sql, time(), $result_array->document_results[0]->doc_ID, $nid);
@@ -500,12 +500,12 @@ function _lr_update_submission_status($nid, $result) {
             'docid' => $result_array->document_results[0]->doc_ID,
         );
         // write it to the database
-        drupal_write_record('lr_publish', $data);
+        drupal_write_record('learningregistry', $data);
       }
       return $result_array->document_results[0]->doc_ID;
     }
     else {
-      watchdog('lr_publish', "Error publishing node ID %nid to the registry.  Full response: %msg",
+      watchdog('learningregistry', "Error publishing node ID %nid to the registry.  Full response: %msg",
           array ('%nid' => $nid,'%msg' => $result));
       return false;
     }
@@ -561,7 +561,7 @@ function _lr_parse_result($result, $error) {
   return $submission_result;
 }
 /**
- * Queues a node for submission to the LR via the lr_publish table
+ * Queues a node for submission to the LR via the learningregistry table
  *
  * @param int $nid
  *    Drupal node ID of item to submit.
@@ -569,14 +569,14 @@ function _lr_parse_result($result, $error) {
 function _lr_queue_node($nid) {
   
   // Check if this record exists in submission table
-  $submission_check_result = db_query('SELECT * FROM {lr_publish} WHERE nid = %d', $nid);
+  $submission_check_result = db_query('SELECT * FROM {learningregistry} WHERE nid = %d', $nid);
   $submission_record = db_fetch_object($submission_check_result);
   
   // If exists, update, else insert new record
   if ($submission_record) {
-    $sql = 'UPDATE {lr_publish} SET queued=1 WHERE nid = %d'; 
+    $sql = 'UPDATE {learningregistry} SET queued=1 WHERE nid = %d'; 
   } else {
-    $sql = 'INSERT INTO {lr_publish} (nid, queued) VALUES (%d, 1)';    
+    $sql = 'INSERT INTO {learningregistry} (nid, queued) VALUES (%d, 1)';    
   }
 
   // Write to database

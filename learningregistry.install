@@ -1,20 +1,20 @@
 <?php
 /**
  * @file
- * Installation file for the lr_publish module.
+ * Installation file for the learningregistry module.
  *
- * This installation file sets up the database for the lr_publish module.
+ * This installation file sets up the database for the learningregistry module.
  */
 
 /**
  * Implementation of hook_install()
  */
-function lr_publish_install() {
-  drupal_set_message((t('Installing lr_publish.')));
-  drupal_install_schema('lr_publish');
+function learningregistry_install() {
+  drupal_set_message((t('Installing learningregistry.')));
+  drupal_install_schema('learningregistry');
 }
 
-function lr_publish_enable() {
+function learningregistry_enable() {
   // set module weight lower than workflow or pathauto. This query lifted from
   // http://drupal.org/node/110238#comment-3567274
   $workFlowWeight =
@@ -23,17 +23,17 @@ function lr_publish_enable() {
     db_result(db_query("SELECT weight FROM {system} WHERE type = 'module' AND name = 'pathauto'"));
   if ($pathautoWeight > $workFlowWeight) { $weight=$pathautoWeight; } else { $weight=$workFlowWeight; }
   
-  db_query("UPDATE {system} SET weight = %d WHERE type = 'module' AND name = 'lr_publish'", $weight + 1);
+  db_query("UPDATE {system} SET weight = %d WHERE type = 'module' AND name = 'learningregistry'", $weight + 1);
 }
 
 /**
  * Implementation of hook_uninstall()
  */
-function lr_publish_uninstall() {
-  drupal_uninstall_schema('lr_publish');
+function learningregistry_uninstall() {
+  drupal_uninstall_schema('learningregistry');
   // remove any configuration values. shamelessly stolen from
   // http://api.drupal.org/api/drupal/includes--bootstrap.inc/function/variable_del/6#comment-10934
-  $result = db_query("SELECT name from {variable} WHERE name LIKE 'lr_publish_%'");
+  $result = db_query("SELECT name from {variable} WHERE name LIKE 'learningregistry_%'");
   while ($var_name = db_result($result)) {
     variable_del($var_name);
   }
@@ -45,8 +45,8 @@ function lr_publish_uninstall() {
  * @returns $schema
  *   An array providing the DB schema definition required by the schema API.
  */
-function lr_publish_schema() {
-  $schema['lr_publish'] = array(
+function learningregistry_schema() {
+  $schema['learningregistry'] = array(
     'description' => t('Tracks which Drupal nodes have been published to the registry.'),
     'fields' => array(
       'nid' => array(
