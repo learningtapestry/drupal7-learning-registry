@@ -125,16 +125,20 @@ function _learningregistry_content_form_values($form_values = array()) {
     $header[] = 'Resource';
     $header[] = 'Submitter';
     $header[] = 'Description';
+    $header[] = 'Create Date';    
 
     $rows = array();
     $docs = $result_array->documents;
-    // dsm($docs);
+    dsm($docs);
 
     foreach ($docs as $row) {
-      //$rows[] = array($row->resource_data_description->resource_locator, $row->resource_data_description->identity->submitter);
-      //$desc = new SimpleXMLElement($row->resource_data_description->resource_data);
       $url = $row->resource_data_description->resource_locator;
       $payload = $row->resource_data_description->resource_data;
+      $submitter = $row->resource_data_description->identity->submitter;
+      $create_date = $row->resource_data_description->create_timestamp;
+      //$create_date = format_date($create_date, 'small');
+     $create_date = substr($create_date, 0, 10);
+      
 
       $title = "";
 
@@ -151,7 +155,7 @@ function _learningregistry_content_form_values($form_values = array()) {
 
       $link = "<a target='_blank' href='" . $url . "'>" . $title . "</a>";
 
-      $rows[] = array($link, $row->resource_data_description->identity->submitter, $desc);
+      $rows[] = array($link, $submitter, $desc, $create_date);
     }
 
     $output = theme_table($header, $rows);
