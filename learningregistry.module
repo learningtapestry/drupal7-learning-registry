@@ -40,7 +40,7 @@ function learningregistry_help($path, $arg) {
  *   An array of valid permissions for the learningregistry module.
  */
 function learningregistry_perm() {
-  return array('administer learningregistry_perm', 'search learningregistry');
+  return array('administer learningregistry', 'access learningregistry');
 } // function learningregistry_perm
 
 
@@ -53,7 +53,7 @@ function learningregistry_menu() {
     'description' => t('Settings for publishing and receiving metadata to a Learning Registry node.'),
     'page callback' => 'drupal_get_form',
     'page arguments' => array('learningregistry_admin_settings'),
-    'access arguments' => array('access administration pages'),
+    'access arguments' => array('administer learningregistry'),
     'type' => MENU_NORMAL_ITEM,
     'file' => 'learningregistry.admin.inc',
   );
@@ -63,7 +63,7 @@ function learningregistry_menu() {
     'description' => t('Settings for publishing and receiving metadata to a Learning Registry node.'),
     'page callback' => 'drupal_get_form',
     'page arguments' => array('learningregistry_content_form'),
-    'access arguments' => array('search learningregistry'),
+    'access arguments' => array('access learningregistry'),
     'type' => MENU_NORMAL_ITEM,
     'file' => 'learningregistry.content.inc',
   );
