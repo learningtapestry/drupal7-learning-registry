@@ -28,7 +28,7 @@ function learningregistry_content_form($form_values = NULL) {
   $form['learningregistry']['search_identity'] = array(
       '#type' => 'textfield',
       '#title' => t('Identity'),
-      '#size' => 128,
+      '#size' => 72,
       '#maxlength' => 1024,
       '#description' => t('The name of a person or organization that is the submitter, author, owner, or curator.'),
   );
@@ -36,9 +36,9 @@ function learningregistry_content_form($form_values = NULL) {
   $form['learningregistry']['search_tags'] = array(
       '#type' => 'textfield',
       '#title' => t('Tags'),
-      '#size' => 128,
+      '#size' => 72,
       '#maxlength' => 1024,
-      '#description' => t('The URL of the Learning Registry node.'),
+      '#description' => t('List of tags, matched against keys, payload_schema, or resource_data_type.'),
   );
 
   $form['learningregistry']['search_from'] = array(
@@ -46,7 +46,7 @@ function learningregistry_content_form($form_values = NULL) {
       '#title' => t('From date'),
       '#size' => 24,
       '#maxlength' => 128,
-      '#description' => t('The URL of the Learning Registry node.'),
+      '#description' => t('Date of publication to learning registry. Format:  YYYY-MM-DD.'),
   );
 
   $form['learningregistry']['search_until'] = array(
@@ -54,7 +54,7 @@ function learningregistry_content_form($form_values = NULL) {
       '#title' => t('Until date'),
       '#size' => 24,
       '#maxlength' => 128,
-      '#description' => t('The URL of the Learning Registry node.'),
+      '#description' => t('Date of publication to learning registry. Format:  YYYY-MM-DD.'),
   );
 
   $form['learningregistry']['submit'] = array(
