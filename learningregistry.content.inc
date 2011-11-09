@@ -129,7 +129,7 @@ function _learningregistry_content_form_values($form_values = array()) {
 
     $rows = array();
     $docs = $result_array->documents;
-    dsm($docs);
+    // dsm($docs);
 
     foreach ($docs as $row) {
       $url = $row->resource_data_description->resource_locator;
