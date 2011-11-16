@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Administration callbacks for the learningregistry module
+ * Administration callbacks for the learning_registry module
  */
 // much of this is lifted from the "Creating Drupal 6.x modules" docs on the
 // Drupal website http://drupal.org/node/231276 and the "Writing a Module"
@@ -16,16 +16,16 @@
  *
  * @ingroup forms
  */
-function learningregistry_content_form($form_values = NULL) {
+function learning_registry_content_form($form_values = NULL) {
 
   $form['#redirect'] = FALSE;
 
-  $form['learningregistry'] = array(
+  $form['learning_registry'] = array(
       '#type' => 'fieldset',
       '#title' => t('Search'),
   );
 
-  $form['learningregistry']['search_identity'] = array(
+  $form['learning_registry']['search_identity'] = array(
       '#type' => 'textfield',
       '#title' => t('Identity'),
       '#size' => 72,
@@ -33,7 +33,7 @@ function learningregistry_content_form($form_values = NULL) {
       '#description' => t('The name of a person or organization that is the submitter, author, owner, or curator.'),
   );
 
-  $form['learningregistry']['search_tags'] = array(
+  $form['learning_registry']['search_tags'] = array(
       '#type' => 'textfield',
       '#title' => t('Tags'),
       '#size' => 72,
@@ -41,7 +41,7 @@ function learningregistry_content_form($form_values = NULL) {
       '#description' => t('List of tags, matched against keys, payload_schema, or resource_data_type.'),
   );
 
-  $form['learningregistry']['search_from'] = array(
+  $form['learning_registry']['search_from'] = array(
       '#type' => 'textfield',
       '#title' => t('From date'),
       '#size' => 24,
@@ -49,7 +49,7 @@ function learningregistry_content_form($form_values = NULL) {
       '#description' => t('Date of publication to learning registry. Format:  YYYY-MM-DD.'),
   );
 
-  $form['learningregistry']['search_until'] = array(
+  $form['learning_registry']['search_until'] = array(
       '#type' => 'textfield',
       '#title' => t('Until date'),
       '#size' => 24,
@@ -57,7 +57,7 @@ function learningregistry_content_form($form_values = NULL) {
       '#description' => t('Date of publication to learning registry. Format:  YYYY-MM-DD.'),
   );
 
-  $form['learningregistry']['submit'] = array(
+  $form['learning_registry']['submit'] = array(
       '#type' => 'submit',
       '#value' => t('Search'),
   );
@@ -70,14 +70,14 @@ function learningregistry_content_form($form_values = NULL) {
     $form['results'] = array(
         '#type' => 'item',
         /*  '#title' => t('The results of your form submission'), */
-        '#value' => _learningregistry_content_form_values($form_values),
+        '#value' => _learning_registry_content_form_values($form_values),
     );
   }
 
   return $form;
 }
 
-function _learningregistry_content_form_values($form_values = array()) {
+function _learning_registry_content_form_values($form_values = array()) {
 
   $identity = $form_values['post']['search_identity'];
   $tags = $form_values['post']['search_tags'];
@@ -101,7 +101,7 @@ function _learningregistry_content_form_values($form_values = array()) {
 
   if ($search != '') {
 
-    $search = variable_get('learningregistry_node_url', NULL) . "/slice?" . $search;
+    $search = variable_get('learning_registry_node_url', NULL) . "/slice?" . $search;
 
     // dsm($search);
 

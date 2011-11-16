@@ -1,20 +1,20 @@
 <?php
 /**
  * @file
- * Installation file for the learningregistry module.
+ * Installation file for the learning_registry module.
  *
- * This installation file sets up the database for the learningregistry module.
+ * This installation file sets up the database for the learning_registry module.
  */
 
 /**
  * Implementation of hook_install()
  */
-function learningregistry_install() {
-  drupal_set_message((t('Installing learningregistry.')));
-  drupal_install_schema('learningregistry');
+function learning_registry_install() {
+  drupal_set_message((t('Installing learning_registry.')));
+  drupal_install_schema('learning_registry');
 }
 
-function learningregistry_enable() {
+function learning_registry_enable() {
   // set module weight lower than workflow or pathauto. This query lifted from
   // http://drupal.org/node/110238#comment-3567274
   $workFlowWeight =
@@ -23,17 +23,17 @@ function learningregistry_enable() {
     db_result(db_query("SELECT weight FROM {system} WHERE type = 'module' AND name = 'pathauto'"));
   if ($pathautoWeight > $workFlowWeight) { $weight=$pathautoWeight; } else { $weight=$workFlowWeight; }
   
-  db_query("UPDATE {system} SET weight = %d WHERE type = 'module' AND name = 'learningregistry'", $weight + 1);
+  db_query("UPDATE {system} SET weight = %d WHERE type = 'module' AND name = 'learning_registry'", $weight + 1);
 }
 
 /**
  * Implementation of hook_uninstall()
  */
-function learningregistry_uninstall() {
-  drupal_uninstall_schema('learningregistry');
+function learning_registry_uninstall() {
+  drupal_uninstall_schema('learning_registry');
   // remove any configuration values. shamelessly stolen from
   // http://api.drupal.org/api/drupal/includes--bootstrap.inc/function/variable_del/6#comment-10934
-  $result = db_query("SELECT name from {variable} WHERE name LIKE 'learningregistry_%'");
+  $result = db_query("SELECT name from {variable} WHERE name LIKE 'learning_registry_%'");
   while ($var_name = db_result($result)) {
     variable_del($var_name);
   }
@@ -45,8 +45,8 @@ function learningregistry_uninstall() {
  * @returns $schema
  *   An array providing the DB schema definition required by the schema API.
  */
-function learningregistry_schema() {
-  $schema['learningregistry'] = array(
+function learning_registry_schema() {
+  $schema['learning_registry'] = array(
     'description' => t('Tracks which Drupal nodes have been published to the registry.'),
     'fields' => array(
       'nid' => array(
