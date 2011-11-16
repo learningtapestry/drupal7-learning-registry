@@ -79,13 +79,14 @@ function learning_registry_nodeapi(&$node, $op) {
   $nodes_to_publish = variable_get('learning_registry_node_types', array());
   if (in_array($node->type, $nodes_to_publish) &&
     $node->nid);
-  switch($op) {
+  switch ($op) {
     case 'insert':
       if ($node->status == 1) {
         
         if (variable_get('learning_registry_queuing', 0) == 1) {
          _lr_queue_node($node->nid); 
-        } else {
+        } 
+        else {
           _learning_registry_publish($node);
         }
       }
@@ -149,13 +150,14 @@ function _learning_registry_bulk_operations_publish($nids) {
     $result = _learning_registry_publish($node, TRUE);
     
     // If successful, update the count.
-    if ($result) { $success++; } 
+    if ($result) { 
+      $success++; } 
   }
   
   if (variable_get('learning_registry_queuing', 0) == 1)
-    drupal_set_message($success.' nodes queued to the registry. '.$failure.' nodes failed.' );
+    drupal_set_message($success . ' nodes queued to the registry. ' . $failure . ' nodes failed.' );
  else
-    drupal_set_message($success.' nodes published to the registry. '.$failure.' nodes failed.' );
+    drupal_set_message($success . ' nodes published to the registry. ' . $failure . ' nodes failed.' );
 }
 
 /**
@@ -257,9 +259,9 @@ function _lr_get_node_url(&$node) {
   
   // URL Type is an admin setting.  Return either alias or node ID.
   if (variable_get('learning_registry_url_type', 0) == 1)
-    return url("node/".$node->nid, array("absolute" => TRUE, "alias" => FALSE));
+    return url("node/" . $node->nid, array("absolute" => TRUE, "alias" => FALSE));
   else
-    return url("node/".$node->nid, array("absolute" => TRUE, "alias" => TRUE));
+    return url("node/" . $node->nid, array("absolute" => TRUE, "alias" => TRUE));
 }
 
 /**
@@ -302,7 +304,7 @@ function _lr_send_to_registry($nid, $json, $service_num = 0, $headless = FALSE) 
     CURLOPT_POST => TRUE,
     CURLOPT_POSTFIELDS => $json,
     CURLOPT_RETURNTRANSFER => 1,
-    CURLOPT_HTTPHEADER => array("Content-type: application/json",),
+    CURLOPT_HTTPHEADER => array("Content-type: application/json"),
   );
   // file_put_contents("/tmp/foo.json", $json);
   curl_setopt_array($ch, $curl_options);
@@ -318,12 +320,13 @@ function _lr_send_to_registry($nid, $json, $service_num = 0, $headless = FALSE) 
     $result = _lr_update_submission_status($nid, $result);
     
     if (!$headless) {
-      $submissionURL = variable_get('learning_registry_node_url', NULL)."/harvest/getrecord?by_doc_ID=TRUE&request_ID=".$result;
-      drupal_set_message(sprintf( 'Node ID %d published to the registry. <a href="%s" target="_new">(View node on registry.)</a>', $nid, $submissionURL), "status");
+      $submissionURL = variable_get('learning_registry_node_url', NULL) . "/harvest/getrecord?by_doc_ID=TRUE&request_ID=" . $result;
+      drupal_set_message(check_plain(sprintf('Node ID %d published to the registry. <a href="%s" target="_new">(View node on registry.)</a>', $nid, $submissionURL)), "status");
     }
     
     return TRUE;
-  } else {
+  }
+  else {
     if (!$headless) {
       drupal_set_message("Error publishing node to registry.", "warning");
     }
@@ -341,7 +344,7 @@ function _lr_send_to_registry($nid, $json, $service_num = 0, $headless = FALSE) 
 
  * @returns object $resource_data
  */
-function _lr_def_resource_data ($content_info) {
+function _lr_def_resource_data($content_info) {
   // values specified as immutable in the LR spec.
   define("LR_DOC_TYPE", "resource_data");
   define("LR_DOC_VERSION", "0.23.0");
@@ -494,7 +497,8 @@ function _lr_update_submission_status($nid, $result) {
       if ($submission_record) {
         if ($submission_record->published==0) {
           $sql = 'UPDATE {learning_registry} SET published=%d, docid=\'%s\', queued=0 WHERE nid = %d';
-        } else {
+        }
+        else {
           $sql = 'UPDATE {learning_registry} SET updated=%d, docid=\'%s\', queued=0 WHERE nid = %d';
         }
         
@@ -516,8 +520,8 @@ function _lr_update_submission_status($nid, $result) {
     }
     else {
       watchdog('learning_registry', "Error publishing node ID %nid to the registry.  Full response: %msg",
-          array ('%nid' => $nid,'%msg' => $result));
-      return false;
+          array('%nid' => $nid, '%msg' => $result));
+      return FALSE;
     }
   }
 }
@@ -545,7 +549,8 @@ function _lr_parse_result($result, $error) {
         // Submission okay
         $submission_result["success"] =  TRUE;
         $submission_result["doc_id"] = $result_array->document_results[0]->doc_ID;
-      } else {
+      }
+      else {
         $submission_result["success"] = FALSE;
         if (!is_null($result_array->document_results[0]->error))
           $submission_result["error_message"] = $result_array->document_results[0]->error;
@@ -562,7 +567,8 @@ function _lr_parse_result($result, $error) {
         }
       }
     }
-  } else {
+  }
+  else {
     // We didn't contact the Learning Registry service, must be a network error
      $submission_result["SUCCESS"] = FALSE;
      $submission_result["error_message"] = $error;
@@ -585,7 +591,8 @@ function _lr_queue_node($nid) {
   // If exists, update, else insert new record
   if ($submission_record) {
     $sql = 'UPDATE {learning_registry} SET queued=1 WHERE nid = %d'; 
-  } else {
+  }
+  else {
     $sql = 'INSERT INTO {learning_registry} (nid, queued) VALUES (%d, 1)';    
   }
 
@@ -602,7 +609,7 @@ function _lr_queue_node($nid) {
  * @return object $returnXML
  *    XML document
  */
-function _lr_create_dublincore_payload (&$node) {
+function _lr_create_dublincore_payload(&$node) {
   
   // Set the initial RDF XML DC envelope body.
   $source = '<?xml version="1.0"?>
@@ -641,8 +648,8 @@ function _lr_create_dublincore_payload (&$node) {
   // Pretty format the XML before sending it to the LR.  Makes it easier to read and debug.  
   // Must be reloaded, won't work if just set on $xmlDoc. 
   $returnXML = new DOMDocument;
-  $returnXML->preserveWhiteSpace = false;
-  $returnXML->formatOutput = true;
+  $returnXML->preserveWhiteSpace = FALSE;
+  $returnXML->formatOutput = TRUE;
   $returnXML->loadXML($xmlDoc->saveXML());
 
   return $returnXML->saveXML();  

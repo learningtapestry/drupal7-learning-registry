@@ -24,8 +24,7 @@ function learning_registry_admin_settings() {
   $type_names = array();
   $cck_fields = array();
 
-  foreach ($options as $option)
-    {
+  foreach ($options as $option) {
       $type_names[$option->type] = $option->name;
       $type = content_types($option->type);
       $cck_fields[$option->type] = $type['fields'];
@@ -90,14 +89,12 @@ function learning_registry_admin_settings() {
     '#description' => t('Metadata for these node types will be published to the specified Learning Registry node.'),
   );
 
-  foreach ($type_names as $type_key => $type_name)
-    {
+  foreach ($type_names as $type_key => $type_name) {
       if (count($cck_fields[$type_key])) {
 
         $cck_checkboxes = array();
 
-        foreach ($cck_fields[$type_key] as $cck_field)
-          {
+        foreach ($cck_fields[$type_key] as $cck_field) {
             $field_name = $cck_field['field_name'];
             $cck_checkboxes[$cck_field['field_name']] = $cck_field['widget']['label'];
           }

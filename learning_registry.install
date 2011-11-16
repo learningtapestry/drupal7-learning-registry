@@ -17,11 +17,14 @@ function learning_registry_install() {
 function learning_registry_enable() {
   // set module weight lower than workflow or pathauto. This query lifted from
   // http://drupal.org/node/110238#comment-3567274
-  $workFlowWeight =
+  $workflow_weight =
     db_result(db_query("SELECT weight FROM {system} WHERE type = 'module' AND name = 'workflow'"));
-  $pathautoWeight =
+  $pathauto_weight =
     db_result(db_query("SELECT weight FROM {system} WHERE type = 'module' AND name = 'pathauto'"));
-  if ($pathautoWeight > $workFlowWeight) { $weight=$pathautoWeight; } else { $weight=$workFlowWeight; }
+  if ($pathauto_weight > $workflow_weight) { 
+    $weight=$pathauto_weight; } 
+  else { 
+    $weight=$workflow_weight; }
   
   db_query("UPDATE {system} SET weight = %d WHERE type = 'module' AND name = 'learning_registry'", $weight + 1);
 }
@@ -86,7 +89,7 @@ function learning_registry_schema() {
       ),
     ),
     'indexes' => array(
-      'changed' => array('updated',),
+      'changed' => array('updated'),
     ),
     'primary key' => array('nid'),
   );
