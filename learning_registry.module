@@ -57,7 +57,7 @@ function learning_registry_menu() {
     'type' => MENU_NORMAL_ITEM,
     'file' => 'learning_registry.admin.inc',
   );
-  
+
   $items['admin/content/learning_registry'] = array(
     'title' => t('Learning Registry'),
     'description' => t('Settings for publishing and receiving metadata to a Learning Registry node.'),
@@ -73,7 +73,7 @@ function learning_registry_menu() {
 
 
 /**
- * Implementation of hook_nodeapi()
+ * Implementation of hook_nodeapi().
  */
 function learning_registry_nodeapi(&$node, $op) {
   $nodes_to_publish = variable_get('learning_registry_node_types', array());
@@ -82,10 +82,10 @@ function learning_registry_nodeapi(&$node, $op) {
   switch ($op) {
     case 'insert':
       if ($node->status == 1) {
-        
+
         if (variable_get('learning_registry_queuing', 0) == 1) {
-         _lr_queue_node($node->nid); 
-        } 
+          _lr_queue_node($node->nid);
+        }
         else {
           _learning_registry_publish($node);
         }
@@ -107,8 +107,8 @@ function learning_registry_nodeapi(&$node, $op) {
 
 
 /**
- * Implementation of hook_cron()
- * 
+ * Implementation of hook_cron().
+ *
  * Reads unprocessed nodes from learning_registry table and attempts to push them to
  * the Learning Registry.
  */
@@ -120,12 +120,11 @@ function learning_registry_cron() {
     $node = node_load($record["nid"], NULL, TRUE);
     _learning_registry_publish($node, TRUE);
   }
-  
 }
 
 /**
- * Implementation of hook_node_operations()
- * 
+ * Implementation of hook_node_operations().
+ *
  * Allows for publishing using the bulk operations content page.
  */
 function learning_registry_node_operations() {
@@ -142,21 +141,21 @@ function learning_registry_node_operations() {
  */
 function _learning_registry_bulk_operations_publish($nids) {
   $success = 0; $failure = 0;
-  
+
   foreach ($nids as $nid) {
     // Load the node
     $node = node_load($nid);
     // Send it to the Learning Registry
     $result = _learning_registry_publish($node, TRUE);
-    
+
     // If successful, update the count.
-    if ($result) { 
-      $success++; } 
+    if ($result) {
+      $success++; }
   }
-  
+
   if (variable_get('learning_registry_queuing', 0) == 1)
     drupal_set_message($success . ' nodes queued to the registry. ' . $failure . ' nodes failed.' );
- else
+  else
     drupal_set_message($success . ' nodes published to the registry. ' . $failure . ' nodes failed.' );
 }
 
@@ -167,10 +166,10 @@ function _learning_registry_bulk_operations_publish($nids) {
  *   A reference to the node object. We have to be very careful to not set
  *   anything, only read from the node object reference since the node
  *   reference allows us to edit the node content.
- * 
+ *
  * @param bool $headless
  *   A flag to determine if this is called from cron (non-user session).
- * 
+ *
  * @return bool $result
  *   Returns TRUE if operation was successful, FALSE if not.
  */
@@ -230,7 +229,7 @@ function _lr_get_content_info(&$node) {
   $content_info['resource_data_type'] = 'metadata';
   $content_info['submitter'] = variable_get('learning_registry_submitter', NULL);
   $content_info['tos'] = variable_get('learning_registry_tos', NULL);
-  
+
   // currently set curator and submitter the same, once we get a better sense
   // of what each field means, this will change
   $content_info['curator'] = $content_info['submitter'];
@@ -239,7 +238,7 @@ function _lr_get_content_info(&$node) {
   $content_info['payload_schema'] = "DC 1.1";
 
   $resource_data=_lr_create_dublincore_payload($node);
- 
+
   $content_info['resource_data'] = $resource_data;
 
   return $content_info;
@@ -256,7 +255,7 @@ function _lr_get_content_info(&$node) {
  *   The absolute URL to the node.  If alias available, return alias.
  */
 function _lr_get_node_url(&$node) {
-  
+
   // URL Type is an admin setting.  Return either alias or node ID.
   if (variable_get('learning_registry_url_type', 0) == 1)
     return url("node/" . $node->nid, array("absolute" => TRUE, "alias" => FALSE));
@@ -280,7 +279,7 @@ function _lr_get_node_url(&$node) {
  *    2 - delete
  * @param bool $headless
  *    A flag to determine if this is called from cron (non-user session).
- * 
+ *
  * @return bool $result
  *    True if operation was successful, false if error.
  */
@@ -311,29 +310,28 @@ function _lr_send_to_registry($nid, $json, $service_num = 0, $headless = FALSE) 
   $result=curl_exec($ch);
   $error = curl_error($ch);
   curl_close($ch);
-  
+
   $submission_result = _lr_parse_result($result, $error);
-  
+
   // dsm($submission_result);
 
   if ($result) {
     $result = _lr_update_submission_status($nid, $result);
-    
+
     if (!$headless) {
       $submissionURL = variable_get('learning_registry_node_url', NULL) . "/harvest/getrecord?by_doc_ID=TRUE&request_ID=" . $result;
       drupal_set_message(check_plain(sprintf('Node ID %d published to the registry. <a href="%s" target="_new">(View node on registry.)</a>', $nid, $submissionURL)), "status");
     }
-    
+
     return TRUE;
   }
   else {
     if (!$headless) {
       drupal_set_message("Error publishing node to registry.", "warning");
     }
-    
+
     return FALSE;
   }
-  
 }
 
 
@@ -491,7 +489,7 @@ function _lr_update_submission_status($nid, $result) {
     // check to see if submission already in database
       $submission_check_result = db_query('SELECT * FROM {learning_registry} WHERE nid = %d', $nid);
       $submission_record = db_fetch_object($submission_check_result);
-      
+
       // Check if this has been published before.  If no, set the published timestamp.  Else,
       // the updated timestamp.
       if ($submission_record) {
@@ -501,7 +499,7 @@ function _lr_update_submission_status($nid, $result) {
         else {
           $sql = 'UPDATE {learning_registry} SET updated=%d, docid=\'%s\', queued=0 WHERE nid = %d';
         }
-        
+
         db_query($sql, time(), $result_array->document_results[0]->doc_ID, $nid);
       }
       else {
@@ -526,12 +524,12 @@ function _lr_update_submission_status($nid, $result) {
   }
 }
 
-/** 
+/**
  * Parse out result from Learning Registry submission
- * 
+ *
  * @param object $result
  *    JSON array result from Learning Registry submission
- * 
+ *
  * @param string $error
  *    Error string from curl (if error occured)
  *
@@ -540,7 +538,7 @@ function _lr_update_submission_status($nid, $result) {
  */
 function _lr_parse_result($result, $error) {
   $submission_result = array();
-  
+
     if ($result) {
       // We have something back from the Learning Registry service
       $result_array = json_decode($result);
@@ -563,17 +561,17 @@ function _lr_parse_result($result, $error) {
           if (strpos($result, "<html") > 0) {
             $start = strripos($result, "<title>");
             $end = strripos($result, "</title");
-            $submission_result["error_message"] = substr($result, $start+7, $end - $start - 7); // what's between the title tags (+7 skips first title tag)
+            $submission_result["error_message"] = drupal_substr($result, $start+7, $end - $start - 7); // what's between the title tags (+7 skips first title tag)
         }
       }
     }
   }
   else {
     // We didn't contact the Learning Registry service, must be a network error
-     $submission_result["SUCCESS"] = FALSE;
-     $submission_result["error_message"] = $error;
+    $submission_result["SUCCESS"] = FALSE;
+    $submission_result["error_message"] = $error;
   }
-  
+
   return $submission_result;
 }
 /**
@@ -583,17 +581,17 @@ function _lr_parse_result($result, $error) {
  *    Drupal node ID of item to submit.
  */
 function _lr_queue_node($nid) {
-  
+
   // Check if this record exists in submission table
   $submission_check_result = db_query('SELECT * FROM {learning_registry} WHERE nid = %d', $nid);
   $submission_record = db_fetch_object($submission_check_result);
-  
+
   // If exists, update, else insert new record
   if ($submission_record) {
-    $sql = 'UPDATE {learning_registry} SET queued=1 WHERE nid = %d'; 
+    $sql = 'UPDATE {learning_registry} SET queued=1 WHERE nid = %d';
   }
   else {
-    $sql = 'INSERT INTO {learning_registry} (nid, queued) VALUES (%d, 1)';    
+    $sql = 'INSERT INTO {learning_registry} (nid, queued) VALUES (%d, 1)';
   }
 
   // Write to database
@@ -605,12 +603,12 @@ function _lr_queue_node($nid) {
  *
  * @param object $node
  *    Drupal node
- * 
+ *
  * @return object $returnXML
  *    XML document
  */
 function _lr_create_dublincore_payload(&$node) {
-  
+
   // Set the initial RDF XML DC envelope body.
   $source = '<?xml version="1.0"?>
     <!DOCTYPE rdf:RDF PUBLIC "-//DUBLIN CORE//DCMES DTD 2002/07/31//EN"
@@ -620,14 +618,14 @@ function _lr_create_dublincore_payload(&$node) {
       <rdf:Description rdf:about="http://dublincore.org/">
       </rdf:Description>
     </rdf:RDF>';
-  
+
   $xmlDoc = new DOMDocument;
   $xmlDoc->loadXML($source);
-  
+
   // Retrieve just the DC node
   $nodeList = $xmlDoc->getElementsByTagNameNS('http://www.w3.org/1999/02/22-rdf-syntax-ns#', 'Description');
   $dcNode = $nodeList->item(0);
-    
+
   // Set the DC title to the node title.
   $element = $xmlDoc->createElementNS('http://purl.org/dc/elements/1.1/', 'title', $node->title);
   $dcNode->appendChild($element);
@@ -635,42 +633,40 @@ function _lr_create_dublincore_payload(&$node) {
   // Set the DC description to the node body.
   $element = $xmlDoc->createElementNS('http://purl.org/dc/elements/1.1/', 'description', $node->body);
   $dcNode->appendChild($element);
-  
+
   // Set the DC date to the node create date.
   $dateCreated = format_date($node->created, 'custom', 'Y-m-d');
   $element = $xmlDoc->createElementNS('http://purl.org/dc/elements/1.1/', 'date', $dateCreated);
   $dcNode->appendChild($element);
 
-  // Set the DC identifier to the absolute URL of the node.  
+  // Set the DC identifier to the absolute URL of the node.
   $element = $xmlDoc->createElementNS('http://purl.org/dc/elements/1.1/', 'identifier', _lr_get_node_url($node));
   $dcNode->appendChild($element);
-  
-  // Pretty format the XML before sending it to the LR.  Makes it easier to read and debug.  
-  // Must be reloaded, won't work if just set on $xmlDoc. 
+
+  // Pretty format the XML before sending it to the LR.  Makes it easier to read and debug.
+  // Must be reloaded, won't work if just set on $xmlDoc.
   $returnXML = new DOMDocument;
   $returnXML->preserveWhiteSpace = FALSE;
   $returnXML->formatOutput = TRUE;
   $returnXML->loadXML($xmlDoc->saveXML());
 
-  return $returnXML->saveXML();  
-    
-  
+  return $returnXML->saveXML();
+
+
   /* References
-    
-   http://dublincore.org/documents/usageguide/elements.shtml 
-   
-    
+
+   http://dublincore.org/documents/usageguide/elements.shtml
+
   <dc:title>Dublin Core Metadata Initiative - Home Page</dc:title>
   <dc:description>The Dublin Core Metadata Initiative Web site.</dc:description>
   <dc:date>2001-01-16</dc:date>
   <dc:format>text/html</dc:format>
   <dc:language>en</dc:language>
-  <dc:contributor>The Dublin Core Metadata Initiative</dc:contributor> 
+  <dc:contributor>The Dublin Core Metadata Initiative</dc:contributor>
 
   <!ENTITY % dcmes "dc:title | dc:creator | dc:subject | dc:description |
   dc:publisher | dc:contributor | dc:date | dc:type | dc:format |
   dc:identifier | dc:source | dc:language | dc:relation | dc:coverage |
-  dc:rights" > 
+  dc:rights" >
    */
-  
 }

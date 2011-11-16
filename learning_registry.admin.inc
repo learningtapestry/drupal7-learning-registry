@@ -14,7 +14,7 @@
  * Form builder. Configure learning_registry module.
  *
  * @ingroup forms
- * @see system_settings_form().
+ * @see system_settings_form()
  */
 function learning_registry_admin_settings() {
   // Get node types with internal names as keys and "friendly" names as
@@ -52,7 +52,7 @@ function learning_registry_admin_settings() {
     '#description' => t('Identifies the submitter of a Learning Registry resource document.'),
     '#required' => TRUE,
   );
-  
+
   $form['learning_registry_tos'] = array(
     '#type' => 'textfield',
     '#title' => t('Terms of Service URL'),
@@ -71,7 +71,7 @@ function learning_registry_admin_settings() {
     '#options' => array(t('Immediate'), t('Queued')),
     '#required' => TRUE,
   );
-  
+
   $form['learning_registry_url_type'] = array(
     '#type' => 'radios',
     '#title' => t('Publish URL Type'),
@@ -80,7 +80,7 @@ function learning_registry_admin_settings() {
     '#options' => array(t('Node ID'), t('Node alias')),
     '#required' => TRUE,
   );
-  
+
   $form['learning_registry_node_types'] = array(
     '#type' => 'checkboxes',
     '#title' => t('Publish metadata for these content types'),

@@ -8,6 +8,7 @@
 // Drupal website http://drupal.org/node/231276 and the "Writing a Module"
 // chapter of Pro Drupal Development 2nd Edition by John K. VanDyk.  ISBN-13:
 // 978-1430209898
+//
 // Thanks to Lullabot for the example on same page search results!
 // http://www.lullabot.com/articles/drupal-5-making-forms-that-display-their-own-results
 
@@ -86,16 +87,16 @@ function _learning_registry_content_form_values($form_values = array()) {
 
   $search = '';
 
-  if (strlen($identity) > 0) {
+  if (drupal_strlen($identity) > 0) {
     $search = '&identity=' . $identity;
   }
-  if (strlen($tags) > 0) {
+  if (drupal_strlen($tags) > 0) {
     $search = '&any_tags=' . $tags;
   }
-  if (strlen($from) > 0) {
+  if (drupal_strlen($from) > 0) {
     $search = '&from=' . $from;
   }
-  if (strlen($until) > 0) {
+  if (drupal_strlen($until) > 0) {
     $search = '&until=' . $until;
   }
 
@@ -125,7 +126,7 @@ function _learning_registry_content_form_values($form_values = array()) {
     $header[] = 'Resource';
     $header[] = 'Submitter';
     $header[] = 'Description';
-    $header[] = 'Create Date';    
+    $header[] = 'Create Date';
 
     $rows = array();
     $docs = $result_array->documents;
@@ -136,9 +137,8 @@ function _learning_registry_content_form_values($form_values = array()) {
       $payload = $row->resource_data_description->resource_data;
       $submitter = $row->resource_data_description->identity->submitter;
       $create_date = $row->resource_data_description->create_timestamp;
-      //$create_date = format_date($create_date, 'small');
-     $create_date = substr($create_date, 0, 10);
-      
+      $create_date = drupal_substr($create_date, 0, 10);
+
 
       $title = "";
 
@@ -149,7 +149,7 @@ function _learning_registry_content_form_values($form_values = array()) {
         $desc = $dc->description;
       }
 
-      if (strlen($title) < 1) {
+      if (drupal_strlen($title) < 1) {
         $title = "[unknown]";
       }
 
