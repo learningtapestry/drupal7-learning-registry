@@ -10,7 +10,7 @@
 // 978-1430209898
 //
 // Thanks to Lullabot for the example on same page search results!
-// http://www.lullabot.com/articles/drupal-5-making-forms-that-display-their-own-results
+// lullabot.com/articles/drupal-5-making-forms-that-display-their-own-results
 
 /**
  * Form builder. Basic search form for Learning Registry.
@@ -63,8 +63,6 @@ function learning_registry_content_form($form_values = NULL) {
       '#value' => t('Search'),
   );
 
-  // return system_settings_form($form);
-
   if ($form_values != NULL) {
     // $form_values is populated, which means we're coming in a second
     // time. Let's display the results instead of the original form fields.
@@ -78,6 +76,11 @@ function learning_registry_content_form($form_values = NULL) {
   return $form;
 }
 
+/**
+ * Process forms and search the Learning Registry.
+ *
+ * @ingroup forms
+ */
 function _learning_registry_content_form_values($form_values = array()) {
 
   $identity = $form_values['post']['search_identity'];
@@ -164,10 +167,3 @@ function _learning_registry_content_form_values($form_values = array()) {
   }
 }
 
-// from - YYYY-MM-DD
-// until - YYYY-MM-DD
-// identity
-// any_tags
-
-// ids_only (default, false - optional)
-// resumption_token (optional - to resume a search)

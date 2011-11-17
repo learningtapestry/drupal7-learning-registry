@@ -14,6 +14,9 @@ function learning_registry_install() {
   drupal_install_schema('learning_registry');
 }
 
+/**
+ * Implementation of hook_enable().
+ */
 function learning_registry_enable() {
   // set module weight lower than workflow or pathauto. This query lifted from
   // http://drupal.org/node/110238#comment-3567274
@@ -34,8 +37,6 @@ function learning_registry_enable() {
  */
 function learning_registry_uninstall() {
   drupal_uninstall_schema('learning_registry');
-  // remove any configuration values. shamelessly stolen from
-  // http://api.drupal.org/api/drupal/includes--bootstrap.inc/function/variable_del/6#comment-10934
   $result = db_query("SELECT name from {variable} WHERE name LIKE 'learning_registry_%'");
   while ($var_name = db_result($result)) {
     variable_del($var_name);
@@ -96,3 +97,4 @@ function learning_registry_schema() {
 
   return $schema;
 }
+

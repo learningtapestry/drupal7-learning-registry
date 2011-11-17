@@ -136,3 +136,4 @@ function learning_registry_admin_settings_validate($form, $form_state) {
     form_set_error('learning_registry_node_url', t('Please provide a valid URL.'));
   }
 }
+
