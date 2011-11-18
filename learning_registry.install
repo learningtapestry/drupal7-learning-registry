@@ -51,7 +51,7 @@ function learning_registry_uninstall() {
  */
 function learning_registry_schema() {
   $schema['learning_registry'] = array(
-    'description' => t('Tracks which Drupal nodes have been published to the registry.'),
+    'description' => 'Tracks which Drupal nodes have been published to the registry.',
     'fields' => array(
       'nid' => array(
         'description' => t('The primary identifier for a node.'),
@@ -61,28 +61,28 @@ function learning_registry_schema() {
       ),
 
       'published' => array(
-        'description' => t('The original date of publication to the LR node.'),
+        'description' => 'The original date of publication to the LR node.',
         'type' => 'int',
         'not null' => TRUE,
         'default' => 0,
       ),
 
       'updated' => array(
-        'description' => t('The most recent update to the LR node.'),
+        'description' => 'The most recent update to the LR node.',
         'type' => 'int',
         'not null' => TRUE,
         'default' => 0,
       ),
 
       'queued' => array(
-        'description' => t('Flag to determine if node is queued for processing.'),
+        'description' => 'Flag to determine if node is queued for processing.',
         'type' => 'int',
         'not null' => TRUE,
         'default' => 0,
       ),
 
       'docid' => array(
-        'description' => t('The doc ID returned on successful submission to the Learning Registry.'),
+        'description' => 'The doc ID returned on successful submission to the Learning Registry.',
         'type' => 'varchar',
         'length' => 1024,
         'not null' => TRUE,
