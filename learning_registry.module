@@ -482,9 +482,9 @@ function _learning_registry_add_resource_data_to_submission($submission, $resour
  *
  */
 function _learning_registry_update_submission_status($nid, $result) {
-  // TODO:  Refactor candidate.  This method has two responsiblities:  
-  // a.) to determine if the node was published to the Learning Registry, 
-  // b.) then to update that status to the learning_registry table.  
+  // TODO:  Refactor candidate.  This method has two responsiblities:
+  // a.) to determine if the node was published to the Learning Registry,
+  // b.) then to update that status to the learning_registry table.
   // The first step should stand on its own.
 
   if ($result) {
@@ -496,8 +496,8 @@ function _learning_registry_update_submission_status($nid, $result) {
       $submission_check_result = db_query('SELECT * FROM {learning_registry} WHERE nid = %d', $nid);
       $submission_record = db_fetch_object($submission_check_result);
 
-      // Check if this has been published before.  
-	  // If no, set the published timestamp.
+      // Check if this has been published before.
+      // If no, set the published timestamp.
       // Else, the updated timestamp.
       if ($submission_record) {
         if ($submission_record->published==0) {
