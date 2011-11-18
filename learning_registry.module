@@ -222,7 +222,7 @@ function _learning_registry_update(&$node) {
  *   anything, only read from the node object reference since the node
  *   reference allows us to edit the node content.
  */
-function _lr_get_content_info(&$node) {
+function _learning_registry_get_content_info(&$node) {
   $content_info = array();
   $content_info['resource_locator'] = _lr_get_node_url($node);
   // TODO: correctly specify resource data type
@@ -255,7 +255,7 @@ function _lr_get_content_info(&$node) {
  * @return string $node_url
  *   The absolute URL to the node.  If alias available, return alias.
  */
-function _lr_get_node_url(&$node) {
+function _learning_registry_get_node_url(&$node) {
 
   // URL Type is an admin setting.  Return either alias or node ID.
   if (variable_get('learning_registry_url_type', 0) == 1)
@@ -284,7 +284,7 @@ function _lr_get_node_url(&$node) {
  * @return bool $result
  *    True if operation was successful, false if error.
  */
-function _lr_send_to_registry($nid, $json, $service_num = 0, $headless = FALSE) {
+function _learning_registry_send_to_registry($nid, $json, $service_num = 0, $headless = FALSE) {
   $services = array(
     'publish',
     'update',
@@ -342,7 +342,7 @@ function _lr_send_to_registry($nid, $json, $service_num = 0, $headless = FALSE) 
  * @param array $content_info
  * @returns object $resource_data
  */
-function _lr_def_resource_data($content_info) {
+function _learning_registry_def_resource_data($content_info) {
   // values specified as immutable in the LR spec.
   define("LR_DOC_TYPE", "resource_data");
   define("LR_DOC_VERSION", "0.23.0");
@@ -446,7 +446,7 @@ function _lr_def_resource_data($content_info) {
  * @return object $submission
  *   An empty LR submission envelop.
  */
-function _lr_build_envelope() {
+function _learning_registry_build_envelope() {
   $submission->documents = array();
   return $submission;
 }
@@ -463,7 +463,7 @@ function _lr_build_envelope() {
  * @return object $submission
  *    The submission object with $resource data pushed on to the documents array.
  */
-function _lr_add_resource_data_to_submission($submission, $resource_data) {
+function _learning_registry_add_resource_data_to_submission($submission, $resource_data) {
   $submission->documents[] = $resource_data;
   return $submission;
 }
@@ -478,7 +478,7 @@ function _lr_add_resource_data_to_submission($submission, $resource_data) {
  *    JSON response from Learning Registry.
  *
  */
-function _lr_update_submission_status($nid, $result) {
+function _learning_registry_update_submission_status($nid, $result) {
   // TODO:  Refactor candidate.  This method has two responsiblities:  
   // a.) to determine if the node was published to the Learning Registry, 
   // b.) then to update that status to the learning_registry table.  
@@ -540,7 +540,7 @@ function _lr_update_submission_status($nid, $result) {
  * @return object $submission_result
  *    Array with status information from submission
  */
-function _lr_parse_result($result, $error) {
+function _learning_registry_parse_result($result, $error) {
   $submission_result = array();
 
     if ($result) {
@@ -584,7 +584,7 @@ function _lr_parse_result($result, $error) {
  * @param int $nid
  *    Drupal node ID of item to submit.
  */
-function _lr_queue_node($nid) {
+function _learning_registry_queue_node($nid) {
 
   // Check if this record exists in submission table
   $submission_check_result = db_query('SELECT * FROM {learning_registry} WHERE nid = %d', $nid);
@@ -611,7 +611,7 @@ function _lr_queue_node($nid) {
  * @return object $returnXML
  *    XML document
  */
-function _lr_create_dublincore_payload(&$node) {
+function _learning_registry_create_dublincore_payload(&$node) {
 
   // Set the initial RDF XML DC envelope body.
   $source = '<?xml version="1.0"?>
@@ -647,7 +647,7 @@ function _lr_create_dublincore_payload(&$node) {
   $element = $xmlDoc->createElementNS('http://purl.org/dc/elements/1.1/', 'identifier', _lr_get_node_url($node));
   $dcNode->appendChild($element);
 
-  // Pretty format the XML before sending it to the LR.  Makes it easier to read and debug.
+  // Pretty format the XML before sending it to the LR.
   // Must be reloaded, won't work if just set on $xmlDoc.
   $returnXML = new DOMDocument;
   $returnXML->preserveWhiteSpace = FALSE;
