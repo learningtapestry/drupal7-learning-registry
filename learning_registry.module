@@ -131,7 +131,7 @@ function learning_registry_node_operations() {
     'label' => 'Publish to Learning Registry',
     'callback' => '_learning_registry_bulk_operations_publish',
     'disabled' => TRUE,
-    )
+    ),
   );
 }
 
@@ -561,9 +561,9 @@ function _learning_registry_parse_result($result, $error) {
     }
     else {
       $submission_result["success"] = FALSE;
-      $null_error_message = is_null($result_array->document_results[0]->error);
-      if (!$null_error_message)
+      if (!is_null($result_array->document_results[0]->error)) {
         $submission_result["error_message"] = $result_array->document_results[0]->error;
+      }
       else {
         // If the error message comes back in form of a HTML page, let's just
         // pop off the title tag as Couch will tell us what's wrong there.
