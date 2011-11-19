@@ -28,7 +28,7 @@ function learning_registry_admin_settings() {
       $type_names[$option->type] = $option->name;
       $type = content_types($option->type);
       $cck_fields[$option->type] = $type['fields'];
-    }
+  }
 
   $form = array();
 
@@ -90,33 +90,31 @@ function learning_registry_admin_settings() {
   );
 
   foreach ($type_names as $type_key => $type_name) {
-      if (count($cck_fields[$type_key])) {
+    if (count($cck_fields[$type_key])) {
 
-        $cck_checkboxes = array();
+      $cck_checkboxes = array();
 
-        foreach ($cck_fields[$type_key] as $cck_field) {
-            $field_name = $cck_field['field_name'];
-            $cck_checkboxes[$cck_field['field_name']] = $cck_field['widget']['label'];
-          }
-
-        $form['learning_registry_node_type_fieldset_' . $type_key] = array(
-          '#type' => 'fieldset',
-          '#title' => t($type_name),
-          '#description' => t('Metadata for these CCK fields will be published to the specified Learning Registry node.'),
-          '#collapsible' => TRUE,
-          '#collapsed' => TRUE,
-        );
-
-
-
-        $form['learning_registry_node_type_fieldset_' . $type_key]['learning_registry_node_type_option_' . $type_key] = array(
-          '#type' => 'checkboxes',
-          '#title' => t('Publish these CCK fields for ' . $type_name),
-          '#options' => $cck_checkboxes,
-          '#default_value' => variable_get('learning_registry_node_type_option_' . $type_key, array()),
-        );
+      foreach ($cck_fields[$type_key] as $cck_field) {
+          $field_name = $cck_field['field_name'];
+          $cck_checkboxes[$cck_field['field_name']] = $cck_field['widget']['label'];
       }
+
+      $form['learning_registry_node_type_fieldset_' . $type_key] = array(
+        '#type' => 'fieldset',
+        '#title' => t($type_name),
+        '#description' => t('Metadata for these CCK fields will be published to the specified Learning Registry node.'),
+        '#collapsible' => TRUE,
+        '#collapsed' => TRUE,
+      );
+
+      $form['learning_registry_node_type_fieldset_' . $type_key]['learning_registry_node_type_option_' . $type_key] = array(
+        '#type' => 'checkboxes',
+        '#title' => t('Publish these CCK fields for ' . $type_name),
+        '#options' => $cck_checkboxes,
+        '#default_value' => variable_get('learning_registry_node_type_option_' . $type_key, array()),
+      );
     }
+  }
 
   return system_settings_form($form);
 }

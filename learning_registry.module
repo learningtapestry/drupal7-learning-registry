@@ -626,36 +626,36 @@ function _learning_registry_create_dublincore_payload(&$node) {
       </rdf:Description>
     </rdf:RDF>';
 
-  $xmlDoc = new DOMDocument;
-  $xmlDoc->loadXML($source);
+  $xml_document = new DOMDocument;
+  $xml_document->loadXML($source);
 
   // Retrieve just the DC node
-  $nodeList = $xmlDoc->getElementsByTagNameNS('http://www.w3.org/1999/02/22-rdf-syntax-ns#', 'Description');
-  $dcNode = $nodeList->item(0);
+  $nodeList = $xml_document->getElementsByTagNameNS('http://www.w3.org/1999/02/22-rdf-syntax-ns#', 'Description');
+  $dc_node = $nodeList->item(0);
 
   // Set the DC title to the node title.
-  $element = $xmlDoc->createElementNS('http://purl.org/dc/elements/1.1/', 'title', $node->title);
-  $dcNode->appendChild($element);
+  $element = $xml_document->createElementNS('http://purl.org/dc/elements/1.1/', 'title', $node->title);
+  $dc_node->appendChild($element);
 
   // Set the DC description to the node body.
-  $element = $xmlDoc->createElementNS('http://purl.org/dc/elements/1.1/', 'description', $node->body);
-  $dcNode->appendChild($element);
+  $element = $xml_document->createElementNS('http://purl.org/dc/elements/1.1/', 'description', $node->body);
+  $dc_node->appendChild($element);
 
   // Set the DC date to the node create date.
   $dateCreated = format_date($node->created, 'custom', 'Y-m-d');
-  $element = $xmlDoc->createElementNS('http://purl.org/dc/elements/1.1/', 'date', $dateCreated);
-  $dcNode->appendChild($element);
+  $element = $xml_document->createElementNS('http://purl.org/dc/elements/1.1/', 'date', $dateCreated);
+  $dc_node->appendChild($element);
 
   // Set the DC identifier to the absolute URL of the node.
-  $element = $xmlDoc->createElementNS('http://purl.org/dc/elements/1.1/', 'identifier', _lr_get_node_url($node));
-  $dcNode->appendChild($element);
+  $element = $xml_document->createElementNS('http://purl.org/dc/elements/1.1/', 'identifier', _lr_get_node_url($node));
+  $dc_node->appendChild($element);
 
   // Pretty format the XML before sending it to the LR.
   // Must be reloaded, won't work if just set on $xmlDoc.
   $returnXML = new DOMDocument;
   $returnXML->preserveWhiteSpace = FALSE;
   $returnXML->formatOutput = TRUE;
-  $returnXML->loadXML($xmlDoc->saveXML());
+  $returnXML->loadXML($xml_document->saveXML());
 
   return $returnXML->saveXML();
 

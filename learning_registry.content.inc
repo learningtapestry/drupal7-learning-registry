@@ -8,7 +8,7 @@
 // Drupal website http://drupal.org/node/231276 and the "Writing a Module"
 // chapter of Pro Drupal Development 2nd Edition by John K. VanDyk.  ISBN-13:
 // 978-1430209898
-//
+// 
 // Thanks to Lullabot for the example on same page search results!
 // lullabot.com/articles/drupal-5-making-forms-that-display-their-own-results
 

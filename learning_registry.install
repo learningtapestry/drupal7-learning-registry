@@ -7,7 +7,7 @@
  */
 
 /**
- * Implementation of hook_install().
+ * Implements hook_install().
  */
 function learning_registry_install() {
   drupal_set_message((t('Installing learning_registry.')));
@@ -15,25 +15,26 @@ function learning_registry_install() {
 }
 
 /**
- * Implementation of hook_enable().
+ * Implements hook_enable().
  */
 function learning_registry_enable() {
   // set module weight lower than workflow or pathauto. This query lifted from
   // http://drupal.org/node/110238#comment-3567274
-  $workflow_weight =
-    db_result(db_query("SELECT weight FROM {system} WHERE type = 'module' AND name = 'workflow'"));
-  $pathauto_weight =
-    db_result(db_query("SELECT weight FROM {system} WHERE type = 'module' AND name = 'pathauto'"));
+  $workflow_weight = db_result(db_query("SELECT weight FROM {system} WHERE type = 'module' AND name = 'workflow'"));
+  $pathauto_weight = db_result(db_query("SELECT weight FROM {system} WHERE type = 'module' AND name = 'pathauto'"));
+  
   if ($pathauto_weight > $workflow_weight) {
-    $weight=$pathauto_weight; }
+    $weight=$pathauto_weight;
+  }
   else {
-    $weight=$workflow_weight; }
+    $weight=$workflow_weight;
+  }
 
   db_query("UPDATE {system} SET weight = %d WHERE type = 'module' AND name = 'learning_registry'", $weight + 1);
 }
 
 /**
- * Implementation of hook_uninstall().
+ * Implements hook_uninstall().
  */
 function learning_registry_uninstall() {
   drupal_uninstall_schema('learning_registry');
@@ -44,7 +45,7 @@ function learning_registry_uninstall() {
 }
 
 /**
- * Implementation of hook_schema().
+ * Implements hook_schema().
  *
  * @returns $schema
  *   An array providing the DB schema definition required by the schema API.
