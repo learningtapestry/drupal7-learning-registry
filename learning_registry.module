@@ -574,7 +574,7 @@ function _learning_registry_parse_result($result, $error) {
           $start = strripos($result, "<title>");
           $end = strripos($result, "</title");
           // error msg is between the title tags (+7 skips first title tag)
-          $submission_result["error_message"] = drupal_substr($result, $start+7, $end - $start - 7);
+          $submission_result["error_message"] = drupal_substr($result, $start + 7, $end - $start - 7);
         }
       }
     }
