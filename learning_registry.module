@@ -45,12 +45,12 @@ function learning_registry_perm() {
 
 
 /**
- * Implementation of hook_menu().
+ * Implements hook_menu().
  */
 function learning_registry_menu() {
   $items['admin/settings/learning_registry'] = array(
-    'title' => t('Learning Registry'),
-    'description' => t('Settings for publishing and receiving metadata to a Learning Registry node.'),
+    'title' => 'Learning Registry',
+    'description' => 'Settings for publishing and receiving metadata to a Learning Registry node.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('learning_registry_admin_settings'),
     'access arguments' => array('administer learning_registry'),
@@ -59,8 +59,8 @@ function learning_registry_menu() {
   );
 
   $items['admin/content/learning_registry'] = array(
-    'title' => t('Learning Registry'),
-    'description' => t('Settings for publishing and receiving metadata to a Learning Registry node.'),
+    'title' => 'Learning Registry',
+    'description' => 'Settings for publishing and receiving metadata to a Learning Registry node.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('learning_registry_content_form'),
     'access arguments' => array('access learning_registry'),
@@ -73,7 +73,7 @@ function learning_registry_menu() {
 
 
 /**
- * Implementation of hook_nodeapi().
+ * Implements hook_nodeapi().
  */
 function learning_registry_nodeapi(&$node, $op) {
   $nodes_to_publish = variable_get('learning_registry_node_types', array());
@@ -107,7 +107,7 @@ function learning_registry_nodeapi(&$node, $op) {
 
 
 /**
- * Implementation of hook_cron().
+ * Implements hook_cron().
  *
  * Reads unprocessed nodes from learning_registry table and attempts to push them to
  * the Learning Registry.
@@ -123,7 +123,7 @@ function learning_registry_cron() {
 }
 
 /**
- * Implementation of hook_node_operations().
+ * Implements hook_node_operations().
  *
  * Allows for publishing using the bulk operations content page.
  */
@@ -328,7 +328,7 @@ function _learning_registry_send_to_registry($nid, $json, $service_num = 0, $hea
   }
   else {
     if (!$headless) {
-      drupal_set_message("Error publishing node to registry.", "warning");
+      drupal_set_message(t("Error publishing node to registry."), "warning");
     }
 
     return FALSE;
