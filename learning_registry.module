@@ -514,9 +514,9 @@ function _learning_registry_update_submission_status($nid, $result) {
         db_query($sql, time(), $result_array->document_results[0]->doc_ID, $nid);
       }
       else {
-      // Insert new record
+        // Insert new record
 
-      // fill parameter array
+        // fill parameter array
         $data = array(
             'nid' => $nid,
             'published' => time(),
@@ -561,7 +561,8 @@ function _learning_registry_parse_result($result, $error) {
     }
     else {
       $submission_result["success"] = FALSE;
-      if (!is_null($result_array->document_results[0]->error))
+      $null_error_message = is_null($result_array->document_results[0]->error);
+      if (!$null_error_message)
         $submission_result["error_message"] = $result_array->document_results[0]->error;
       else {
         // If the error message comes back in form of a HTML page, let's just
@@ -573,8 +574,7 @@ function _learning_registry_parse_result($result, $error) {
           $start = strripos($result, "<title>");
           $end = strripos($result, "</title");
           // error msg is between the title tags (+7 skips first title tag)
-          $submission_result["error_message"] = drupal_substr($result, 
-            $start+7, $end - $start - 7); 
+          $submission_result["error_message"] = drupal_substr($result, $start+7, $end - $start - 7);
         }
       }
     }
