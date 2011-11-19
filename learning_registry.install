@@ -22,12 +22,12 @@ function learning_registry_enable() {
   // http://drupal.org/node/110238#comment-3567274
   $workflow_weight = db_result(db_query("SELECT weight FROM {system} WHERE type = 'module' AND name = 'workflow'"));
   $pathauto_weight = db_result(db_query("SELECT weight FROM {system} WHERE type = 'module' AND name = 'pathauto'"));
-  
+
   if ($pathauto_weight > $workflow_weight) {
-    $weight=$pathauto_weight;
+    $weight = $pathauto_weight;
   }
   else {
-    $weight=$workflow_weight;
+    $weight = $workflow_weight;
   }
 
   db_query("UPDATE {system} SET weight = %d WHERE type = 'module' AND name = 'learning_registry'", $weight + 1);

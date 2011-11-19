@@ -630,8 +630,8 @@ function _learning_registry_create_dublincore_payload(&$node) {
   $xml_document->loadXML($source);
 
   // Retrieve just the DC node
-  $nodeList = $xml_document->getElementsByTagNameNS('http://www.w3.org/1999/02/22-rdf-syntax-ns#', 'Description');
-  $dc_node = $nodeList->item(0);
+  $node_list = $xml_document->getElementsByTagNameNS('http://www.w3.org/1999/02/22-rdf-syntax-ns#', 'Description');
+  $dc_node = $node_list->item(0);
 
   // Set the DC title to the node title.
   $element = $xml_document->createElementNS('http://purl.org/dc/elements/1.1/', 'title', $node->title);
@@ -642,8 +642,8 @@ function _learning_registry_create_dublincore_payload(&$node) {
   $dc_node->appendChild($element);
 
   // Set the DC date to the node create date.
-  $dateCreated = format_date($node->created, 'custom', 'Y-m-d');
-  $element = $xml_document->createElementNS('http://purl.org/dc/elements/1.1/', 'date', $dateCreated);
+  $date_created = format_date($node->created, 'custom', 'Y-m-d');
+  $element = $xml_document->createElementNS('http://purl.org/dc/elements/1.1/', 'date', $date_created);
   $dc_node->appendChild($element);
 
   // Set the DC identifier to the absolute URL of the node.
@@ -652,12 +652,12 @@ function _learning_registry_create_dublincore_payload(&$node) {
 
   // Pretty format the XML before sending it to the LR.
   // Must be reloaded, won't work if just set on $xmlDoc.
-  $returnXML = new DOMDocument;
-  $returnXML->preserveWhiteSpace = FALSE;
-  $returnXML->formatOutput = TRUE;
-  $returnXML->loadXML($xml_document->saveXML());
+  $return_xml = new DOMDocument;
+  $return_xml->preserveWhiteSpace = FALSE;
+  $return_xml->formatOutput = TRUE;
+  $return_xml->loadXML($xml_document->saveXML());
 
-  return $returnXML->saveXML();
+  return $return_xml->saveXML();
 
 
   /* References
