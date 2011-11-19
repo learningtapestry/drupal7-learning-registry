@@ -77,34 +77,32 @@ function learning_registry_menu() {
  */
 function learning_registry_nodeapi(&$node, $op) {
   $nodes_to_publish = variable_get('learning_registry_node_types', array());
-  $node_found = in_array($node->type, $nodes_to_publish);
-  if ($node_found && $node->nid);
-  switch ($op) {
-    case 'insert':
-      if ($node->status == 1) {
-
-        if (variable_get('learning_registry_queuing', 0) == 1) {
-          _lr_queue_node($node->nid);
+  if (in_array($node->type, $nodes_to_publish) && $node->nid) {
+    switch ($op) {
+      case 'insert':
+        if ($node->status == 1) {
+          if (variable_get('learning_registry_queuing', 0) == 1) {
+            _lr_queue_node($node->nid);
+          }
+          else {
+            _learning_registry_publish($node);
+          }
         }
-        else {
-          _learning_registry_publish($node);
-        }
-      }
-      break;
-    // case 'update':
-    //   if ($node->status == 0) {
-    //     _learning_registry_set_deleted($node);
-    //   }
-    //   else if ($node->status == 1) {
-    //     _learning_registry_update($node);
-    //   }
-    //   break;
-    // case 'delete':
-    //   _learning_registry_set_deleted($node);
-    //   break;
+        break;
+      // case 'update':
+      //   if ($node->status == 0) {
+      //     _learning_registry_set_deleted($node);
+      //   }
+      //   else if ($node->status == 1) {
+      //     _learning_registry_update($node);
+      //   }
+      //   break;
+      // case 'delete':
+      //   _learning_registry_set_deleted($node);
+      //   break;
+    }
   }
 }
-
 
 /**
  * Implements hook_cron().
@@ -155,11 +153,12 @@ function _learning_registry_bulk_operations_publish($nids) {
     }
   }
 
-  $queueing = variable_get('learning_registry_queuing', 0);
-  if ($queueing == 1)
+  if (variable_get('learning_registry_queuing', 0) == 1) {
     drupal_set_message($success . ' nodes queued to the registry. ' . $failure . ' nodes failed.');
-  else
+  }
+  else {
     drupal_set_message($success . ' nodes published to the registry. ' . $failure . ' nodes failed.');
+  }
 }
 
 /**
@@ -261,11 +260,12 @@ function _learning_registry_get_content_info(&$node) {
 function _learning_registry_get_node_url(&$node) {
 
   // URL Type is an admin setting.  Return either alias or node ID.
-  $url_type = variable_get('learning_registry_url_type', 0);
-  if ($url_type == 1)
+  if (variable_get('learning_registry_url_type', 0) == 1) {
     return url("node/" . $node->nid, array("absolute" => TRUE, "alias" => FALSE));
-  else
+  }
+  else {
     return url("node/" . $node->nid, array("absolute" => TRUE, "alias" => TRUE));
+  }
 }
 
 /**
