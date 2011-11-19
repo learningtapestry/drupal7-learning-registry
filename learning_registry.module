@@ -77,8 +77,7 @@ function learning_registry_menu() {
  */
 function learning_registry_nodeapi(&$node, $op) {
   $nodes_to_publish = variable_get('learning_registry_node_types', array());
-  if (in_array($node->type, $nodes_to_publish) &&
-    $node->nid);
+  if (in_array($node->type, $nodes_to_publish) && $node->nid);
   switch ($op) {
     case 'insert':
       if ($node->status == 1) {
@@ -109,8 +108,8 @@ function learning_registry_nodeapi(&$node, $op) {
 /**
  * Implements hook_cron().
  *
- * Reads unprocessed nodes from learning_registry table and attempts to push them to
- * the Learning Registry.
+ * Reads unprocessed nodes from learning_registry table and 
+ * attempts to push them to the Learning Registry.
  */
 function learning_registry_cron() {
   // Pull node IDs of records queued for processing
@@ -150,13 +149,14 @@ function _learning_registry_bulk_operations_publish($nids) {
 
     // If successful, update the count.
     if ($result) {
-      $success++; }
+      $success++;
+    }
   }
 
   if (variable_get('learning_registry_queuing', 0) == 1)
-    drupal_set_message($success . ' nodes queued to the registry. ' . $failure . ' nodes failed.' );
+    drupal_set_message($success . ' nodes queued to the registry. ' . $failure . ' nodes failed.');
   else
-    drupal_set_message($success . ' nodes published to the registry. ' . $failure . ' nodes failed.' );
+    drupal_set_message($success . ' nodes published to the registry. ' . $failure . ' nodes failed.');
 }
 
 /**
@@ -247,7 +247,8 @@ function _learning_registry_get_content_info(&$node) {
 
 
 /**
- * Return the absolute URL to a node.  If alias available, return alias as friendlier URL.
+ * Return the absolute URL to a node.  If alias available, 
+ * return alias as friendlier URL.
  *
  * @param int $nid
  *   The numerical node id.
@@ -267,12 +268,12 @@ function _learning_registry_get_node_url(&$node) {
 /**
  * Make the curl calls to send to the LR node.
  *
- * All the specified nodeapi operations ($ops) call this function to actually send the data.
+ * All the specified nodeapi operations ($ops) call this to send the data.
  *
  * @param string $nid
  *    A string containing the node ID for submission into the registry.
  * @param string $json
- *    A string containing the json object that will be sent to the registry node.
+ *    A string containing the json object to be sent to the registry node.
  * @param int $service_num
  *    An int that specifies the service that will be called.
  *    0 - publish (default value)
@@ -320,8 +321,8 @@ function _learning_registry_send_to_registry($nid, $json, $service_num = 0, $hea
     $result = _lr_update_submission_status($nid, $result);
 
     if (!$headless) {
-      $submissionURL = variable_get('learning_registry_node_url', NULL) . "/harvest/getrecord?by_doc_ID=TRUE&request_ID=" . $result;
-      drupal_set_message(check_plain(sprintf('Node ID %d published to the registry. <a href="%s" target="_new">(View node on registry.)</a>', $nid, $submissionURL)), "status");
+      $submission_url = variable_get('learning_registry_node_url', NULL) . "/harvest/getrecord?by_doc_ID=TRUE&request_ID=" . $result;
+      drupal_set_message(check_plain(sprintf('Node ID %d published to the registry. <a href="%s" target="_new">(View node on registry.)</a>', $nid, $submission_url)), "status");
     }
 
     return TRUE;
