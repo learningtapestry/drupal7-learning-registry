@@ -22,54 +22,54 @@ function learning_registry_content_form($form_values = NULL) {
   $form['#redirect'] = FALSE;
 
   $form['learning_registry'] = array(
-      '#type' => 'fieldset',
-      '#title' => t('Search'),
+    '#type' => 'fieldset',
+    '#title' => t('Search'),
   );
 
   $form['learning_registry']['search_identity'] = array(
-      '#type' => 'textfield',
-      '#title' => t('Identity'),
-      '#size' => 72,
-      '#maxlength' => 1024,
-      '#description' => t('The name of a person or organization that is the submitter, author, owner, or curator.'),
+    '#type' => 'textfield',
+    '#title' => t('Identity'),
+    '#size' => 72,
+    '#maxlength' => 1024,
+    '#description' => t('The name of a person or organization that is the submitter, author, owner, or curator.'),
   );
 
   $form['learning_registry']['search_tags'] = array(
-      '#type' => 'textfield',
-      '#title' => t('Tags'),
-      '#size' => 72,
-      '#maxlength' => 1024,
-      '#description' => t('List of tags, matched against keys, payload_schema, or resource_data_type.'),
+    '#type' => 'textfield',
+    '#title' => t('Tags'),
+    '#size' => 72,
+    '#maxlength' => 1024,
+    '#description' => t('List of tags, matched against keys, payload_schema, or resource_data_type.'),
   );
 
   $form['learning_registry']['search_from'] = array(
-      '#type' => 'textfield',
-      '#title' => t('From date'),
-      '#size' => 24,
-      '#maxlength' => 128,
-      '#description' => t('Date of publication to learning registry. Format:  YYYY-MM-DD.'),
+    '#type' => 'textfield',
+    '#title' => t('From date'),
+    '#size' => 24,
+    '#maxlength' => 128,
+    '#description' => t('Date of publication to learning registry. Format:  YYYY-MM-DD.'),
   );
 
   $form['learning_registry']['search_until'] = array(
-      '#type' => 'textfield',
-      '#title' => t('Until date'),
-      '#size' => 24,
-      '#maxlength' => 128,
-      '#description' => t('Date of publication to learning registry. Format:  YYYY-MM-DD.'),
+    '#type' => 'textfield',
+    '#title' => t('Until date'),
+    '#size' => 24,
+    '#maxlength' => 128,
+    '#description' => t('Date of publication to learning registry. Format:  YYYY-MM-DD.'),
   );
 
   $form['learning_registry']['submit'] = array(
-      '#type' => 'submit',
-      '#value' => t('Search'),
+    '#type' => 'submit',
+    '#value' => t('Search'),
   );
 
   if ($form_values != NULL) {
     // $form_values is populated, which means we're coming in a second
     // time. Let's display the results instead of the original form fields.
     $form['results'] = array(
-        '#type' => 'item',
+      '#type' => 'item',
         /*  '#title' => t('The results of your form submission'), */
-        '#value' => _learning_registry_content_form_values($form_values),
+      '#value' => _learning_registry_content_form_values($form_values),
     );
   }
 

@@ -100,7 +100,7 @@ function learning_registry_schema() {
 }
 
 /**
- * Implements of hook_requirements().
+ * Implements hook_requirements().
  *
  * @returns $requirements
  *   An array requirements met or not met.
