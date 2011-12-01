@@ -156,7 +156,7 @@ function _learning_registry_content_form_values($form_values = array()) {
         $title = "[unknown]";
       }
 
-      $link = "<a target='_blank' href='" . $url . "'>" . $title . "</a>";
+      $link = l($title, $url, array('attributes' => array('target' => '_blank')));
 
       $rows[] = array($link, $submitter, $desc, $create_date);
     }
