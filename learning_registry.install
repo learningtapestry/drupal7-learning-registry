@@ -18,7 +18,7 @@ function learning_registry_install() {
  * Implements hook_enable().
  */
 function learning_registry_enable() {
-  // set module weight lower than workflow or pathauto. This query lifted from
+  // Set module weight lower than workflow or pathauto. This query lifted from
   // http://drupal.org/node/110238#comment-3567274
   $workflow_weight = db_result(db_query("SELECT weight FROM {system} WHERE type = 'module' AND name = 'workflow'"));
   $pathauto_weight = db_result(db_query("SELECT weight FROM {system} WHERE type = 'module' AND name = 'pathauto'"));

@@ -5,11 +5,11 @@
  * Administration callbacks for the learning_registry module
  */
 
-// much of this is lifted from the "Creating Drupal 6.x modules" docs on the
+// Much of this is lifted from the "Creating Drupal 6.x modules" docs on the
 // Drupal website http://drupal.org/node/231276 and the "Writing a Module"
 // chapter of Pro Drupal Development 2nd Edition by John K. VanDyk.  ISBN-13:
 // 978-1430209898
-
+//
 /**
  * Form builder. Configure learning_registry module.
  *

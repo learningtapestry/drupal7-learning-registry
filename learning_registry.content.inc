@@ -4,13 +4,14 @@
  * @file
  * Administration callbacks for the learning_registry module
  */
-// much of this is lifted from the "Creating Drupal 6.x modules" docs on the
+// Much of this is lifted from the "Creating Drupal 6.x modules" docs on the
 // Drupal website http://drupal.org/node/231276 and the "Writing a Module"
 // chapter of Pro Drupal Development 2nd Edition by John K. VanDyk.  ISBN-13:
 // 978-1430209898
+//
 // Thanks to Lullabot for the example on same page search results!
 // lullabot.com/articles/drupal-5-making-forms-that-display-their-own-results
-
+//
 /**
  * Form builder. Basic search form for Learning Registry.
  *
@@ -107,7 +108,6 @@ function _learning_registry_content_form_values($form_values = array()) {
     $search = variable_get('learning_registry_node_url', NULL) . "/slice?" . $search;
 
     // dsm($search);
-
     $ch = curl_init();
     $curl_options = array(
         CURLOPT_URL => $search,
@@ -119,10 +119,11 @@ function _learning_registry_content_form_values($form_values = array()) {
     $error = curl_error($ch);
     curl_close($ch);
 
-    // dsm($result);
+    /* dsm($result); */
+
     $result_array = json_decode($result);
-    // dsm($result_array);
-    // dsm($error);
+    /* dsm($result_array);
+       dsm($error); */
 
     $header = array();
     $header[] = 'Resource';
@@ -132,7 +133,7 @@ function _learning_registry_content_form_values($form_values = array()) {
 
     $rows = array();
     $docs = $result_array->documents;
-    // dsm($docs);
+    /* dsm($docs); */
 
     foreach ($docs as $row) {
       $url = $row->resource_data_description->resource_locator;

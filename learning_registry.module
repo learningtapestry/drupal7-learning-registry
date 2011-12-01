@@ -89,17 +89,17 @@ function learning_registry_nodeapi(&$node, $op) {
           }
         }
         break;
-      // case 'update':
-      //   if ($node->status == 0) {
-      //     _learning_registry_set_deleted($node);
-      //   }
-      //   else if ($node->status == 1) {
-      //     _learning_registry_update($node);
-      //   }
-      //   break;
-      // case 'delete':
-      //   _learning_registry_set_deleted($node);
-      //   break;
+      /* case 'update':
+         if ($node->status == 0) {
+           _learning_registry_set_deleted($node);
+         }
+         else if ($node->status == 1) {
+           _learning_registry_update($node);
+         }
+         break;
+       case 'delete':
+         _learning_registry_set_deleted($node);
+         break; */
     }
   }
 }
@@ -111,7 +111,7 @@ function learning_registry_nodeapi(&$node, $op) {
  * attempts to push them to the Learning Registry.
  */
 function learning_registry_cron() {
-  // Pull node IDs of records queued for processing
+  // Pull node IDs of records queued for processing.
   $records = db_query('SELECT nid FROM {learning_registry} WHERE queued = 1');
 
   while ($record = db_fetch_array($records)) {
@@ -142,9 +142,9 @@ function _learning_registry_bulk_operations_publish($nids) {
   $success = 0; $failure = 0;
 
   foreach ($nids as $nid) {
-    // Load the node
+    // Load the node.
     $node = node_load($nid);
-    // Send it to the Learning Registry
+    // Send it to the Learning Registry.
     $result = _learning_registry_publish($node, TRUE);
 
     // If successful, update the count.
@@ -182,8 +182,8 @@ function _learning_registry_publish(&$node, $headless = FALSE) {
   // watchdog('learning_registry', json_encode($empty_submission));
   $prepared_submission = _learning_registry_add_resource_data_to_submission($empty_submission, $resource_data);
   $resource_post_payload = json_encode($prepared_submission);
-  // watchdog('learning_registry', $resource_post_payload,
-  // array(), WATCHDOG_DEBUG);
+  /* watchdog('learning_registry', $resource_post_payload,
+   array(), WATCHDOG_DEBUG); */
 
   $result = _learning_registry_send_to_registry($node->nid, $resource_post_payload, 0, $headless);
   return $result;
@@ -227,15 +227,15 @@ function _learning_registry_get_content_info(&$node) {
   $content_info = array();
   $content_info['resource_locator'] = _learning_registry_get_node_url($node);
   // TODO: correctly specify resource data type
-  // resource_data_type is currently hardcoded, will be fixed in a later version
+  // resource_data_type is hardcoded, will be fixed in a later version.
   $content_info['resource_data_type'] = 'metadata';
   $content_info['submitter'] = variable_get('learning_registry_submitter', NULL);
   $content_info['tos'] = variable_get('learning_registry_tos', NULL);
 
-  // currently set curator and submitter the same, once we get a better sense
-  // of what each field means, this will change
+  // Currently set curator and submitter the same, once we get a better sense
+  // of what each field means, this will change.
   $content_info['curator'] = $content_info['submitter'];
-  // TODO: correctly set active value, currently hardcoded to TRUE
+  // TODO: correctly set active value, currently hardcoded to TRUE.
   $content_info['active' ] = TRUE;
   $content_info['payload_schema'] = "DC 1.1";
 
@@ -303,7 +303,7 @@ function _learning_registry_send_to_registry($nid, $json, $service_num = 0, $hea
   $curl_options = array(
     // TODO: allow more than publish! Currently hardcoding the publish
     // bit. this function needs to take an argument to add the appropriate
-    // service at the end of the curl URL
+    // service at the end of the curl URL.
     CURLOPT_URL => variable_get('learning_registry_node_url', NULL) . "/publish",
     CURLOPT_POST => TRUE,
     CURLOPT_POSTFIELDS => $json,
@@ -318,7 +318,7 @@ function _learning_registry_send_to_registry($nid, $json, $service_num = 0, $hea
 
   $submission_result = _learning_registry_parse_result($result, $error);
 
-  // dsm($submission_result);
+  /* dsm($submission_result); */
 
   if ($result) {
     $result = _learning_registry_update_submission_status($nid, $result);
@@ -350,11 +350,11 @@ function _learning_registry_send_to_registry($nid, $json, $service_num = 0, $hea
  *    Formatted array of resource data.
  */
 function _learning_registry_def_resource_data($content_info) {
-  // values specified as immutable in the LR spec.
+  // Values specified as immutable in the LR spec.
   define("LR_DOC_TYPE", "resource_data");
   define("LR_DOC_VERSION", "0.23.0");
   define("LR_SUBMITTER_TYPE", "agent");
-  // commented since we aren't signing submissions
+  // Commented since we aren't signing submissions
   // define("LR_SIGNING_METHOD", "LR-PGP.1.0");
   define("LR_PAYLOAD_PLACEMENT", "inline");
 
@@ -373,7 +373,7 @@ function _learning_registry_def_resource_data($content_info) {
     'payload_schema_format',
   );
 
-  // we don't really do much with these since we aren't currently signing
+  // We don't really do much with these since we aren't currently signing
   // submissions.
   $opt_sig_fields = array(
     'signature',
@@ -393,32 +393,32 @@ function _learning_registry_def_resource_data($content_info) {
 
   // TODO: extract these foreach calls into their own function
   // Add the optional keys / objects if they are passed in $content_info
-
-  // optional identity values.
+  //
+  // Optional identity values.
   foreach ($opt_id_fields as $field) {
     if (array_key_exists($field, $content_info)) {
       $identity->$field = $content_info[$field];
     }
   }
 
-  // optional resource_data values
+  // Optional resource_data values.
   foreach ($opt_res_fields as $field) {
     if (array_key_exists($field, $content_info)) {
       $resource_data->$field = $content_info[$field];
     }
   }
 
-  // create an empty stdClass since the digital_signature is completely
+  // Create an empty stdClass since the digital_signature is completely
   // optional.
   $digital_signature = new stdClass();
-  // optional digital signature  values
+  // Optional digital signature values.
   foreach ($opt_sig_fields as $field) {
     if (array_key_exists($field, $content_info)) {
       $digital_signature->$field = $content_info[$field];
     }
   }
 
-  // optional TOS values
+  // Optional TOS values.
   foreach ($opt_tos_fields as $field) {
     if (array_key_exists($field, $content_info)) {
       $tos->$field = $content_info[$field];
@@ -433,7 +433,7 @@ function _learning_registry_def_resource_data($content_info) {
   $resource_data->identity = $identity;
   $resource_data->TOS = $tos;
 
-  // only add the signature key if signature data are defined.
+  // Only add the signature key if signature data are defined.
   if (!empty($digital_signature)) {
     $resource_data->digital_signature = $digital_signature;
   }
@@ -490,13 +490,13 @@ function _learning_registry_update_submission_status($nid, $result) {
   // a.) to determine if the node was published to the Learning Registry,
   // b.) then to update that status to the learning_registry table.
   // The first step should stand on its own.
-
+  //
   if ($result) {
 
     $result_array = json_decode($result);
 
     if ($result_array->document_results[0]->OK) {
-      // check to see if submission already in database
+      // Check to see if submission already in database.
       $submission_check_result = db_query('SELECT * FROM {learning_registry} WHERE nid = %d', $nid);
       $submission_record = db_fetch_object($submission_check_result);
 
@@ -514,15 +514,15 @@ function _learning_registry_update_submission_status($nid, $result) {
         db_query($sql, time(), $result_array->document_results[0]->doc_ID, $nid);
       }
       else {
-        // Insert new record
-
-        // fill parameter array
+        // Insert new record.
+        //
+        // Fill parameter array.
         $data = array(
             'nid' => $nid,
             'published' => time(),
             'docid' => $result_array->document_results[0]->doc_ID,
         );
-        // write it to the database
+        // Write it to the database.
         drupal_write_record('learning_registry', $data);
       }
       return $result_array->document_results[0]->doc_ID;
@@ -551,12 +551,12 @@ function _learning_registry_parse_result($result, $error) {
   $submission_result = array();
 
   if ($result) {
-    // We have something back from the Learning Registry service
+    // We have something back from the Learning Registry service.
     $result_array = json_decode($result);
 
     if ($result_array->document_results[0]->OK) {
-      // Submission okay
-      $submission_result["success"] =  TRUE;
+      // Submission okay.
+      $submission_result["success"] = TRUE;
       $submission_result["doc_id"] = $result_array->document_results[0]->doc_ID;
     }
     else {
@@ -573,14 +573,14 @@ function _learning_registry_parse_result($result, $error) {
         if (strpos($result, "<html") > 0) {
           $start = strripos($result, "<title>");
           $end = strripos($result, "</title");
-          // error msg is between the title tags (+7 skips first title tag)
+          // Error msg is between the title tags (+7 skips first title tag).
           $submission_result["error_message"] = drupal_substr($result, $start + 7, $end - $start - 7);
         }
       }
     }
   }
   else {
-    // We didn't contact the Learning Registry, must be a network error
+    // We didn't contact the Learning Registry, must be a network error.
     $submission_result["SUCCESS"] = FALSE;
     $submission_result["error_message"] = $error;
   }
@@ -595,11 +595,11 @@ function _learning_registry_parse_result($result, $error) {
  */
 function _learning_registry_queue_node($nid) {
 
-  // Check if this record exists in submission table
+  // Check if this record exists in submission table.
   $submission_check_result = db_query('SELECT * FROM {learning_registry} WHERE nid = %d', $nid);
   $submission_record = db_fetch_object($submission_check_result);
 
-  // If exists, update, else insert new record
+  // If exists, update, else insert new record.
   if ($submission_record) {
     $sql = 'UPDATE {learning_registry} SET queued=1 WHERE nid = %d';
   }
@@ -607,7 +607,7 @@ function _learning_registry_queue_node($nid) {
     $sql = 'INSERT INTO {learning_registry} (nid, queued) VALUES (%d, 1)';
   }
 
-  // Write to database
+  // Write to database.
   db_query($sql, $nid);
 }
 
@@ -635,7 +635,7 @@ function _learning_registry_create_dublincore_payload(&$node) {
   $xml_document = new DOMDocument();
   $xml_document->loadXML($source);
 
-  // Retrieve just the DC node
+  // Retrieve just the DC node.
   $node_list = $xml_document->getElementsByTagNameNS('http://www.w3.org/1999/02/22-rdf-syntax-ns#', 'Description');
   $dc_node = $node_list->item(0);
 
