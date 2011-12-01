@@ -99,3 +99,46 @@ function learning_registry_schema() {
   return $schema;
 }
 
+/**
+ * Implements of hook_requirements().
+ *
+ * @returns $requirements
+ *   An array requirements met or not met.
+ */
+function curl_requirements($phase) {
+  $requirements = array();
+
+  if ($phase == 'runtime') {
+    // Check cURL library.
+    if (function_exists('curl_init')) {
+      $requirements['curl_']['severity'] = REQUIREMENT_OK;
+      $info = curl_version();
+      $requirements['curl_']['value'] = is_array($info) ? $info['version'] : $info;
+    }
+    else {
+      $requirements['curl_'] = array(
+        'value' => t('Not installed'),
+        'severity' => REQUIREMENT_ERROR,
+        'description' => t('The cURL library for PHP is missing or outdated. Please check the <a href="@url">PHP cURL documentation</a> for information on how to correct this.', array('@url' => 'http://www.php.net/manual/en/ref.curl.php')),
+      );
+    }
+    $requirements['curl_']['title'] = t('cURL library');
+  }
+
+  $requirements['phpdom'] = array(
+    'title' => t('PHP Document Object Model'),
+  );
+
+  if (class_exists('DOMDocument')) {
+    $requirements['phpdom']['value'] = t('Installed');
+    $requirements['phpdom']['severity'] = REQUIREMENT_OK;
+  }
+  else {
+    $requirements['phpdom']['value'] = t('Not installed');
+    $requirements['phpdom']['description'] = t('External links filter requires PHP <a href="http://php.net/manual/en/book.dom.php">Document Object Model</a>.');
+    $requirements['phpdom']['severity'] = REQUIREMENT_ERROR;
+  }
+
+  return $requirements;
+}
+
