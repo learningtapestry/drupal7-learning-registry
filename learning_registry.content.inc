@@ -83,10 +83,10 @@ function learning_registry_content_form($form_values = NULL) {
  */
 function _learning_registry_content_form_values($form_values = array()) {
 
-  $identity = $form_values['post']['search_identity'];
-  $tags = $form_values['post']['search_tags'];
-  $from = $form_values['post']['search_from'];
-  $until = $form_values['post']['search_until'];
+  $identity = check_plain($form_values['post']['search_identity']);
+  $tags = check_plain($form_values['post']['search_tags']);
+  $from = check_plain($form_values['post']['search_from']);
+  $until = check_plain($form_values['post']['search_until']);
 
   $search = '';
 
@@ -105,7 +105,7 @@ function _learning_registry_content_form_values($form_values = array()) {
 
   if ($search != '') {
 
-    $search = variable_get('learning_registry_node_url', NULL) . "/slice?" . $search;
+    $search = variable_get('learning_registry_node_url', NULL) . '/slice?' . $search;
 
     // dsm($search);
     $ch = curl_init();
@@ -143,17 +143,17 @@ function _learning_registry_content_form_values($form_values = array()) {
       $create_date = drupal_substr($create_date, 0, 10);
 
 
-      $title = "";
+      $title = '';
 
-      if (gettype($payload) == "string") {
+      if (gettype($payload) == 'string') {
         $xml = simplexml_load_string($payload);
-        $dc = $xml->children("http://purl.org/dc/elements/1.1/");
+        $dc = $xml->children('http://purl.org/dc/elements/1.1/');
         $title = $dc->title;
         $desc = $dc->description;
       }
 
       if (drupal_strlen($title) < 1) {
-        $title = "[unknown]";
+        $title = '[unknown]';
       }
 
       $link = l($title, $url, array('attributes' => array('target' => '_blank')));
