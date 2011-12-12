@@ -25,9 +25,9 @@ function learning_registry_admin_settings() {
   $cck_fields = array();
 
   foreach ($options as $option) {
-      $type_names[$option->type] = $option->name;
-      $type = content_types($option->type);
-      $cck_fields[$option->type] = $type['fields'];
+    $type_names[$option->type] = $option->name;
+    $type = content_types($option->type);
+    $cck_fields[$option->type] = $type['fields'];
   }
 
   $form = array();
@@ -95,8 +95,8 @@ function learning_registry_admin_settings() {
       $cck_checkboxes = array();
 
       foreach ($cck_fields[$type_key] as $cck_field) {
-          $field_name = $cck_field['field_name'];
-          $cck_checkboxes[$cck_field['field_name']] = $cck_field['widget']['label'];
+        $field_name = $cck_field['field_name'];
+        $cck_checkboxes[$cck_field['field_name']] = $cck_field['widget']['label'];
       }
 
       $form['learning_registry_node_type_fieldset_' . $type_key] = array(

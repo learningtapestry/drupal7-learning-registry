@@ -23,9 +23,9 @@
 function learning_registry_help($path, $arg) {
   $output = '';
   switch ($path) {
-    case "admin/help#learning_registry":
+    case 'admin/help#learning_registry':
       $output = '<p>' .
-        t("Pushes Drupal node data to the specified Learning Registry node.") .
+        t('Pushes Drupal node data to the specified Learning Registry node.') .
         '<p>';
       break;
   }
@@ -115,7 +115,7 @@ function learning_registry_cron() {
   $records = db_query('SELECT nid FROM {learning_registry} WHERE queued = 1');
 
   while ($record = db_fetch_array($records)) {
-    $node = node_load($record["nid"], NULL, TRUE);
+    $node = node_load($record['nid'], NULL, TRUE);
     _learning_registry_publish($node, TRUE);
   }
 }
@@ -199,6 +199,8 @@ function _learning_registry_publish(&$node, $headless = FALSE) {
  *   reference allows us to edit the node content.
  */
 function _learning_registry_set_deleted(&$node) {
+//TODO: Implement in the future. This method will send a message to the
+//registry to remove the resource from the repository.
   return;
 }
 
@@ -212,6 +214,8 @@ function _learning_registry_set_deleted(&$node) {
  *   reference allows us to edit the node content.
  */
 function _learning_registry_update(&$node) {
+//TODO:  Implement in the future.  This method will send a message to the
+//registry to update an existing resource in the repository.
   return;
 }
 
@@ -237,7 +241,7 @@ function _learning_registry_get_content_info(&$node) {
   $content_info['curator'] = $content_info['submitter'];
   // TODO: correctly set active value, currently hardcoded to TRUE.
   $content_info['active' ] = TRUE;
-  $content_info['payload_schema'] = "DC 1.1";
+  $content_info['payload_schema'] = 'DC 1.1';
 
   $resource_data = _learning_registry_create_dublincore_payload($node);
 
@@ -261,10 +265,10 @@ function _learning_registry_get_node_url(&$node) {
 
   // URL Type is an admin setting.  Return either alias or node ID.
   if (variable_get('learning_registry_url_type', 0) == 1) {
-    return url("node/" . $node->nid, array("absolute" => TRUE, "alias" => FALSE));
+    return url('node/' . $node->nid, array('absolute' => TRUE, 'alias' => FALSE));
   }
   else {
-    return url("node/" . $node->nid, array("absolute" => TRUE, "alias" => TRUE));
+    return url('node/' . $node->nid, array('absolute' => TRUE, 'alias' => TRUE));
   }
 }
 
@@ -304,11 +308,11 @@ function _learning_registry_send_to_registry($nid, $json, $service_num = 0, $hea
     // TODO: allow more than publish! Currently hardcoding the publish
     // bit. this function needs to take an argument to add the appropriate
     // service at the end of the curl URL.
-    CURLOPT_URL => variable_get('learning_registry_node_url', NULL) . "/publish",
+    CURLOPT_URL => variable_get('learning_registry_node_url', NULL) . '/publish',
     CURLOPT_POST => TRUE,
     CURLOPT_POSTFIELDS => $json,
     CURLOPT_RETURNTRANSFER => 1,
-    CURLOPT_HTTPHEADER => array("Content-type: application/json"),
+    CURLOPT_HTTPHEADER => array('Content-type: application/json'),
   );
   // file_put_contents("/tmp/foo.json", $json);
   curl_setopt_array($ch, $curl_options);
@@ -324,15 +328,15 @@ function _learning_registry_send_to_registry($nid, $json, $service_num = 0, $hea
     $result = _learning_registry_update_submission_status($nid, $result);
 
     if (!$headless) {
-      $submission_url = variable_get('learning_registry_node_url', NULL) . "/harvest/getrecord?by_doc_ID=TRUE&request_ID=" . $result;
-      drupal_set_message(filter_xss((sprintf('Node ID %d published to the registry. <a href="%s" target="_new">(View node on registry.)</a>', $nid, $submission_url))), "status");
+      $submission_url = variable_get('learning_registry_node_url', NULL) . '/harvest/getrecord?by_doc_ID=TRUE&request_ID=' . $result;
+      drupal_set_message(filter_xss((sprintf('Node ID %d published to the registry. <a href="%s" target="_new">(View node on registry.)</a>', $nid, $submission_url))), 'status');
     }
 
     return TRUE;
   }
   else {
     if (!$headless) {
-      drupal_set_message(t("Error publishing node to registry."), "warning");
+      drupal_set_message(t('Error publishing node to registry.'), 'warning');
     }
 
     return FALSE;
@@ -351,12 +355,12 @@ function _learning_registry_send_to_registry($nid, $json, $service_num = 0, $hea
  */
 function _learning_registry_def_resource_data($content_info) {
   // Values specified as immutable in the LR spec.
-  define("LR_DOC_TYPE", "resource_data");
-  define("LR_DOC_VERSION", "0.23.0");
-  define("LR_SUBMITTER_TYPE", "agent");
+  define('LR_DOC_TYPE', 'resource_data');
+  define('LR_DOC_VERSION', '0.23.0');
+  define('LR_SUBMITTER_TYPE', 'agent');
   // Commented since we aren't signing submissions
-  // define("LR_SIGNING_METHOD", "LR-PGP.1.0");
-  define("LR_PAYLOAD_PLACEMENT", "inline");
+  // define('LR_SIGNING_METHOD', 'LR-PGP.1.0');
+  define('LR_PAYLOAD_PLACEMENT', 'inline');
 
   $opt_id_fields = array(
     'curator',
@@ -387,9 +391,9 @@ function _learning_registry_def_resource_data($content_info) {
     'tos_submission_attribution',
   );
   $identity->submitter_type = LR_SUBMITTER_TYPE;
-  $identity->submitter = $content_info["submitter"];
+  $identity->submitter = $content_info['submitter'];
 
-  $tos->submission_TOS = $content_info["tos"];;
+  $tos->submission_TOS = $content_info['tos'];;
 
   // TODO: extract these foreach calls into their own function
   // Add the optional keys / objects if they are passed in $content_info
@@ -528,7 +532,7 @@ function _learning_registry_update_submission_status($nid, $result) {
       return $result_array->document_results[0]->doc_ID;
     }
     else {
-      watchdog('learning_registry', "Error publishing node ID %nid to the registry.  Full response: %msg",
+      watchdog('learning_registry', 'Error publishing node ID %nid to the registry.  Full response: %msg',
           array('%nid' => $nid, '%msg' => $result));
       return FALSE;
     }
@@ -556,13 +560,13 @@ function _learning_registry_parse_result($result, $error) {
 
     if ($result_array->document_results[0]->OK) {
       // Submission okay.
-      $submission_result["success"] = TRUE;
-      $submission_result["doc_id"] = $result_array->document_results[0]->doc_ID;
+      $submission_result['success'] = TRUE;
+      $submission_result['doc_id'] = $result_array->document_results[0]->doc_ID;
     }
     else {
-      $submission_result["success"] = FALSE;
+      $submission_result['success'] = FALSE;
       if (!is_null($result_array->document_results[0]->error)) {
-        $submission_result["error_message"] = $result_array->document_results[0]->error;
+        $submission_result['error_message'] = $result_array->document_results[0]->error;
       }
       else {
         // If the error message comes back in form of a HTML page, let's just
@@ -570,19 +574,19 @@ function _learning_registry_parse_result($result, $error) {
         // Current impl of LR spits two title tags, so we're grabbing the
         // last one as it displays better error message.  If not two
         // present, we'd just grab the first.
-        if (strpos($result, "<html") > 0) {
-          $start = strripos($result, "<title>");
-          $end = strripos($result, "</title");
+        if (strpos($result, '<html') > 0) {
+          $start = strripos($result, '<title>');
+          $end = strripos($result, '</title');
           // Error msg is between the title tags (+7 skips first title tag).
-          $submission_result["error_message"] = drupal_substr($result, $start + 7, $end - $start - 7);
+          $submission_result['error_message'] = drupal_substr($result, $start + 7, $end - $start - 7);
         }
       }
     }
   }
   else {
     // We didn't contact the Learning Registry, must be a network error.
-    $submission_result["SUCCESS"] = FALSE;
-    $submission_result["error_message"] = $error;
+    $submission_result['SUCCESS'] = FALSE;
+    $submission_result['error_message'] = $error;
   }
 
   return $submission_result;
