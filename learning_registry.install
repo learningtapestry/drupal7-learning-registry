@@ -105,24 +105,24 @@ function learning_registry_schema() {
  * @returns $requirements
  *   An array requirements met or not met.
  */
-function curl_requirements($phase) {
+function learning_registry_requirements($phase) {
   $requirements = array();
 
-  if ($phase == 'runtime') {
+  if ($phase == 'install') {
     // Check cURL library.
     if (function_exists('curl_init')) {
-      $requirements['curl_']['severity'] = REQUIREMENT_OK;
+      $requirements['curl']['severity'] = REQUIREMENT_OK;
       $info = curl_version();
-      $requirements['curl_']['value'] = is_array($info) ? $info['version'] : $info;
+      $requirements['curl']['value'] = is_array($info) ? $info['version'] : $info;
     }
     else {
-      $requirements['curl_'] = array(
+      $requirements['curl'] = array(
         'value' => st('Not installed'),
         'severity' => REQUIREMENT_ERROR,
         'description' => st('The cURL library for PHP is missing or outdated. Please check the <a href="@url">PHP cURL documentation</a> for information on how to correct this.', array('@url' => 'http://www.php.net/manual/en/ref.curl.php')),
       );
     }
-    $requirements['curl_']['title'] = st('cURL library');
+    $requirements['curl']['title'] = st('cURL library');
   }
 
   $requirements['phpdom'] = array(
