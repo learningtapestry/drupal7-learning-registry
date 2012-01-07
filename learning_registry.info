@@ -1,5 +1,3 @@
-; description file for learningregistry module
-
 name = Learning Registry
 description = Publish and receive Drupal node metadata to a Learning Registry node.
 core = 6.x
