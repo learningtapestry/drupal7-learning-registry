@@ -8,7 +8,23 @@
  * Learning Registry node.
  */
 
-
+  define('LEARNING_REGISTRY_QUEUE_IMMEDIATE', 0);
+  define('LEARING_REGISTRY_QUEUE_QUEUED', 1);
+  
+  define('LEARNING_REGISTRY_URL_NODE_ID', 0);
+  define('LEARNING_REGISTRY_URL_ALIAS', 1);
+  
+  define('LEARNING_REGISTRY_DOC_TYPE', 'resource_data');
+  define('LEARNING_REGISTRY_DOC_VERSION', '0.23.0');
+  define('LEARNING_REGISTRY_SUBMITTER_TYPE', 'agent');
+  define('LEARNING_REGISTRY_PAYLOAD_PLACEMENT', 'inline');
+  define('LEARNING_REGISTRY_DEFAULT_SCHEMA', 'DC 1.1');
+  
+  define('LEARNING_REGISTRY_MODE_PUBLISH', 0);
+  define('LEARNING_REGISTRY_MODE_UPDATE', 1);  //future impl
+  define('LEARNING_REGISTRY_MODE_DELETE', 2); //future impl
+  
+  
 /**
  * Display help and module information.
  *
@@ -78,10 +94,12 @@ function learning_registry_menu() {
 function learning_registry_nodeapi(&$node, $op) {
   $nodes_to_publish = variable_get('learning_registry_node_types', array());
   if (in_array($node->type, $nodes_to_publish) && $node->nid) {
+    // Switch case below used to accomodate more methods (update, delete)
+    // in the future.
     switch ($op) {
       case 'insert':
         if ($node->status == 1) {
-          if (variable_get('learning_registry_queuing', 0) == 1) {
+          if (variable_get('learning_registry_queuing', LEARNING_REGISTRY_QUEUE_IMMEDIATE) == LEARING_REGISTRY_QUEUE_QUEUED) {
             _learning_registry_queue_node($node->nid);
           }
           else {
@@ -128,7 +146,7 @@ function learning_registry_node_operations() {
  * Callback function for learning_registry_node_operations()
  */
 function _learning_registry_bulk_operations_publish($nids) {
-  $success = 0; $failure = 0;
+  $success = 0; $failure = 0; // counters for batch operations
 
   foreach ($nids as $nid) {
     // Load the node.
@@ -141,8 +159,8 @@ function _learning_registry_bulk_operations_publish($nids) {
       $success++;
     }
   }
-
-  if (variable_get('learning_registry_queuing', 0) == 1) {
+  
+  if (variable_get('learning_registry_queuing', LEARNING_REGISTRY_QUEUE_IMMEDIATE) == LEARING_REGISTRY_QUEUE_QUEUED) {
     drupal_set_message($success . ' nodes queued to the registry. ' . $failure . ' nodes failed.');
   }
   else {
@@ -171,7 +189,7 @@ function _learning_registry_publish(&$node, $headless = FALSE) {
   $prepared_submission = _learning_registry_add_resource_data_to_submission($empty_submission, $resource_data);
   $resource_post_payload = json_encode($prepared_submission);
 
-  $result = _learning_registry_send_to_registry($node->nid, $resource_post_payload, 0, $headless);
+  $result = _learning_registry_send_to_registry($node->nid, $resource_post_payload, LEARNING_REGISTRY_MODE_PUBLISH, $headless);
   return $result;
 }
 
@@ -194,7 +212,7 @@ function _learning_registry_get_content_info(&$node) {
   // of what each field means, this will change.
   $content_info['curator'] = $content_info['submitter'];
   $content_info['active' ] = TRUE;
-  $content_info['payload_schema'] = 'DC 1.1';
+  $content_info['payload_schema'] = LEARNING_REGISTRY_DEFAULT_SCHEMA;
 
   $resource_data = _learning_registry_create_dublincore_payload($node);
 
@@ -217,7 +235,7 @@ function _learning_registry_get_content_info(&$node) {
 function _learning_registry_get_node_url(&$node) {
 
   // URL Type is an admin setting.  Return either alias or node ID.
-  if (variable_get('learning_registry_url_type', 0) == 1) {
+  if (variable_get('learning_registry_url_type', LEARNING_REGISTRY_URL_NODE_ID) == LEARNING_REGISTRY_URL_ALIAS) {
     return url('node/' . $node->nid, array('absolute' => TRUE, 'alias' => FALSE));
   }
   else {
@@ -237,22 +255,15 @@ function _learning_registry_get_node_url(&$node) {
  * @param int $service_num
  *    An int that specifies the service that will be called.
  *    0 - publish (default value)
- *    1 - update
- *    2 - delete
+ *    1 - update (future impl)
+ *    2 - delete  (future impl)
  * @param bool $headless
  *    A flag to determine if this is called from cron (non-user session).
  *
  * @return bool $result
  *    True if operation was successful, false if error.
  */
-function _learning_registry_send_to_registry($nid, $json, $service_num = 0, $headless = FALSE) {
-  $services = array(
-    'publish'
-  );
-
-  if ($service_num >= count($services)) {
-    return;
-  }
+function _learning_registry_send_to_registry($nid, $json, $service_num = LEARNING_REGISTRY_MODE_PUBLISH, $headless = FALSE) {
 
   $ch = curl_init();
   $curl_options = array(
@@ -300,10 +311,6 @@ function _learning_registry_send_to_registry($nid, $json, $service_num = 0, $hea
  */
 function _learning_registry_def_resource_data($content_info) {
   // Values specified as immutable in the LR spec.
-  define('LR_DOC_TYPE', 'resource_data');
-  define('LR_DOC_VERSION', '0.23.0');
-  define('LR_SUBMITTER_TYPE', 'agent');
-  define('LR_PAYLOAD_PLACEMENT', 'inline');
 
   $opt_id_fields = array(
     'curator',
@@ -331,7 +338,7 @@ function _learning_registry_def_resource_data($content_info) {
   $opt_tos_fields = array(
     'tos_submission_attribution',
   );
-  $identity->submitter_type = LR_SUBMITTER_TYPE;
+  $identity->submitter_type = LEARNING_REGISTRY_SUBMITTER_TYPE;
   $identity->submitter = $content_info['submitter'];
 
   $tos->submission_TOS = $content_info['tos'];;
@@ -368,8 +375,8 @@ function _learning_registry_def_resource_data($content_info) {
   }
 
 
-  $resource_data->doc_type = LR_DOC_TYPE;
-  $resource_data->doc_version = LR_DOC_VERSION;
+  $resource_data->doc_type = LEARNING_REGISTRY_DOC_TYPE;
+  $resource_data->doc_version = LEARNING_REGISTRY_DOC_VERSION;
   $resource_data->resource_data_type = $content_info['resource_data_type'];
   $resource_data->active = $content_info['active'];
   $resource_data->identity = $identity;
@@ -381,7 +388,7 @@ function _learning_registry_def_resource_data($content_info) {
   }
 
   $resource_data->resource_locator = $content_info['resource_locator'];
-  $resource_data->payload_placement = LR_PAYLOAD_PLACEMENT;
+  $resource_data->payload_placement = LEARNING_REGISTRY_PAYLOAD_PLACEMENT;
   $resource_data->payload_schema = array($content_info['payload_schema']);
   $resource_data->resource_data = $content_info['resource_data'];
 

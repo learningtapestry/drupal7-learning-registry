@@ -19,7 +19,6 @@
 function learning_registry_admin_settings() {
   // Get node types with internal names as keys and "friendly" names as
   // values.
-  // $options = node_get_types('names');
   $options = node_get_types();
   $type_names = array();
   $cck_fields = array();
@@ -67,7 +66,10 @@ function learning_registry_admin_settings() {
     '#title' => t('Immediate or Queued Publishing'),
     '#default_value' => variable_get('learning_registry_queuing', 0),
     '#description' => t('Selects if submissions to the Learning Registry will publish immediately or queued in a batch to publish when cron executes.'),
-    '#options' => array(t('Immediate'), t('Queued')),
+     '#options' => array(
+       LEARNING_REGISTRY_QUEUE_IMMEDIATE => t('Immediate'),
+       LEARNING_REGISTRY_QUEUE_QUEUED => t('Queued'),
+    ),
     '#required' => TRUE,
   );
 
