@@ -42,7 +42,6 @@ function learning_registry_admin_settings() {
     '#required' => TRUE,
   );
 
-  // TODO: figure out if we need to validate this information.
   $form['learning_registry_submitter'] = array(
     '#type' => 'textfield',
     '#title' => t('Submitter'),

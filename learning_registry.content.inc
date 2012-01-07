@@ -68,7 +68,6 @@ function learning_registry_content_form($form_values = NULL) {
     // time. Let's display the results instead of the original form fields.
     $form['results'] = array(
       '#type' => 'item',
-        /*  '#title' => t('The results of your form submission'), */
       '#value' => _learning_registry_content_form_values($form_values),
     );
   }
@@ -107,7 +106,6 @@ function _learning_registry_content_form_values($form_values = array()) {
 
     $search = variable_get('learning_registry_node_url', NULL) . '/slice?' . $search;
 
-    // dsm($search);
     $ch = curl_init();
     $curl_options = array(
         CURLOPT_URL => $search,
@@ -119,11 +117,7 @@ function _learning_registry_content_form_values($form_values = array()) {
     $error = curl_error($ch);
     curl_close($ch);
 
-    /* dsm($result); */
-
     $result_array = json_decode($result);
-    /* dsm($result_array);
-       dsm($error); */
 
     $header = array();
     $header[] = 'Resource';
@@ -133,7 +127,6 @@ function _learning_registry_content_form_values($form_values = array()) {
 
     $rows = array();
     $docs = $result_array->documents;
-    /* dsm($docs); */
 
     foreach ($docs as $row) {
       $url = $row->resource_data_description->resource_locator;

@@ -89,17 +89,6 @@ function learning_registry_nodeapi(&$node, $op) {
           }
         }
         break;
-      /* case 'update':
-         if ($node->status == 0) {
-           _learning_registry_set_deleted($node);
-         }
-         else if ($node->status == 1) {
-           _learning_registry_update($node);
-         }
-         break;
-       case 'delete':
-         _learning_registry_set_deleted($node);
-         break; */
     }
   }
 }
@@ -179,44 +168,11 @@ function _learning_registry_publish(&$node, $headless = FALSE) {
   $content_info = _learning_registry_get_content_info(&$node);
   $resource_data = _learning_registry_def_resource_data($content_info);
   $empty_submission = _learning_registry_build_envelope();
-  // watchdog('learning_registry', json_encode($empty_submission));
   $prepared_submission = _learning_registry_add_resource_data_to_submission($empty_submission, $resource_data);
   $resource_post_payload = json_encode($prepared_submission);
-  /* watchdog('learning_registry', $resource_post_payload,
-   array(), WATCHDOG_DEBUG); */
 
   $result = _learning_registry_send_to_registry($node->nid, $resource_post_payload, 0, $headless);
   return $result;
-}
-
-
-/**
- * Sets the deleted status for a deleted Drupal node in the LR node.
- *
- * @param object &$node
- *   A reference to the node object. We have to be very careful to not set
- *   anything, only read from the node object reference since the node
- *   reference allows us to edit the node content.
- */
-function _learning_registry_set_deleted(&$node) {
-//TODO: Implement in the future. This method will send a message to the
-//registry to remove the resource from the repository.
-  return;
-}
-
-
-/**
- * Update the info published to the node.
- *
- * @param object &$node
- *   A reference to the node object. We have to be very careful to not set
- *   anything, only read from the node object reference since the node
- *   reference allows us to edit the node content.
- */
-function _learning_registry_update(&$node) {
-//TODO:  Implement in the future.  This method will send a message to the
-//registry to update an existing resource in the repository.
-  return;
 }
 
 /**
@@ -230,8 +186,6 @@ function _learning_registry_update(&$node) {
 function _learning_registry_get_content_info(&$node) {
   $content_info = array();
   $content_info['resource_locator'] = _learning_registry_get_node_url($node);
-  // TODO: correctly specify resource data type
-  // resource_data_type is hardcoded, will be fixed in a later version.
   $content_info['resource_data_type'] = 'metadata';
   $content_info['submitter'] = variable_get('learning_registry_submitter', NULL);
   $content_info['tos'] = variable_get('learning_registry_tos', NULL);
@@ -239,7 +193,6 @@ function _learning_registry_get_content_info(&$node) {
   // Currently set curator and submitter the same, once we get a better sense
   // of what each field means, this will change.
   $content_info['curator'] = $content_info['submitter'];
-  // TODO: correctly set active value, currently hardcoded to TRUE.
   $content_info['active' ] = TRUE;
   $content_info['payload_schema'] = 'DC 1.1';
 
@@ -294,9 +247,7 @@ function _learning_registry_get_node_url(&$node) {
  */
 function _learning_registry_send_to_registry($nid, $json, $service_num = 0, $headless = FALSE) {
   $services = array(
-    'publish',
-    'update',
-    'delete',
+    'publish'
   );
 
   if ($service_num >= count($services)) {
@@ -305,24 +256,18 @@ function _learning_registry_send_to_registry($nid, $json, $service_num = 0, $hea
 
   $ch = curl_init();
   $curl_options = array(
-    // TODO: allow more than publish! Currently hardcoding the publish
-    // bit. this function needs to take an argument to add the appropriate
-    // service at the end of the curl URL.
     CURLOPT_URL => variable_get('learning_registry_node_url', NULL) . '/publish',
     CURLOPT_POST => TRUE,
     CURLOPT_POSTFIELDS => $json,
     CURLOPT_RETURNTRANSFER => 1,
     CURLOPT_HTTPHEADER => array('Content-type: application/json'),
   );
-  // file_put_contents("/tmp/foo.json", $json);
   curl_setopt_array($ch, $curl_options);
   $result = curl_exec($ch);
   $error = curl_error($ch);
   curl_close($ch);
 
   $submission_result = _learning_registry_parse_result($result, $error);
-
-  /* dsm($submission_result); */
 
   if ($result) {
     $result = _learning_registry_update_submission_status($nid, $result);
@@ -358,8 +303,6 @@ function _learning_registry_def_resource_data($content_info) {
   define('LR_DOC_TYPE', 'resource_data');
   define('LR_DOC_VERSION', '0.23.0');
   define('LR_SUBMITTER_TYPE', 'agent');
-  // Commented since we aren't signing submissions
-  // define('LR_SIGNING_METHOD', 'LR-PGP.1.0');
   define('LR_PAYLOAD_PLACEMENT', 'inline');
 
   $opt_id_fields = array(
@@ -377,8 +320,6 @@ function _learning_registry_def_resource_data($content_info) {
     'payload_schema_format',
   );
 
-  // We don't really do much with these since we aren't currently signing
-  // submissions.
   $opt_sig_fields = array(
     'signature',
     'key_server',
@@ -395,9 +336,6 @@ function _learning_registry_def_resource_data($content_info) {
 
   $tos->submission_TOS = $content_info['tos'];;
 
-  // TODO: extract these foreach calls into their own function
-  // Add the optional keys / objects if they are passed in $content_info
-  //
   // Optional identity values.
   foreach ($opt_id_fields as $field) {
     if (array_key_exists($field, $content_info)) {
@@ -490,11 +428,6 @@ function _learning_registry_add_resource_data_to_submission($submission, $resour
  *
  */
 function _learning_registry_update_submission_status($nid, $result) {
-  // TODO:  Refactor candidate.  This method has two responsiblities:
-  // a.) to determine if the node was published to the Learning Registry,
-  // b.) then to update that status to the learning_registry table.
-  // The first step should stand on its own.
-  //
   if ($result) {
 
     $result_array = json_decode($result);
