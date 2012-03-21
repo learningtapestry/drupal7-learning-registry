@@ -18,6 +18,7 @@
  * @ingroup forms
  */
 function learning_registry_content_form($form_values = NULL) {
+  //TODO: use hook_form_validate and hook_form_submit
 
   $form['#redirect'] = FALSE;
 
