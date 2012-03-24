@@ -109,18 +109,8 @@ function learning_registry_content_form_submit($form, &$form_state) {
 
   if ($search != '') {
     $search = variable_get('learning_registry_node_url', NULL) . '/slice?' . $search;
-    $ch = curl_init();
-    $curl_options = array(
-      CURLOPT_URL => $search,
-      CURLOPT_RETURNTRANSFER => 1,
-    );
-
-    curl_setopt_array($ch, $curl_options);
-    $result = curl_exec($ch);
-    $error = curl_error($ch);
-    curl_close($ch);
-
-    $result_array = json_decode($result);
+    $result = drupal_http_request($search);
+    $result_array = json_decode($result->data);
 
     $header = array();
     $header[] = 'Resource';
