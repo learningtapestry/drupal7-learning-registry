@@ -61,10 +61,10 @@ function learning_registry_admin_settings() {
     '#title' => t('Immediate or queued publishing'),
     '#default_value' => variable_get('learning_registry_queuing', 0),
     '#description' => t('Selects if submissions to the Learning Registry will publish immediately or queued in a batch to publish when cron executes.'),
-     '#options' => array(
+    '#options' => array(
       LEARNING_REGISTRY_QUEUE_IMMEDIATE => t('Immediate'),
       LEARNING_REGISTRY_QUEUE_QUEUED => t('Queued'),
-    ),
+     ),
     '#required' => TRUE,
   );
 
@@ -105,7 +105,7 @@ function learning_registry_admin_settings() {
 
       $form['learning_registry_node_type_fieldset_' . $type_key]['learning_registry_node_type_option_' . $type_key] = array(
         '#type' => 'checkboxes',
-        '#title' => t('Publish these CCK fields for ' . $type_name),
+        '#title' => t('Publish these CCK fields for !type', array('!type' =>$type_name)),
         '#options' => $cck_checkboxes,
         '#default_value' => variable_get('learning_registry_node_type_option_' . $type_key, array()),
       );
@@ -130,4 +130,3 @@ function learning_registry_admin_settings_validate($form, $form_state) {
     form_set_error('learning_registry_node_url', t('Please provide a valid URL.'));
   }
 }
-
