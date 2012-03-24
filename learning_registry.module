@@ -30,7 +30,6 @@ define('LEARNING_REGISTRY_MODE_DELETE', 2);
  *   A string that specifies which path of the site we're displaying help.
  * @param string $arg
  *   An array that holds that current path as would be returned from arg().
- *
  * @return string $help
  *   A string that contains the help text for the specified path.
  */
@@ -96,7 +95,8 @@ function learning_registry_nodeapi(&$node, $op) {
         if ($node->status == 1) {
           if (variable_get('learning_registry_queuing', LEARNING_REGISTRY_QUEUE_IMMEDIATE) == LEARNING_REGISTRY_QUEUE_QUEUED) {
             _learning_registry_queue_node($node->nid);
-          } else {
+          }
+          else {
             _learning_registry_publish($node);
           }
         }
@@ -141,7 +141,7 @@ function learning_registry_node_operations() {
  */
 function _learning_registry_bulk_operations_publish($nids) {
   $success = 0;
-  $failure = 0; // counters for batch operations
+  $failure = 0;
 
   foreach ($nids as $nid) {
     // Load the node.
@@ -157,7 +157,8 @@ function _learning_registry_bulk_operations_publish($nids) {
 
   if (variable_get('learning_registry_queuing', LEARNING_REGISTRY_QUEUE_IMMEDIATE) == LEARNING_REGISTRY_QUEUE_QUEUED) {
     drupal_set_message($success . ' nodes queued to the registry. ' . $failure . ' nodes failed.');
-  } else {
+  }
+  else {
     drupal_set_message($success . ' nodes published to the registry. ' . $failure . ' nodes failed.');
   }
 }
@@ -169,10 +170,8 @@ function _learning_registry_bulk_operations_publish($nids) {
  *   A reference to the node object. We have to be very careful to not set
  *   anything, only read from the node object reference since the node
  *   reference allows us to edit the node content.
- *
  * @param bool $headless
  *   A flag to determine if this is called from cron (non-user session).
- *
  * @return bool $result
  *   Returns TRUE if operation was successful, FALSE if not.
  */
@@ -218,9 +217,8 @@ function _learning_registry_get_content_info(&$node) {
 /**
  * Return the absolute URL to a node.  If alias available,  return alias.
  *
- * @param int $nid
- *   The numerical node id.
- *
+ * @param int $node
+ *   The node.
  * @return string $node_url
  *   The absolute URL to the node.  If alias available, return alias.
  */
@@ -229,7 +227,8 @@ function _learning_registry_get_node_url(&$node) {
   // URL Type is an admin setting.  Return either alias or node ID.
   if (variable_get('learning_registry_url_type', LEARNING_REGISTRY_URL_NODE_ID) == LEARNING_REGISTRY_URL_ALIAS) {
     return url('node/' . $node->nid, array('absolute' => TRUE, 'alias' => FALSE));
-  } else {
+  }
+  else {
     return url('node/' . $node->nid, array('absolute' => TRUE, 'alias' => TRUE));
   }
 }
@@ -250,7 +249,6 @@ function _learning_registry_get_node_url(&$node) {
  *    2 - delete  (future impl)
  * @param bool $headless
  *    A flag to determine if this is called from cron (non-user session).
- *
  * @return bool $result
  *    True if operation was successful, false if error.
  */
@@ -280,7 +278,8 @@ function _learning_registry_send_to_registry($nid, $json, $service_num = LEARNIN
     }
 
     return TRUE;
-  } else {
+  }
+  else {
     if (!$headless) {
       drupal_set_message(t('Error publishing node to registry.'), 'warning');
     }
@@ -403,7 +402,6 @@ function _learning_registry_build_envelope() {
  *    An LR submission object.
  * @param object $resource_data
  *    An LR resource data object.
- *
  * @return object $submission
  *    The submission object with $resource data pushed to the documents array.
  */
@@ -436,12 +434,14 @@ function _learning_registry_update_submission_status($nid, $result) {
       if ($submission_record) {
         if ($submission_record->published == 0) {
           $sql = 'UPDATE {learning_registry} SET published=%d, docid=\'%s\', queued=0 WHERE nid = %d';
-        } else {
+        }
+        else {
           $sql = 'UPDATE {learning_registry} SET updated=%d, docid=\'%s\', queued=0 WHERE nid = %d';
         }
 
         db_query($sql, time(), $result_array->document_results[0]->doc_ID, $nid);
-      } else {
+      }
+      else {
         // Insert new record.
         //
         // Fill parameter array.
@@ -454,7 +454,8 @@ function _learning_registry_update_submission_status($nid, $result) {
         drupal_write_record('learning_registry', $data);
       }
       return $result_array->document_results[0]->doc_ID;
-    } else {
+    }
+    else {
       watchdog('learning_registry', 'Error publishing node ID %nid to the registry.  Full response: %msg', array('%nid' => $nid, '%msg' => $result));
       return FALSE;
     }
@@ -469,7 +470,6 @@ function _learning_registry_update_submission_status($nid, $result) {
  *
  * @param string $error
  *    Error string from curl (if error occured)
- *
  * @return object $submission_result
  *    Array with status information from submission
  */
@@ -484,11 +484,13 @@ function _learning_registry_parse_result($result, $error) {
       // Submission okay.
       $submission_result['success'] = TRUE;
       $submission_result['doc_id'] = $result_array->document_results[0]->doc_ID;
-    } else {
+    }
+    else {
       $submission_result['success'] = FALSE;
       if (!is_null($result_array->document_results[0]->error)) {
         $submission_result['error_message'] = $result_array->document_results[0]->error;
-      } else {
+      }
+      else {
         // If the error message comes back in form of a HTML page, let's just
         // pop off the title tag as Couch will tell us what's wrong there.
         // Current impl of LR spits two title tags, so we're grabbing the
@@ -502,7 +504,8 @@ function _learning_registry_parse_result($result, $error) {
         }
       }
     }
-  } else {
+  }
+  else {
     // We didn't contact the Learning Registry, must be a network error.
     $submission_result['SUCCESS'] = FALSE;
     $submission_result['error_message'] = $error;
@@ -526,7 +529,8 @@ function _learning_registry_queue_node($nid) {
   // If exists, update, else insert new record.
   if ($submission_record) {
     $sql = 'UPDATE {learning_registry} SET queued=1 WHERE nid = %d';
-  } else {
+  }
+  else {
     $sql = 'INSERT INTO {learning_registry} (nid, queued) VALUES (%d, 1)';
   }
 
@@ -539,7 +543,6 @@ function _learning_registry_queue_node($nid) {
  *
  * @param object $node
  *    Drupal node
- *
  * @return object $returnXML
  *    XML document
  */

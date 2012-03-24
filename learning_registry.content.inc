@@ -73,7 +73,7 @@ function learning_registry_content_form($form_state) {
 }
 
 /**
- * Implementation of hook_validate().
+ * Implements of hook_validate().
  */
 function learning_registry_content_form_validate($form, &$form_state) {
   if ($form_state['values']['search_identity'] == '' && $form_state['values']['search_tags'] == '' &&
@@ -84,7 +84,7 @@ function learning_registry_content_form_validate($form, &$form_state) {
 }
 
 /**
- * Implementation of hook_submit().
+ * Implements of hook_submit().
  */
 function learning_registry_content_form_submit($form, &$form_state) {
   $identity = $form_state['values']['search_identity'];
