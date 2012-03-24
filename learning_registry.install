@@ -126,7 +126,7 @@ function learning_registry_requirements($phase) {
   }
 
   $requirements['phpdom'] = array(
-    'title' => st('PHP Document Object Model'),
+    'title' => st('PHP document object model'),
   );
 
   if (class_exists('DOMDocument')) {

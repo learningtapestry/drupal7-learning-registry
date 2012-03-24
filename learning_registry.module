@@ -10,21 +10,20 @@
 
   define('LEARNING_REGISTRY_QUEUE_IMMEDIATE', 0);
   define('LEARNING_REGISTRY_QUEUE_QUEUED', 1);
-  
+
   define('LEARNING_REGISTRY_URL_NODE_ID', 0);
   define('LEARNING_REGISTRY_URL_ALIAS', 1);
-  
+
   define('LEARNING_REGISTRY_DOC_TYPE', 'resource_data');
   define('LEARNING_REGISTRY_DOC_VERSION', '0.23.0');
   define('LEARNING_REGISTRY_SUBMITTER_TYPE', 'agent');
   define('LEARNING_REGISTRY_PAYLOAD_PLACEMENT', 'inline');
   define('LEARNING_REGISTRY_DEFAULT_SCHEMA', 'DC 1.1');
-  
+
   define('LEARNING_REGISTRY_MODE_PUBLISH', 0);
-  define('LEARNING_REGISTRY_MODE_UPDATE', 1);  //future impl
-  define('LEARNING_REGISTRY_MODE_DELETE', 2); //future impl
-  
-  
+  define('LEARNING_REGISTRY_MODE_UPDATE', 1);
+  define('LEARNING_REGISTRY_MODE_DELETE', 2);
+
 /**
  * Display help and module information.
  *
@@ -159,7 +158,7 @@ function _learning_registry_bulk_operations_publish($nids) {
       $success++;
     }
   }
-  
+
   if (variable_get('learning_registry_queuing', LEARNING_REGISTRY_QUEUE_IMMEDIATE) == LEARNING_REGISTRY_QUEUE_QUEUED) {
     drupal_set_message($success . ' nodes queued to the registry. ' . $failure . ' nodes failed.');
   }
@@ -223,8 +222,7 @@ function _learning_registry_get_content_info(&$node) {
 
 
 /**
- * Return the absolute URL to a node.  If alias available,
- * return alias as friendlier URL.
+ * Return the absolute URL to a node.  If alias available,  return alias.
  *
  * @param int $nid
  *   The numerical node id.
@@ -432,7 +430,6 @@ function _learning_registry_add_resource_data_to_submission($submission, $resour
  *    Drupal node ID of item to submit.
  * @param string $result
  *    JSON response from Learning Registry.
- *
  */
 function _learning_registry_update_submission_status($nid, $result) {
   if ($result) {

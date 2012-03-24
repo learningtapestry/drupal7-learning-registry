@@ -72,7 +72,7 @@ function learning_registry_content_form($form_state) {
 }
 
 /**
- * Implements of hook_validate.
+ * Implementation of hook_validate().
  */
 function learning_registry_content_form_validate($form, &$form_state) {
   if ($form_state['values']['search_identity'] == '' && $form_state['values']['search_tags'] == '' &&
@@ -122,7 +122,7 @@ function learning_registry_content_form_submit($form, &$form_state) {
     $header[] = 'Resource';
     $header[] = 'Submitter';
     $header[] = 'Description';
-    $header[] = 'Create Date';
+    $header[] = 'Create date';
 
     $rows = array();
     $docs = $result_array->documents;
@@ -170,7 +170,7 @@ function learning_registry_content_form_submit($form, &$form_state) {
               default:
                 break;
             }
-            if (strlen($title) == 0) {
+            if (drupal_strlen($title) == 0) {
               $title = "[not provided]";
             }
             $link = l($title, $url, array('attributes' => array('target' => '_blank')));

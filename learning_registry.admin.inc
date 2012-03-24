@@ -5,11 +5,6 @@
  * Administration callbacks for the learning_registry module
  */
 
-// Much of this is lifted from the "Creating Drupal 6.x modules" docs on the
-// Drupal website http://drupal.org/node/231276 and the "Writing a Module"
-// chapter of Pro Drupal Development 2nd Edition by John K. VanDyk.  ISBN-13:
-// 978-1430209898
-//
 /**
  * Form builder. Configure learning_registry module.
  *
@@ -53,7 +48,7 @@ function learning_registry_admin_settings() {
 
   $form['learning_registry_tos'] = array(
     '#type' => 'textfield',
-    '#title' => t('Terms of Service URL'),
+    '#title' => t('Terms of service URL'),
     '#size' => 128,
     '#maxlength' => 1024,
     '#default_value' => variable_get('learning_registry_tos', NULL),
@@ -63,19 +58,19 @@ function learning_registry_admin_settings() {
 
   $form['learning_registry_queuing'] = array(
     '#type' => 'radios',
-    '#title' => t('Immediate or Queued Publishing'),
+    '#title' => t('Immediate or queued publishing'),
     '#default_value' => variable_get('learning_registry_queuing', 0),
     '#description' => t('Selects if submissions to the Learning Registry will publish immediately or queued in a batch to publish when cron executes.'),
      '#options' => array(
-       LEARNING_REGISTRY_QUEUE_IMMEDIATE => t('Immediate'),
-       LEARNING_REGISTRY_QUEUE_QUEUED => t('Queued'),
+      LEARNING_REGISTRY_QUEUE_IMMEDIATE => t('Immediate'),
+      LEARNING_REGISTRY_QUEUE_QUEUED => t('Queued'),
     ),
     '#required' => TRUE,
   );
 
   $form['learning_registry_url_type'] = array(
     '#type' => 'radios',
-    '#title' => t('Publish URL Type'),
+    '#title' => t('Publish URL type'),
     '#default_value' => variable_get('learning_registry_url_type', 0),
     '#description' => t('Determines the URL to the published Drupal node.  Node ID is the internal Drupal node (node/1234).  Node alias is the alias provided for the node (blog/this-is-a-test).'),
     '#options' => array(t('Node ID'), t('Node alias')),
