@@ -7,22 +7,21 @@
  * This module takes the specified node content and publishes it to a
  * Learning Registry node.
  */
+define('LEARNING_REGISTRY_QUEUE_IMMEDIATE', 0);
+define('LEARNING_REGISTRY_QUEUE_QUEUED', 1);
 
-  define('LEARNING_REGISTRY_QUEUE_IMMEDIATE', 0);
-  define('LEARNING_REGISTRY_QUEUE_QUEUED', 1);
+define('LEARNING_REGISTRY_URL_NODE_ID', 0);
+define('LEARNING_REGISTRY_URL_ALIAS', 1);
 
-  define('LEARNING_REGISTRY_URL_NODE_ID', 0);
-  define('LEARNING_REGISTRY_URL_ALIAS', 1);
+define('LEARNING_REGISTRY_DOC_TYPE', 'resource_data');
+define('LEARNING_REGISTRY_DOC_VERSION', '0.23.0');
+define('LEARNING_REGISTRY_SUBMITTER_TYPE', 'agent');
+define('LEARNING_REGISTRY_PAYLOAD_PLACEMENT', 'inline');
+define('LEARNING_REGISTRY_DEFAULT_SCHEMA', 'DC 1.1');
 
-  define('LEARNING_REGISTRY_DOC_TYPE', 'resource_data');
-  define('LEARNING_REGISTRY_DOC_VERSION', '0.23.0');
-  define('LEARNING_REGISTRY_SUBMITTER_TYPE', 'agent');
-  define('LEARNING_REGISTRY_PAYLOAD_PLACEMENT', 'inline');
-  define('LEARNING_REGISTRY_DEFAULT_SCHEMA', 'DC 1.1');
-
-  define('LEARNING_REGISTRY_MODE_PUBLISH', 0);
-  define('LEARNING_REGISTRY_MODE_UPDATE', 1);
-  define('LEARNING_REGISTRY_MODE_DELETE', 2);
+define('LEARNING_REGISTRY_MODE_PUBLISH', 0);
+define('LEARNING_REGISTRY_MODE_UPDATE', 1);
+define('LEARNING_REGISTRY_MODE_DELETE', 2);
 
 /**
  * Display help and module information.
@@ -40,13 +39,12 @@ function learning_registry_help($path, $arg) {
   switch ($path) {
     case 'admin/help#learning_registry':
       $output = '<p>' .
-        t('Pushes Drupal node data to the specified Learning Registry node.') .
-        '<p>';
+              t('Pushes Drupal node data to the specified Learning Registry node.') .
+              '<p>';
       break;
   }
   return $output;
 }
-
 
 /**
  * Valid permissions for this module
@@ -57,7 +55,6 @@ function learning_registry_help($path, $arg) {
 function learning_registry_perm() {
   return array('administer learning_registry', 'access learning_registry');
 }
-
 
 /**
  * Implements hook_menu().
@@ -86,7 +83,6 @@ function learning_registry_menu() {
   return $items;
 }
 
-
 /**
  * Implements hook_nodeapi().
  */
@@ -100,8 +96,7 @@ function learning_registry_nodeapi(&$node, $op) {
         if ($node->status == 1) {
           if (variable_get('learning_registry_queuing', LEARNING_REGISTRY_QUEUE_IMMEDIATE) == LEARNING_REGISTRY_QUEUE_QUEUED) {
             _learning_registry_queue_node($node->nid);
-          }
-          else {
+          } else {
             _learning_registry_publish($node);
           }
         }
@@ -134,9 +129,9 @@ function learning_registry_cron() {
 function learning_registry_node_operations() {
   return array(
     'process_orders' => array(
-    'label' => 'Publish to Learning Registry',
-    'callback' => '_learning_registry_bulk_operations_publish',
-    'disabled' => TRUE,
+      'label' => 'Publish to Learning Registry',
+      'callback' => '_learning_registry_bulk_operations_publish',
+      'disabled' => TRUE,
     ),
   );
 }
@@ -145,7 +140,8 @@ function learning_registry_node_operations() {
  * Callback function for learning_registry_node_operations()
  */
 function _learning_registry_bulk_operations_publish($nids) {
-  $success = 0; $failure = 0; // counters for batch operations
+  $success = 0;
+  $failure = 0; // counters for batch operations
 
   foreach ($nids as $nid) {
     // Load the node.
@@ -161,8 +157,7 @@ function _learning_registry_bulk_operations_publish($nids) {
 
   if (variable_get('learning_registry_queuing', LEARNING_REGISTRY_QUEUE_IMMEDIATE) == LEARNING_REGISTRY_QUEUE_QUEUED) {
     drupal_set_message($success . ' nodes queued to the registry. ' . $failure . ' nodes failed.');
-  }
-  else {
+  } else {
     drupal_set_message($success . ' nodes published to the registry. ' . $failure . ' nodes failed.');
   }
 }
@@ -210,7 +205,7 @@ function _learning_registry_get_content_info(&$node) {
   // Currently set curator and submitter the same, once we get a better sense
   // of what each field means, this will change.
   $content_info['curator'] = $content_info['submitter'];
-  $content_info['active' ] = TRUE;
+  $content_info['active'] = TRUE;
   $content_info['payload_schema'] = LEARNING_REGISTRY_DEFAULT_SCHEMA;
 
   $resource_data = _learning_registry_create_dublincore_payload($node);
@@ -219,7 +214,6 @@ function _learning_registry_get_content_info(&$node) {
 
   return $content_info;
 }
-
 
 /**
  * Return the absolute URL to a node.  If alias available,  return alias.
@@ -235,8 +229,7 @@ function _learning_registry_get_node_url(&$node) {
   // URL Type is an admin setting.  Return either alias or node ID.
   if (variable_get('learning_registry_url_type', LEARNING_REGISTRY_URL_NODE_ID) == LEARNING_REGISTRY_URL_ALIAS) {
     return url('node/' . $node->nid, array('absolute' => TRUE, 'alias' => FALSE));
-  }
-  else {
+  } else {
     return url('node/' . $node->nid, array('absolute' => TRUE, 'alias' => TRUE));
   }
 }
@@ -287,8 +280,7 @@ function _learning_registry_send_to_registry($nid, $json, $service_num = LEARNIN
     }
 
     return TRUE;
-  }
-  else {
+  } else {
     if (!$headless) {
       drupal_set_message(t('Error publishing node to registry.'), 'warning');
     }
@@ -296,7 +288,6 @@ function _learning_registry_send_to_registry($nid, $json, $service_num = LEARNIN
     return FALSE;
   }
 }
-
 
 /**
  * Define the Learning Registry resource data.
@@ -339,7 +330,8 @@ function _learning_registry_def_resource_data($content_info) {
   $identity->submitter_type = LEARNING_REGISTRY_SUBMITTER_TYPE;
   $identity->submitter = $content_info['submitter'];
 
-  $tos->submission_TOS = $content_info['tos'];;
+  $tos->submission_TOS = $content_info['tos'];
+  ;
 
   // Optional identity values.
   foreach ($opt_id_fields as $field) {
@@ -393,7 +385,6 @@ function _learning_registry_def_resource_data($content_info) {
   return $resource_data;
 }
 
-
 /**
  * Return a basic LR submission envelope.
  *
@@ -404,7 +395,6 @@ function _learning_registry_build_envelope() {
   $submission->documents = array();
   return $submission;
 }
-
 
 /**
  * Adds resource data to a LR submission envelope.
@@ -421,7 +411,6 @@ function _learning_registry_add_resource_data_to_submission($submission, $resour
   $submission->documents[] = $resource_data;
   return $submission;
 }
-
 
 /**
  * Adds a status record in the learning_registry table to record submission
@@ -447,30 +436,26 @@ function _learning_registry_update_submission_status($nid, $result) {
       if ($submission_record) {
         if ($submission_record->published == 0) {
           $sql = 'UPDATE {learning_registry} SET published=%d, docid=\'%s\', queued=0 WHERE nid = %d';
-        }
-        else {
+        } else {
           $sql = 'UPDATE {learning_registry} SET updated=%d, docid=\'%s\', queued=0 WHERE nid = %d';
         }
 
         db_query($sql, time(), $result_array->document_results[0]->doc_ID, $nid);
-      }
-      else {
+      } else {
         // Insert new record.
         //
         // Fill parameter array.
         $data = array(
-            'nid' => $nid,
-            'published' => time(),
-            'docid' => $result_array->document_results[0]->doc_ID,
+          'nid' => $nid,
+          'published' => time(),
+          'docid' => $result_array->document_results[0]->doc_ID,
         );
         // Write it to the database.
         drupal_write_record('learning_registry', $data);
       }
       return $result_array->document_results[0]->doc_ID;
-    }
-    else {
-      watchdog('learning_registry', 'Error publishing node ID %nid to the registry.  Full response: %msg',
-          array('%nid' => $nid, '%msg' => $result));
+    } else {
+      watchdog('learning_registry', 'Error publishing node ID %nid to the registry.  Full response: %msg', array('%nid' => $nid, '%msg' => $result));
       return FALSE;
     }
   }
@@ -499,13 +484,11 @@ function _learning_registry_parse_result($result, $error) {
       // Submission okay.
       $submission_result['success'] = TRUE;
       $submission_result['doc_id'] = $result_array->document_results[0]->doc_ID;
-    }
-    else {
+    } else {
       $submission_result['success'] = FALSE;
       if (!is_null($result_array->document_results[0]->error)) {
         $submission_result['error_message'] = $result_array->document_results[0]->error;
-      }
-      else {
+      } else {
         // If the error message comes back in form of a HTML page, let's just
         // pop off the title tag as Couch will tell us what's wrong there.
         // Current impl of LR spits two title tags, so we're grabbing the
@@ -519,8 +502,7 @@ function _learning_registry_parse_result($result, $error) {
         }
       }
     }
-  }
-  else {
+  } else {
     // We didn't contact the Learning Registry, must be a network error.
     $submission_result['SUCCESS'] = FALSE;
     $submission_result['error_message'] = $error;
@@ -528,6 +510,7 @@ function _learning_registry_parse_result($result, $error) {
 
   return $submission_result;
 }
+
 /**
  * Queues a node for submission to the LR via the learning_registry table
  *
@@ -543,8 +526,7 @@ function _learning_registry_queue_node($nid) {
   // If exists, update, else insert new record.
   if ($submission_record) {
     $sql = 'UPDATE {learning_registry} SET queued=1 WHERE nid = %d';
-  }
-  else {
+  } else {
     $sql = 'INSERT INTO {learning_registry} (nid, queued) VALUES (%d, 1)';
   }
 
@@ -609,19 +591,19 @@ function _learning_registry_create_dublincore_payload(&$node) {
 
   /* References
 
-   http://dublincore.org/documents/usageguide/elements.shtml
+    http://dublincore.org/documents/usageguide/elements.shtml
 
-  <dc:title>Dublin Core Metadata Initiative - Home Page</dc:title>
-  <dc:description>The Dublin Core Metadata Initiative Web site.</dc:description>
-  <dc:date>2001-01-16</dc:date>
-  <dc:format>text/html</dc:format>
-  <dc:language>en</dc:language>
-  <dc:contributor>The Dublin Core Metadata Initiative</dc:contributor>
+    <dc:title>Dublin Core Metadata Initiative - Home Page</dc:title>
+    <dc:description>The Dublin Core Metadata Initiative Web site.</dc:description>
+    <dc:date>2001-01-16</dc:date>
+    <dc:format>text/html</dc:format>
+    <dc:language>en</dc:language>
+    <dc:contributor>The Dublin Core Metadata Initiative</dc:contributor>
 
-  <!ENTITY % dcmes "dc:title | dc:creator | dc:subject | dc:description |
-  dc:publisher | dc:contributor | dc:date | dc:type | dc:format |
-  dc:identifier | dc:source | dc:language | dc:relation | dc:coverage |
-  dc:rights" >
+    <!ENTITY % dcmes "dc:title | dc:creator | dc:subject | dc:description |
+    dc:publisher | dc:contributor | dc:date | dc:type | dc:format |
+    dc:identifier | dc:source | dc:language | dc:relation | dc:coverage |
+    dc:rights" >
    */
 }
 

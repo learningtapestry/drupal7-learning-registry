@@ -64,7 +64,7 @@ function learning_registry_admin_settings() {
     '#options' => array(
       LEARNING_REGISTRY_QUEUE_IMMEDIATE => t('Immediate'),
       LEARNING_REGISTRY_QUEUE_QUEUED => t('Queued'),
-     ),
+    ),
     '#required' => TRUE,
   );
 
@@ -105,7 +105,7 @@ function learning_registry_admin_settings() {
 
       $form['learning_registry_node_type_fieldset_' . $type_key]['learning_registry_node_type_option_' . $type_key] = array(
         '#type' => 'checkboxes',
-        '#title' => t('Publish these CCK fields for !type', array('!type' =>$type_name)),
+        '#title' => t('Publish these CCK fields for !type', array('!type' => $type_name)),
         '#options' => $cck_checkboxes,
         '#default_value' => variable_get('learning_registry_node_type_option_' . $type_key, array()),
       );

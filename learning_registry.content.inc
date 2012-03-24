@@ -4,6 +4,7 @@
  * @file
  * Administration callbacks for the learning_registry module
  */
+
 define('LEARNING_REGISTRY_PAYLOAD_SCHEMA_DC11', 0);
 define('LEARNING_REGISTRY_PAYLOAD_SCHEMA_LOM', 1);
 define('LEARNING_REGISTRY_PAYLOAD_SCHEMA_UNKNOWN', -1);
@@ -82,6 +83,9 @@ function learning_registry_content_form_validate($form, &$form_state) {
   }
 }
 
+/**
+ * Implementation of hook_submit().
+ */
 function learning_registry_content_form_submit($form, &$form_state) {
   $identity = $form_state['values']['search_identity'];
   $tags = $form_state['values']['search_tags'];
@@ -142,15 +146,13 @@ function learning_registry_content_form_submit($form, &$form_state) {
         $desc = '[unknown]';
 
         if (gettype($payload) == 'string') {
-          // Load XML, surpress errors.  If it's not valid XML, we'll pass up the resource.
+          // Load XML, surpress errors.
           $xml = simplexml_load_string($payload, 'SimpleXMLElement', LIBXML_NOERROR);
 
           if (gettype($xml) == 'object') {
 
             switch (_learning_registry_get_metadata_type($payload_schema)) {
               case LEARNING_REGISTRY_PAYLOAD_SCHEMA_DC11:
-
-
                 if (array_key_exists('dc', $xml->getNameSpaces(TRUE))) {
                   $result = $xml->xpath('//dc:title');
                   if (count($result) > 0) {
@@ -162,6 +164,7 @@ function learning_registry_content_form_submit($form, &$form_state) {
                   }
                 }
                 break;
+
               case LEARNING_REGISTRY_PAYLOAD_SCHEMA_LOM:
                 $lom = $xml;
                 $title = (string) $lom->description->metadata->lom->general->title->string[0];
@@ -201,9 +204,11 @@ function _learning_registry_get_metadata_type($payload_schema_array) {
       case "LOM":
         return LEARNING_REGISTRY_PAYLOAD_SCHEMA_LOM;
         break;
+
       case "DC 1.1":
         return LEARNING_REGISTRY_PAYLOAD_SCHEMA_DC11;
         break;
+
     }
   }
   return $type;
