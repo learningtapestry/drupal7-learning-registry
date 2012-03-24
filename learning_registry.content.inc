@@ -12,7 +12,7 @@ define('LEARNING_REGISTRY_PAYLOAD_SCHEMA_UNKNOWN', -1);
 /**
  * Form builder. Basic search form for Learning Registry.
  */
-function learning_registry_content_form($form_state) {
+function learning_registry_content_form(&$form_state) {
 
   $form['#redirect'] = FALSE;
 
