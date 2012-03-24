@@ -9,7 +9,7 @@
  */
 
   define('LEARNING_REGISTRY_QUEUE_IMMEDIATE', 0);
-  define('LEARING_REGISTRY_QUEUE_QUEUED', 1);
+  define('LEARNING_REGISTRY_QUEUE_QUEUED', 1);
   
   define('LEARNING_REGISTRY_URL_NODE_ID', 0);
   define('LEARNING_REGISTRY_URL_ALIAS', 1);
@@ -99,7 +99,7 @@ function learning_registry_nodeapi(&$node, $op) {
     switch ($op) {
       case 'insert':
         if ($node->status == 1) {
-          if (variable_get('learning_registry_queuing', LEARNING_REGISTRY_QUEUE_IMMEDIATE) == LEARING_REGISTRY_QUEUE_QUEUED) {
+          if (variable_get('learning_registry_queuing', LEARNING_REGISTRY_QUEUE_IMMEDIATE) == LEARNING_REGISTRY_QUEUE_QUEUED) {
             _learning_registry_queue_node($node->nid);
           }
           else {
@@ -160,7 +160,7 @@ function _learning_registry_bulk_operations_publish($nids) {
     }
   }
   
-  if (variable_get('learning_registry_queuing', LEARNING_REGISTRY_QUEUE_IMMEDIATE) == LEARING_REGISTRY_QUEUE_QUEUED) {
+  if (variable_get('learning_registry_queuing', LEARNING_REGISTRY_QUEUE_IMMEDIATE) == LEARNING_REGISTRY_QUEUE_QUEUED) {
     drupal_set_message($success . ' nodes queued to the registry. ' . $failure . ' nodes failed.');
   }
   else {
