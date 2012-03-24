@@ -7,6 +7,7 @@
  * This module takes the specified node content and publishes it to a
  * Learning Registry node.
  */
+
 define('LEARNING_REGISTRY_QUEUE_IMMEDIATE', 0);
 define('LEARNING_REGISTRY_QUEUE_QUEUED', 1);
 
@@ -129,9 +130,8 @@ function learning_registry_cron() {
 function learning_registry_node_operations() {
   return array(
     'process_orders' => array(
-      'label' => 'Publish to Learning Registry',
+      'label' => t('Publish to Learning Registry'),
       'callback' => '_learning_registry_bulk_operations_publish',
-      'disabled' => TRUE,
     ),
   );
 }
@@ -239,18 +239,18 @@ function _learning_registry_get_node_url(&$node) {
  * All the specified nodeapi operations ($ops) call this to send the data.
  *
  * @param string $nid
- *    A string containing the node ID for submission into the registry.
+ *   A string containing the node ID for submission into the registry.
  * @param string $json
- *    A string containing the json object to be sent to the registry node.
+ *   A string containing the json object to be sent to the registry node.
  * @param int $service_num
- *    An int that specifies the service that will be called.
- *    0 - publish (default value)
- *    1 - update (future impl)
- *    2 - delete  (future impl)
+ *   An int that specifies the service that will be called.
+ *   0 - publish (default value)
+ *   1 - update (future impl)
+ *   2 - delete  (future impl)
  * @param bool $headless
- *    A flag to determine if this is called from cron (non-user session).
+ *   A flag to determine if this is called from cron (non-user session).
  * @return bool $result
- *    True if operation was successful, false if error.
+ *   True if operation was successful, false if error.
  */
 function _learning_registry_send_to_registry($nid, $json, $service_num = LEARNING_REGISTRY_MODE_PUBLISH, $headless = FALSE) {
 
@@ -609,4 +609,3 @@ function _learning_registry_create_dublincore_payload(&$node) {
     dc:rights" >
    */
 }
-
