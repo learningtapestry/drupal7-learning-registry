@@ -255,8 +255,6 @@ function _learning_registry_get_node_url(&$node) {
 function _learning_registry_send_to_registry($nid, $json, $service_num = LEARNING_REGISTRY_MODE_PUBLISH, $headless = FALSE) {
   $url = variable_get('learning_registry_node_url', NULL) . '/publish';
   $result = drupal_http_request($url, array('Content-type: application/json'), 'POST', $json);
-  
-  dsm($result); 
 
   $submission_result = _learning_registry_parse_result($result->data, $result->code);
 
