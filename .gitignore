@@ -1,7 +1,0 @@
-# ignore editor backup files
-.*~
-*~
-\#*\#
-/nbproject/private/
-/nbproject/
-/LRPHP/nbproject/private/
