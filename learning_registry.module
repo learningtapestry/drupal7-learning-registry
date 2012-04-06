@@ -61,7 +61,7 @@ function learning_registry_perm() {
  */
 function learning_registry_menu() {
   $items['admin/settings/learning_registry'] = array(
-    'title' => 'Learning Registry',
+    'title' => 'Learning Registry Settings',
     'description' => 'Settings for publishing and receiving metadata to a Learning Registry node.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('learning_registry_admin_settings'),
@@ -71,8 +71,8 @@ function learning_registry_menu() {
   );
 
   $items['admin/content/learning_registry'] = array(
-    'title' => 'Learning Registry',
-    'description' => 'Settings for publishing and receiving metadata to a Learning Registry node.',
+    'title' => 'Learning Registry Search',
+    'description' => 'Search metadata in the Learning Registry.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('learning_registry_content_form'),
     'access arguments' => array('access learning_registry'),
