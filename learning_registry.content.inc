@@ -180,7 +180,7 @@ function learning_registry_content_form_submit($form, &$form_state) {
       }
     }
 
-    $output = theme_table($header, $rows);
+    $output = theme('table', $header, $rows);
 
     $form_state['storage']['results'] = $output;
     return;
