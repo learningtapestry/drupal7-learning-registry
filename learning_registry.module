@@ -319,7 +319,6 @@ function _learning_registry_def_resource_data($content_info) {
   $identity->submitter = $content_info['submitter'];
 
   $tos->submission_TOS = $content_info['tos'];
-  ;
 
   // Optional identity values.
   foreach ($opt_id_fields as $field) {
