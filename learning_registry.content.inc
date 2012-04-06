@@ -27,7 +27,7 @@ function learning_registry_content_form(&$form_state) {
     '#size' => 72,
     '#maxlength' => 1024,
     '#description' => t('The name of a person or organization that is the submitter, author, owner, or curator.'),
-    '#default_value' => urldecode($form_state['values']['search_identity']),
+    '#default_value' => isset($form_state['values']['search_identity']) ? urldecode($form_state['values']['search_identity']) : '',
   );
 
   $form['learning_registry']['search_tags'] = array(
@@ -36,7 +36,7 @@ function learning_registry_content_form(&$form_state) {
     '#size' => 72,
     '#maxlength' => 1024,
     '#description' => t('List of tags, matched against keys, payload_schema, or resource_data_type.'),
-    '#default_value' => urldecode($form_state['values']['search_tags']),
+    '#default_value' => isset($form_state['values']['search_tags']) ? urldecode($form_state['values']['search_tags']) : '',
   );
 
   $form['learning_registry']['search_from'] = array(
@@ -45,7 +45,7 @@ function learning_registry_content_form(&$form_state) {
     '#size' => 24,
     '#maxlength' => 128,
     '#description' => t('Date of publication to learning registry. Format:  YYYY-MM-DD.'),
-    '#default_value' => urldecode($form_state['values']['search_from']),
+    '#default_value' => isset($form_state['values']['search_from']) ? urldecode($form_state['values']['search_from']) : '',
   );
 
   $form['learning_registry']['search_until'] = array(
@@ -54,7 +54,7 @@ function learning_registry_content_form(&$form_state) {
     '#size' => 24,
     '#maxlength' => 128,
     '#description' => t('Date of publication to learning registry. Format:  YYYY-MM-DD.'),
-    '#default_value' => urldecode($form_state['values']['search_until']),
+    '#default_value' => isset($form_state['values']['search_until']) ? urldecode($form_state['values']['search_until']) : '',
   );
 
 
