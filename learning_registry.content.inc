@@ -168,7 +168,11 @@ function learning_registry_content_form_submit($form, &$form_state) {
             if (drupal_strlen($title) == 0) {
               $title = "[not provided]";
             }
+            $title = check_plain($title);
             $link = l($title, $url, array('attributes' => array('target' => '_blank')));
+            $submitter = check_plain($submitter);
+            $desc = check_plain($desc);
+            $create_date = check_plain($create_date);
 
             $rows[] = array($link, $submitter, $desc, $create_date);
           }
