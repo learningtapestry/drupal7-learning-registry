@@ -10,7 +10,6 @@
  * Implements hook_install().
  */
 function learning_registry_install() {
-  drupal_set_message((st('Installing learning_registry.')));
   drupal_install_schema('learning_registry');
 }
 
@@ -106,19 +105,21 @@ function learning_registry_schema() {
  *   An array requirements met or not met.
  */
 function learning_registry_requirements($phase) {
+  $t = get_t();
+  
   $requirements = array();
 
   $requirements['phpdom'] = array(
-    'title' => st('PHP document object model'),
+    'title' => $t('PHP document object model'),
   );
 
   if (class_exists('DOMDocument')) {
-    $requirements['phpdom']['value'] = st('Installed');
+    $requirements['phpdom']['value'] = $t('Installed');
     $requirements['phpdom']['severity'] = REQUIREMENT_OK;
   }
   else {
-    $requirements['phpdom']['value'] = st('Not installed');
-    $requirements['phpdom']['description'] = st('External links filter requires PHP <a href="http://php.net/manual/en/book.dom.php">Document Object Model</a>.');
+    $requirements['phpdom']['value'] = $t('Not installed');
+    $requirements['phpdom']['description'] = $t('External links filter requires PHP <a href="http://php.net/manual/en/book.dom.php">Document Object Model</a>.');
     $requirements['phpdom']['severity'] = REQUIREMENT_ERROR;
   }
 
