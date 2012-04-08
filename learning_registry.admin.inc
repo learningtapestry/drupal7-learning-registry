@@ -128,6 +128,12 @@ function learning_registry_admin_settings() {
 function learning_registry_admin_settings_validate($form, $form_state) {
   $lr_node_url = $form_state['values']['learning_registry_node_url'];
   if (!valid_url($lr_node_url, TRUE)) {
-    form_set_error('learning_registry_node_url', t('Please provide a valid URL.'));
+    form_set_error('learning_registry_node_url', t('Please provide a valid Learning Registry node URL.'));
   }
+  
+  $tos_url = $form_state['values']['learning_registry_tos'];
+  if (!valid_url($tos_url, TRUE)) {
+    form_set_error('learning_registry_node_url', t('Please provide a valid Terms of Service URL.'));
+  }
+  
 }
