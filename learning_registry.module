@@ -186,10 +186,10 @@ function _learning_registry_bulk_operations_publish($nids) {
   }
 
   if (variable_get('learning_registry_queuing', LEARNING_REGISTRY_QUEUE_IMMEDIATE) == LEARNING_REGISTRY_QUEUE_QUEUED) {
-    drupal_set_message($success . ' nodes queued to the registry. ' . $failure . ' nodes failed.');
+    drupal_set_message(t('@success nodes queued to the registry.  @failure nodes failed.', array('@success' => $success, '@failure' => $failure)));
   }
   else {
-    drupal_set_message($success . ' nodes published to the registry. ' . $failure . ' nodes failed.');
+    drupal_set_message(t('@success nodes published to the registry.  @failure nodes failed.', array('@success' => $success, '@failure' => $failure)));
   }
 }
 
@@ -283,7 +283,7 @@ function _learning_registry_get_node_url(&$node) {
  *   True if operation was successful, false if error.
  */
 function _learning_registry_send_to_registry($nid, $json, $service_num = LEARNING_REGISTRY_MODE_PUBLISH, $headless = FALSE) {
-  $url = variable_get('learning_registry_node_url', NULL) . '/publish';
+  $url = variable_get('learning_registry_node_url', NULL);
   if ($url == NULL) {
     drupal_set_message(t('This node has not been published because the Learning Registry URL has not been set.  
       Please visit Site configuration -> Learning Registry settings to set the URL of the Learning Registry.'), 'warning');
@@ -297,10 +297,9 @@ function _learning_registry_send_to_registry($nid, $json, $service_num = LEARNIN
 
     if ($result) {
       $result = _learning_registry_update_submission_status($nid, $result->data);
-
       if (!$headless) {
         $submission_url = variable_get('learning_registry_node_url', NULL) . '/harvest/getrecord?by_doc_ID=TRUE&request_ID=' . $result;
-        drupal_set_message(filter_xss((sprintf('Node ID %d published to the registry. <a href="%s" target="_new">(View node on registry.)</a>', $nid, $submission_url))), 'status');
+        drupal_set_message(t('Node ID @nid published to the registry. <a href="@url" target="_new">(View node on registry.)</a>', array('@nid' =>$nid, '@url' => $submission_url)));
       }
 
       return TRUE;
