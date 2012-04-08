@@ -8,11 +8,30 @@
  * Learning Registry node.
  */
 
+/** 
+ * LEARNING_REGISTRY_QUEUE_IMMEDIATE - Content types enabled for publishing in
+ * the Learning Registry will publish immediately.
+ * 
+ * LEARNING_REGISTRY_QUEUE_QUEUED - Content types enabled for publishing in the
+ * Learning Registry will be queued and published when cron runs.
+ */
+
 define('LEARNING_REGISTRY_QUEUE_IMMEDIATE', 0);
 define('LEARNING_REGISTRY_QUEUE_QUEUED', 1);
 
+/**
+ * LEARNING_REGISTRY_URL_NODE_ID - Publish the URL in the LR using the node ID.
+ * 
+ * LEARNING_REGISTRY_URL_ALIAS - Publish the URL in the LR using the path alias.
+ */
+
 define('LEARNING_REGISTRY_URL_NODE_ID', 0);
 define('LEARNING_REGISTRY_URL_ALIAS', 1);
+
+/**
+ *  The following constants are defaults set in the JSON metadata envelope sent to
+ *  the Learning Registry. 
+ */
 
 define('LEARNING_REGISTRY_DOC_TYPE', 'resource_data');
 define('LEARNING_REGISTRY_DOC_VERSION', '0.23.0');
@@ -20,11 +39,20 @@ define('LEARNING_REGISTRY_SUBMITTER_TYPE', 'agent');
 define('LEARNING_REGISTRY_PAYLOAD_PLACEMENT', 'inline');
 define('LEARNING_REGISTRY_DEFAULT_SCHEMA', 'DC 1.1');
 
+/**
+ * The following constants represent modes of publishing to the Learning Registry.
+ * Currently, only LEARNING_REGISTRY_MODE_PUBLISH is implemented and _UPDATE
+ * and _DELETE are reserved for future implementations once the Learning Registry
+ * establishes those patterns.
+ */
+
 define('LEARNING_REGISTRY_MODE_PUBLISH', 0);
 define('LEARNING_REGISTRY_MODE_UPDATE', 1);
 define('LEARNING_REGISTRY_MODE_DELETE', 2);
 
 /**
+ * Implements hook_help().
+ * 
  * Display help and module information.
  *
  * @param string $path
@@ -47,6 +75,8 @@ function learning_registry_help($path, $arg) {
 }
 
 /**
+ * Implements hook_perm().
+ * 
  * Valid permissions for this module
  *
  * @return array
@@ -61,7 +91,7 @@ function learning_registry_perm() {
  */
 function learning_registry_menu() {
   $items['admin/settings/learning_registry'] = array(
-    'title' => 'Learning Registry Settings',
+    'title' => 'Learning Registry settings',
     'description' => 'Settings for publishing and receiving metadata to a Learning Registry node.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('learning_registry_admin_settings'),
@@ -71,7 +101,7 @@ function learning_registry_menu() {
   );
 
   $items['admin/content/learning_registry'] = array(
-    'title' => 'Learning Registry Search',
+    'title' => 'Learning Registry search',
     'description' => 'Search metadata in the Learning Registry.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('learning_registry_content_form'),
@@ -254,26 +284,34 @@ function _learning_registry_get_node_url(&$node) {
  */
 function _learning_registry_send_to_registry($nid, $json, $service_num = LEARNING_REGISTRY_MODE_PUBLISH, $headless = FALSE) {
   $url = variable_get('learning_registry_node_url', NULL) . '/publish';
-  $result = drupal_http_request($url, array('Content-type: application/json'), 'POST', $json);
-
-  $submission_result = _learning_registry_parse_result($result->data, $result->code);
-
-  if ($result) {
-    $result = _learning_registry_update_submission_status($nid, $result->data);
-
-    if (!$headless) {
-      $submission_url = variable_get('learning_registry_node_url', NULL) . '/harvest/getrecord?by_doc_ID=TRUE&request_ID=' . $result;
-      drupal_set_message(filter_xss((sprintf('Node ID %d published to the registry. <a href="%s" target="_new">(View node on registry.)</a>', $nid, $submission_url))), 'status');
-    }
-
-    return TRUE;
-  }
-  else {
-    if (!$headless) {
-      drupal_set_message(t('Error publishing node to registry.'), 'warning');
-    }
-
+  if ($url == NULL) {
+    drupal_set_message(t('This node has not been published because the Learning Registry URL has not been set.  
+      Please visit Site configuration -> Learning Registry settings to set the URL of the Learning Registry.'), 'warning');
+    
     return FALSE;
+  } else {
+    $url .= '/publish';
+    $result = drupal_http_request($url, array('Content-type: application/json'), 'POST', $json);
+
+    $submission_result = _learning_registry_parse_result($result->data, $result->code);
+
+    if ($result) {
+      $result = _learning_registry_update_submission_status($nid, $result->data);
+
+      if (!$headless) {
+        $submission_url = variable_get('learning_registry_node_url', NULL) . '/harvest/getrecord?by_doc_ID=TRUE&request_ID=' . $result;
+        drupal_set_message(filter_xss((sprintf('Node ID %d published to the registry. <a href="%s" target="_new">(View node on registry.)</a>', $nid, $submission_url))), 'status');
+      }
+
+      return TRUE;
+    }
+    else {
+      if (!$headless) {
+        drupal_set_message(t('Error publishing node to registry.'), 'warning');
+      }
+
+      return FALSE;
+    }
   }
 }
 
@@ -444,7 +482,7 @@ function _learning_registry_update_submission_status($nid, $result) {
       return $result_array->document_results[0]->doc_ID;
     }
     else {
-      watchdog('learning_registry', 'Error publishing node ID %nid to the registry.  Full response: %msg', array('%nid' => $nid, '%msg' => $result));
+      watchdog('learning_registry', 'Error publishing node ID %nid to the registry.  Full response: %msg', array('%nid' => $nid, '%msg' => $result),  WATCHDOG_ERROR);
       return FALSE;
     }
   }

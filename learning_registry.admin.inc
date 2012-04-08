@@ -6,7 +6,7 @@
  */
 
 /**
- * Form builder. Configure learning_registry module.
+ * Form constructor to configure learning_registry module.
  *
  * @ingroup forms
  * @see system_settings_form()
@@ -118,7 +118,7 @@ function learning_registry_admin_settings() {
 
 
 /**
- * Validate the learning_registry configuration form.
+ * Form validation handler for learning_registry_content_form().
  *
  * @param array $form
  *   The array that describes the configuration form.

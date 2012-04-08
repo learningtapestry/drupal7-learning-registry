@@ -5,75 +5,88 @@
  * Administration callbacks for the learning_registry module
  */
 
+/**
+ * LEARNING_REGISTRY_PAYLOAD_SCHEMA_DC11 - Content in Dublin Core 1.1 wrapper.
+ * 
+ * LEARNING_REGISTRY_PAYLOAD_SCHEMA_LOM - Content in LOM wrapper.
+ * 
+ * LEARNING_REGISTRY_PAYLOAD_SCHEMA_UNKNOWN - Content is unknown.
+ */
+
 define('LEARNING_REGISTRY_PAYLOAD_SCHEMA_DC11', 0);
 define('LEARNING_REGISTRY_PAYLOAD_SCHEMA_LOM', 1);
 define('LEARNING_REGISTRY_PAYLOAD_SCHEMA_UNKNOWN', -1);
 
 /**
- * Form builder. Basic search form for Learning Registry.
+ * Form constructor to for basic search form for Learning Registry.
  */
 function learning_registry_content_form(&$form_state) {
+  
+  if (variable_get('learning_registry_node_url', NULL) == NULL) {
+      drupal_set_message(t('A Learning Registry URL has not yet been configured in the administration settings.  
+        Please visit Site Configuration -> Learning Registry settings to configure a URL before continuing.'), 'error');
+  } else {
+    $form['#redirect'] = FALSE;
 
-  $form['#redirect'] = FALSE;
-
-  $form['learning_registry'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Search'),
-  );
-
-  $form['learning_registry']['search_identity'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Identity'),
-    '#size' => 72,
-    '#maxlength' => 1024,
-    '#description' => t('The name of a person or organization that is the submitter, author, owner, or curator.'),
-    '#default_value' => isset($form_state['values']['search_identity']) ? urldecode($form_state['values']['search_identity']) : '',
-  );
-
-  $form['learning_registry']['search_tags'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Tags'),
-    '#size' => 72,
-    '#maxlength' => 1024,
-    '#description' => t('List of tags, matched against keys, payload_schema, or resource_data_type.'),
-    '#default_value' => isset($form_state['values']['search_tags']) ? urldecode($form_state['values']['search_tags']) : '',
-  );
-
-  $form['learning_registry']['search_from'] = array(
-    '#type' => 'textfield',
-    '#title' => t('From date'),
-    '#size' => 24,
-    '#maxlength' => 128,
-    '#description' => t('Date of publication to learning registry. Format:  YYYY-MM-DD.'),
-    '#default_value' => isset($form_state['values']['search_from']) ? urldecode($form_state['values']['search_from']) : '',
-  );
-
-  $form['learning_registry']['search_until'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Until date'),
-    '#size' => 24,
-    '#maxlength' => 128,
-    '#description' => t('Date of publication to learning registry. Format:  YYYY-MM-DD.'),
-    '#default_value' => isset($form_state['values']['search_until']) ? urldecode($form_state['values']['search_until']) : '',
-  );
-
-
-  $form['learning_registry']['submit'] = array(
-    '#type' => 'submit',
-    '#value' => t('Search'),
-  );
-
-  if (isset($form_state['storage']['results'])) {
-    $form['learning_registry']['results'] = array(
-      '#value' => $form_state['storage']['results'],
+    $form['learning_registry'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Search'),
     );
-  }
 
+    $form['learning_registry']['search_identity'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Identity'),
+      '#size' => 72,
+      '#maxlength' => 1024,
+      '#description' => t('The name of a person or organization that is the submitter, author, owner, or curator.'),
+      '#default_value' => isset($form_state['values']['search_identity']) ? urldecode($form_state['values']['search_identity']) : '',
+    );
+
+    $form['learning_registry']['search_tags'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Tags'),
+      '#size' => 72,
+      '#maxlength' => 1024,
+      '#description' => t('List of tags, matched against keys, payload_schema, or resource_data_type.'),
+      '#default_value' => isset($form_state['values']['search_tags']) ? urldecode($form_state['values']['search_tags']) : '',
+    );
+
+    $form['learning_registry']['search_from'] = array(
+      '#type' => 'textfield',
+      '#title' => t('From date'),
+      '#size' => 24,
+      '#maxlength' => 128,
+      '#description' => t('Date of publication to learning registry. Format:  YYYY-MM-DD.'),
+      '#default_value' => isset($form_state['values']['search_from']) ? urldecode($form_state['values']['search_from']) : '',
+    );
+
+    $form['learning_registry']['search_until'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Until date'),
+      '#size' => 24,
+      '#maxlength' => 128,
+      '#description' => t('Date of publication to learning registry. Format:  YYYY-MM-DD.'),
+      '#default_value' => isset($form_state['values']['search_until']) ? urldecode($form_state['values']['search_until']) : '',
+    );
+
+
+    $form['learning_registry']['submit'] = array(
+      '#type' => 'submit',
+      '#value' => t('Search'),
+    );
+
+    if (isset($form_state['storage']['results'])) {
+      $form['learning_registry']['results'] = array(
+        '#value' => $form_state['storage']['results'],
+      );
+    }
+  }
+  
   return $form;
 }
 
 /**
- * Implements of hook_validate().
+ * Form validation handler for learning_registry_content_form().
  */
 function learning_registry_content_form_validate($form, &$form_state) {
   if ($form_state['values']['search_identity'] == '' && $form_state['values']['search_tags'] == '' &&
@@ -84,7 +97,7 @@ function learning_registry_content_form_validate($form, &$form_state) {
 }
 
 /**
- * Implements of hook_submit().
+ * Form submission handler for learning_registry_content_form().
  */
 function learning_registry_content_form_submit($form, &$form_state) {
   $identity = $form_state['values']['search_identity'];
