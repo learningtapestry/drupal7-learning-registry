@@ -11,16 +11,16 @@
  * @ingroup forms
  * @see system_settings_form()
  */
-function learning_registry_admin_settings() {
+function learning_registry_admin_settings($form, &$form_state) {
   // Get node types with internal names as keys and "friendly" names as
   // values.
-  $options = node_get_types();
+  $options = node_type_get_types();
   $type_names = array();
   $cck_fields = array();
 
   foreach ($options as $option) {
     $type_names[$option->type] = check_plain($option->name);
-    $type = content_types($option->type);
+    $type = field_attach_load('node', $option->type);
     $cck_fields[$option->type] = $type['fields'];
   }
 
@@ -95,7 +95,7 @@ function learning_registry_admin_settings() {
       }
 
       $type_name = check_plain($type_name);
-      
+
       $form['learning_registry_node_type_fieldset_' . $type_key] = array(
         '#type' => 'fieldset',
         '#title' => t($type_name),
@@ -130,10 +130,10 @@ function learning_registry_admin_settings_validate($form, $form_state) {
   if (!valid_url($lr_node_url, TRUE)) {
     form_set_error('learning_registry_node_url', t('Please provide a valid Learning Registry node URL.'));
   }
-  
+
   $tos_url = $form_state['values']['learning_registry_tos'];
   if (!valid_url($tos_url, TRUE)) {
     form_set_error('learning_registry_node_url', t('Please provide a valid Terms of Service URL.'));
   }
-  
+
 }
