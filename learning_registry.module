@@ -110,7 +110,7 @@ function learning_registry_menu() {
   );
 
   $items['admin/content/learning_registry'] = array(
-    'title' => 'Learning Registry search',
+    'title' => 'Learning Registry',
     'description' => 'Search metadata in the Learning Registry.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('learning_registry_content_form'),
