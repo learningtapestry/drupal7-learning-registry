@@ -16,12 +16,11 @@ function learning_registry_admin_settings($form, &$form_state) {
   // values.
   $options = node_type_get_types();
   $type_names = array();
-  $cck_fields = array();
+  $node_fields = array();
 
   foreach ($options as $option) {
     $type_names[$option->type] = check_plain($option->name);
-    $type = field_attach_load('node', $option->type);
-    $cck_fields[$option->type] = $type['fields'];
+     $node_fields[$option->type] = field_info_instances('node', $option->type);
   }
 
   $form = array();
@@ -86,12 +85,11 @@ function learning_registry_admin_settings($form, &$form_state) {
   );
 
   foreach ($type_names as $type_key => $type_name) {
-    if (count($cck_fields[$type_key])) {
-
-      $cck_checkboxes = array();
-
-      foreach ($cck_fields[$type_key] as $cck_field) {
-        $cck_checkboxes[$cck_field['field_name']] = check_plain($cck_field['widget']['label']);
+    if (count($node_fields[$type_key])) {
+      $checkboxes = array();
+      // loop through and build a list of checkboxes
+      foreach ($node_fields[$type_key] as $field) {
+        $checkboxes[$field['field_name']] = check_plain($field['label']);
       }
 
       $type_name = check_plain($type_name);
@@ -107,7 +105,7 @@ function learning_registry_admin_settings($form, &$form_state) {
       $form['learning_registry_node_type_fieldset_' . $type_key]['learning_registry_node_type_option_' . $type_key] = array(
         '#type' => 'checkboxes',
         '#title' => t('Publish these CCK fields for !type', array('!type' => $type_name)),
-        '#options' => $cck_checkboxes,
+        '#options' => $checkboxes,
         '#default_value' => variable_get('learning_registry_node_type_option_' . $type_key, array()),
       );
     }
