@@ -115,7 +115,7 @@ function learning_registry_menu() {
     'page callback' => 'drupal_get_form',
     'page arguments' => array('learning_registry_content_form'),
     'access arguments' => array('access learning_registry'),
-    'type' => MENU_NORMAL_ITEM,
+    'type' => MENU_LOCAL_TASK,
     'file' => 'learning_registry.content.inc',
   );
 
