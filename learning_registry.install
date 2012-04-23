@@ -7,20 +7,13 @@
  */
 
 /**
- * Implements hook_install().
- */
-function learning_registry_install() {
-  drupal_install_schema('learning_registry');
-}
-
-/**
  * Implements hook_enable().
  */
 function learning_registry_enable() {
   // Set module weight lower than workflow or pathauto. This query lifted from
   // http://drupal.org/node/110238#comment-3567274
-  $workflow_weight = db_result(db_query("SELECT weight FROM {system} WHERE type = 'module' AND name = 'workflow'"));
-  $pathauto_weight = db_result(db_query("SELECT weight FROM {system} WHERE type = 'module' AND name = 'pathauto'"));
+  $workflow_weight = db_query("SELECT weight FROM {system} WHERE type = :type AND name = :name", array(':type' => 'module', ':name' => 'workflow'))->fetchField();
+  $pathauto_weight = db_query("SELECT weight FROM {system} WHERE type = :type AND name = :name", array(':type' => 'module', ':name' => 'pathauto'))->fetchField();
 
   if ($pathauto_weight > $workflow_weight) {
     $weight = $pathauto_weight;
@@ -29,17 +22,25 @@ function learning_registry_enable() {
     $weight = $workflow_weight;
   }
 
-  db_query("UPDATE {system} SET weight = %d WHERE type = 'module' AND name = 'learning_registry'", $weight + 1);
+  db_update('system')
+  ->fields(array(
+    'weight' => $weight + 1,
+  ))
+  ->condition('type', 'module')
+  ->condition('name', 'learning_registry')
+  ->execute();
 }
 
 /**
  * Implements hook_uninstall().
  */
 function learning_registry_uninstall() {
-  drupal_uninstall_schema('learning_registry');
-  $result = db_query("SELECT name from {variable} WHERE name LIKE 'learning_registry_%'");
-  while ($var_name = db_result($result)) {
-    variable_del($var_name);
+  $result = db_select('variable', 'v')
+  ->fields('v', array('name'))
+  ->condition('name', 'learning_registry_%', 'like')
+  ->execute();
+  foreach ($result as $var) {
+    variable_del($var->name);
   }
 }
 
@@ -59,28 +60,24 @@ function learning_registry_schema() {
         'unsigned' => TRUE,
         'not null' => TRUE,
       ),
-
       'published' => array(
         'description' => 'The original date of publication to the LR node.',
         'type' => 'int',
         'not null' => TRUE,
         'default' => 0,
       ),
-
       'updated' => array(
         'description' => 'The most recent update to the LR node.',
         'type' => 'int',
         'not null' => TRUE,
         'default' => 0,
       ),
-
       'queued' => array(
         'description' => 'Flag to determine if node is queued for processing.',
         'type' => 'int',
         'not null' => TRUE,
         'default' => 0,
       ),
-
       'docid' => array(
         'description' => 'The doc ID returned on successful submission to the Learning Registry.',
         'type' => 'varchar',
@@ -106,7 +103,7 @@ function learning_registry_schema() {
  */
 function learning_registry_requirements($phase) {
   $t = get_t();
-  
+
   $requirements = array();
 
   $requirements['phpdom'] = array(

@@ -8,10 +8,10 @@
  * Learning Registry node.
  */
 
-/** 
+/**
  * LEARNING_REGISTRY_QUEUE_IMMEDIATE - Content types enabled for publishing in
  * the Learning Registry will publish immediately.
- * 
+ *
  * LEARNING_REGISTRY_QUEUE_QUEUED - Content types enabled for publishing in the
  * Learning Registry will be queued and published when cron runs.
  */
@@ -21,7 +21,7 @@ define('LEARNING_REGISTRY_QUEUE_QUEUED', 1);
 
 /**
  * LEARNING_REGISTRY_URL_NODE_ID - Publish the URL in the LR using the node ID.
- * 
+ *
  * LEARNING_REGISTRY_URL_ALIAS - Publish the URL in the LR using the path alias.
  */
 
@@ -30,7 +30,7 @@ define('LEARNING_REGISTRY_URL_ALIAS', 1);
 
 /**
  *  The following constants are defaults set in the JSON metadata envelope sent to
- *  the Learning Registry. 
+ *  the Learning Registry.
  */
 
 define('LEARNING_REGISTRY_DOC_TYPE', 'resource_data');
@@ -52,7 +52,7 @@ define('LEARNING_REGISTRY_MODE_DELETE', 2);
 
 /**
  * Implements hook_help().
- * 
+ *
  * Display help and module information.
  *
  * @param string $path
@@ -75,22 +75,31 @@ function learning_registry_help($path, $arg) {
 }
 
 /**
- * Implements hook_perm().
- * 
+ * Implements hook_permission().
+ *
  * Valid permissions for this module
  *
  * @return array
  *   An array of valid permissions for the learning_registry module.
  */
-function learning_registry_perm() {
-  return array('administer learning_registry', 'access learning_registry');
+function learning_registry_permission() {
+  return array(
+    'administer learning_registry' => array(
+      'title' => t('administer learning_registry'),
+      'description' => t('Change the admin settings for the learning registry connection.'),
+    ),
+    'access learning_registry' => array(
+      'title' => t('access learning_registry'),
+      'description' => t('Be able to access the learning registry integration page.'),
+    ),
+  );
 }
 
 /**
  * Implements hook_menu().
  */
 function learning_registry_menu() {
-  $items['admin/settings/learning_registry'] = array(
+  $items['admin/config/services/learning_registry'] = array(
     'title' => 'Learning Registry settings',
     'description' => 'Settings for publishing and receiving metadata to a Learning Registry node.',
     'page callback' => 'drupal_get_form',
@@ -114,26 +123,36 @@ function learning_registry_menu() {
 }
 
 /**
- * Implements hook_nodeapi().
+ * Implements hook_node_insert().
  */
-function learning_registry_nodeapi(&$node, $op) {
+function learning_registry_node_insert($node) {
   $nodes_to_publish = variable_get('learning_registry_node_types', array());
   if (in_array($node->type, $nodes_to_publish) && $node->nid) {
     // Switch case below used to accomodate more methods (update, delete)
     // in the future.
-    switch ($op) {
-      case 'insert':
-        if ($node->status == 1) {
-          if (variable_get('learning_registry_queuing', LEARNING_REGISTRY_QUEUE_IMMEDIATE) == LEARNING_REGISTRY_QUEUE_QUEUED) {
-            _learning_registry_queue_node($node->nid);
-          }
-          else {
-            _learning_registry_publish($node);
-          }
-        }
-        break;
+    if ($node->status == 1) {
+      if (variable_get('learning_registry_queuing', LEARNING_REGISTRY_QUEUE_IMMEDIATE) == LEARNING_REGISTRY_QUEUE_QUEUED) {
+        _learning_registry_queue_node($node->nid);
+      }
+      else {
+        _learning_registry_publish($node);
+      }
     }
   }
+}
+
+/**
+ * Implements hook_node_update().
+ */
+function learning_registry_node_update($node) {
+ // @todo: account for nodes being updated in drupal needing to go to LR
+}
+
+/**
+ * Implements hook_node_delete().
+ */
+function learning_registry_node_delete($node) {
+ // @todo: if nodes deleted from drupal, delete from LR
 }
 
 /**
@@ -144,7 +163,7 @@ function learning_registry_nodeapi(&$node, $op) {
  */
 function learning_registry_cron() {
   // Pull node IDs of records queued for processing.
-  $records = db_query('SELECT nid FROM {learning_registry} WHERE queued = 1');
+  $records = db_query('SELECT nid FROM {learning_registry} WHERE queued = :queued', array(':queued' => 1));
 
   while ($record = db_fetch_array($records)) {
     $node = node_load($record['nid'], NULL, TRUE);
@@ -285,13 +304,14 @@ function _learning_registry_get_node_url(&$node) {
 function _learning_registry_send_to_registry($nid, $json, $service_num = LEARNING_REGISTRY_MODE_PUBLISH, $headless = FALSE) {
   $url = variable_get('learning_registry_node_url', NULL);
   if ($url == NULL) {
-    drupal_set_message(t('This node has not been published because the Learning Registry URL has not been set.  
+    drupal_set_message(t('This node has not been published because the Learning Registry URL has not been set.
       Please visit Site configuration -> Learning Registry settings to set the URL of the Learning Registry.'), 'warning');
-    
+
     return FALSE;
-  } else {
+  }
+  else {
     $url .= '/publish';
-    $result = drupal_http_request($url, array('Content-type: application/json'), 'POST', $json);
+    $result = drupal_http_request($url, array('headers' => array('Content-type: application/json'), 'method' => 'POST', 'data' => $json));
 
     $submission_result = _learning_registry_parse_result($result->data, $result->code);
 
@@ -299,7 +319,7 @@ function _learning_registry_send_to_registry($nid, $json, $service_num = LEARNIN
       $result = _learning_registry_update_submission_status($nid, $result->data);
       if (!$headless) {
         $submission_url = variable_get('learning_registry_node_url', NULL) . '/harvest/getrecord?by_doc_ID=TRUE&request_ID=' . $result;
-        drupal_set_message(t('Node ID @nid published to the registry. <a href="@url" target="_new">(View node on registry.)</a>', array('@nid' =>$nid, '@url' => $submission_url)));
+        drupal_set_message(t('Node ID @nid published to the registry. <a href="@url" target="_new">(View node on registry.)</a>', array('@nid' => $nid, '@url' => $submission_url)));
       }
 
       return TRUE;
@@ -450,7 +470,7 @@ function _learning_registry_update_submission_status($nid, $result) {
 
     if ($result_array->document_results[0]->OK) {
       // Check to see if submission already in database.
-      $submission_check_result = db_query('SELECT * FROM {learning_registry} WHERE nid = %d', $nid);
+      $submission_check_result = db_query('SELECT * FROM {learning_registry} WHERE nid = :nid', array(':nid' => $nid));
       $submission_record = db_fetch_object($submission_check_result);
 
       // Check if this has been published before.
@@ -458,13 +478,25 @@ function _learning_registry_update_submission_status($nid, $result) {
       // Else, the updated timestamp.
       if ($submission_record) {
         if ($submission_record->published == 0) {
-          $sql = 'UPDATE {learning_registry} SET published=%d, docid=\'%s\', queued=0 WHERE nid = %d';
+          db_update('learning_registry')
+          ->fields(array(
+                  'published' => REQUEST_TIME,
+                  'docid' => $result_array->document_results[0]->doc_ID,
+                  'queued' => 0,
+                ))
+          ->condition('nid', $nid)
+          ->execute();
         }
         else {
-          $sql = 'UPDATE {learning_registry} SET updated=%d, docid=\'%s\', queued=0 WHERE nid = %d';
+          db_update('learning_registry')
+          ->fields(array(
+                  'updated' => REQUEST_TIME,
+                  'docid' => $result_array->document_results[0]->doc_ID,
+                  'queued' => 0,
+                ))
+          ->condition('nid', $nid)
+          ->execute();
         }
-
-        db_query($sql, time(), $result_array->document_results[0]->doc_ID, $nid);
       }
       else {
         // Insert new record.
@@ -472,7 +504,7 @@ function _learning_registry_update_submission_status($nid, $result) {
         // Fill parameter array.
         $data = array(
           'nid' => $nid,
-          'published' => time(),
+          'published' => REQUEST_TIME,
           'docid' => $result_array->document_results[0]->doc_ID,
         );
         // Write it to the database.
@@ -481,7 +513,7 @@ function _learning_registry_update_submission_status($nid, $result) {
       return $result_array->document_results[0]->doc_ID;
     }
     else {
-      watchdog('learning_registry', 'Error publishing node ID %nid to the registry.  Full response: %msg', array('%nid' => $nid, '%msg' => $result),  WATCHDOG_ERROR);
+      watchdog('learning_registry', 'Error publishing node ID %nid to the registry.  Full response: %msg', array('%nid' => $nid, '%msg' => $result),   WATCHDOG_ERROR);
       return FALSE;
     }
   }
@@ -548,19 +580,26 @@ function _learning_registry_parse_result($result, $code) {
 function _learning_registry_queue_node($nid) {
 
   // Check if this record exists in submission table.
-  $submission_check_result = db_query('SELECT * FROM {learning_registry} WHERE nid = %d', $nid);
+  $submission_check_result = db_query('SELECT * FROM {learning_registry} WHERE nid = :nid', array(':nid' => $nid));
   $submission_record = db_fetch_object($submission_check_result);
 
   // If exists, update, else insert new record.
   if ($submission_record) {
-    $sql = 'UPDATE {learning_registry} SET queued=1 WHERE nid = %d';
+    db_update('learning_registry')
+    ->fields(array(
+            'queued' => 1,
+          ))
+    ->condition('nid', $nid)
+    ->execute();
   }
   else {
-    $sql = 'INSERT INTO {learning_registry} (nid, queued) VALUES (%d, 1)';
-  }
-
-  // Write to database.
-  db_query($sql, $nid);
+    $id = db_insert('learning_registry')
+    ->fields(array(
+      'nid' => $nid,
+      'queued' => 1,
+    ))
+    ->execute();
+  }  
 }
 
 /**
@@ -619,18 +658,18 @@ function _learning_registry_create_dublincore_payload(&$node) {
 
   /* References
 
-    http://dublincore.org/documents/usageguide/elements.shtml
+   http://dublincore.org/documents/usageguide/elements.shtml
 
-    <dc:title>Dublin Core Metadata Initiative - Home Page</dc:title>
-    <dc:description>The Dublin Core Metadata Initiative Web site.</dc:description>
-    <dc:date>2001-01-16</dc:date>
-    <dc:format>text/html</dc:format>
-    <dc:language>en</dc:language>
-    <dc:contributor>The Dublin Core Metadata Initiative</dc:contributor>
+   <dc:title>Dublin Core Metadata Initiative - Home Page</dc:title>
+   <dc:description>The Dublin Core Metadata Initiative Web site.</dc:description>
+   <dc:date>2001-01-16</dc:date>
+   <dc:format>text/html</dc:format>
+   <dc:language>en</dc:language>
+   <dc:contributor>The Dublin Core Metadata Initiative</dc:contributor>
 
-    <!ENTITY % dcmes "dc:title | dc:creator | dc:subject | dc:description |
-    dc:publisher | dc:contributor | dc:date | dc:type | dc:format |
-    dc:identifier | dc:source | dc:language | dc:relation | dc:coverage |
-    dc:rights" >
+   <!ENTITY % dcmes "dc:title | dc:creator | dc:subject | dc:description |
+   dc:publisher | dc:contributor | dc:date | dc:type | dc:format |
+   dc:identifier | dc:source | dc:language | dc:relation | dc:coverage |
+   dc:rights" >
    */
 }

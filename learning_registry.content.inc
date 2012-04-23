@@ -7,9 +7,9 @@
 
 /**
  * LEARNING_REGISTRY_PAYLOAD_SCHEMA_DC11 - Content in Dublin Core 1.1 wrapper.
- * 
+ *
  * LEARNING_REGISTRY_PAYLOAD_SCHEMA_LOM - Content in LOM wrapper.
- * 
+ *
  * LEARNING_REGISTRY_PAYLOAD_SCHEMA_UNKNOWN - Content is unknown.
  */
 
@@ -20,13 +20,14 @@ define('LEARNING_REGISTRY_PAYLOAD_SCHEMA_UNKNOWN', -1);
 /**
  * Form constructor to for basic search form for Learning Registry.
  */
-function learning_registry_content_form(&$form_state) {
-  
+function learning_registry_content_form($form, &$form_state) {
+
   if (variable_get('learning_registry_node_url', NULL) == NULL) {
-      drupal_set_message(t('A Learning Registry URL has not yet been configured in the administration settings.  
+    drupal_set_message(t('A Learning Registry URL has not yet been configured in the administration settings.
         Please visit Site Configuration -> Learning Registry settings to configure a URL before continuing.'), 'error');
-  } else {
-    $form['#redirect'] = FALSE;
+  }
+  else {
+    $form_state['#redirect'] = FALSE;
 
     $form['learning_registry'] = array(
       '#type' => 'fieldset',
@@ -81,7 +82,7 @@ function learning_registry_content_form(&$form_state) {
       );
     }
   }
-  
+
   return $form;
 }
 
@@ -193,7 +194,7 @@ function learning_registry_content_form_submit($form, &$form_state) {
       }
     }
 
-    $output = theme('table', $header, $rows);
+    $output = theme('table', array('header' => $header, 'rows' => $rows));
 
     $form_state['storage']['results'] = $output;
     return;
