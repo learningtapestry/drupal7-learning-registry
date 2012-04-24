@@ -124,7 +124,7 @@ function learning_registry_content_form_submit($form, &$form_state) {
   if ($search != '') {
     $search = variable_get('learning_registry_node_url', NULL) . '/slice?' . $search;
     $result = drupal_http_request($search);
-    $result_array = json_decode($result->data);
+    $result_array = drupal_json_decode($result->data);
 
     $header = array();
     $header[] = 'Resource';
