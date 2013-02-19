@@ -119,6 +119,16 @@ function learning_registry_menu() {
     'file' => 'learning_registry.content.inc',
   );
 
+  $items['admin/config/services/learning_registry'] = array(
+    'title' => 'Learning Registry settings',
+    'description' => 'Settings for publishing and receiving metadata to a Learning Registry node.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('learning_registry_admin_settings'),
+    'access arguments' => array('administer learning_registry'),
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'learning_registry.admin.inc',
+  );
+
   return $items;
 }
 
@@ -259,7 +269,7 @@ function _learning_registry_get_content_info(&$node) {
   $resource_data = _learning_registry_create_dublincore_payload($node);
 
   $content_info['resource_data'] = $resource_data;
-  
+
   return $content_info;
 }
 
