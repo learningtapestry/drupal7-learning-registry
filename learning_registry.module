@@ -259,7 +259,7 @@ function _learning_registry_get_content_info(&$node) {
   $resource_data = _learning_registry_create_dublincore_payload($node);
 
   $content_info['resource_data'] = $resource_data;
-
+  
   return $content_info;
 }
 
@@ -311,12 +311,26 @@ function _learning_registry_send_to_registry($nid, $json, $service_num = LEARNIN
   }
   else {
     $url .= '/publish';
-    $result = drupal_http_request($url, array('headers' => array('Content-type: application/json'), 'method' => 'POST', 'data' => $json));
+    //$result = drupal_http_request($url, array('headers' => array('Content-type: application/json'), 'method' => 'POST', 'data' => $json));
+    $consumer = array(
+      'key' => 'afraaz@appnovation.com',
+      'secret' => 'nLwXtywFmTJE56WHEUPTVPLgaRAsNMX/',
+    );
 
-    $submission_result = _learning_registry_parse_result($result->data, $result->code);
+    $token = array(
+      'key' => 'node_sign_token',
+      'secret' => 'AGlHQyjZ9qj37aYMO6WzplB5BVp3fgXy',
+    );
+    $oauth_consumer = new OAuth($consumer['key'], $consumer['secret']);
+    $oauth_consumer->setToken($token['key'], $token['secret']);
+    $oauth_consumer->disableSSLChecks();
+    $oauth_consumer->fetch($url, $json, OAUTH_HTTP_METHOD_POST, array('Content-Type' => 'application/json'));
+    $result = $oauth_consumer->getLastResponse();
+    $response_info = $oauth_consumer->getLastResponseInfo();
+    $submission_result = _learning_registry_parse_result($result, $response_info['http_code']);
 
     if ($result) {
-      $result = _learning_registry_update_submission_status($nid, $result->data);
+      $result = _learning_registry_update_submission_status($nid, $result);
       if (!$headless) {
         $submission_url = variable_get('learning_registry_node_url', NULL) . '/harvest/getrecord?by_doc_ID=TRUE&request_ID=' . $result;
         drupal_set_message(t('Node ID @nid published to the registry. <a href="@url" target="_new">(View node on registry.)</a>', array('@nid' => $nid, '@url' => $submission_url)));
@@ -345,6 +359,9 @@ function _learning_registry_send_to_registry($nid, $json, $service_num = LEARNIN
  */
 function _learning_registry_def_resource_data($content_info) {
   // Values specified as immutable in the LR spec.
+  $identity = new stdClass();
+  $resource_data = new stdClass();
+  $tos = new stdClass();
 
   $opt_id_fields = array(
     'curator',
@@ -436,6 +453,7 @@ function _learning_registry_def_resource_data($content_info) {
  *   An empty LR submission envelop.
  */
 function _learning_registry_build_envelope() {
+  $submission = new stdClass();
   $submission->documents = array();
   return $submission;
 }
@@ -468,7 +486,7 @@ function _learning_registry_update_submission_status($nid, $result) {
 
     $result_array = drupal_json_decode($result);
 
-    if ($result_array->document_results[0]->OK) {
+    if ($result_array['document_results'][0]['OK']) {
       // Check to see if submission already in database.
       $submission_check_result = db_query('SELECT * FROM {learning_registry} WHERE nid = :nid', array(':nid' => $nid));
       $submission_record = $submission_check_result->fetch();
@@ -481,7 +499,7 @@ function _learning_registry_update_submission_status($nid, $result) {
           db_update('learning_registry')
           ->fields(array(
                   'published' => REQUEST_TIME,
-                  'docid' => $result_array->document_results[0]->doc_ID,
+                  'docid' => $result_array['document_results'][0]['doc_ID'],
                   'queued' => 0,
                 ))
           ->condition('nid', $nid)
@@ -491,7 +509,7 @@ function _learning_registry_update_submission_status($nid, $result) {
           db_update('learning_registry')
           ->fields(array(
                   'updated' => REQUEST_TIME,
-                  'docid' => $result_array->document_results[0]->doc_ID,
+                  'docid' => $result_array['document_results'][0]['doc_ID'],
                   'queued' => 0,
                 ))
           ->condition('nid', $nid)
@@ -505,12 +523,12 @@ function _learning_registry_update_submission_status($nid, $result) {
         $data = array(
           'nid' => $nid,
           'published' => REQUEST_TIME,
-          'docid' => $result_array->document_results[0]->doc_ID,
+          'docid' => $result_array['document_results'][0]['doc_ID'],
         );
         // Write it to the database.
         drupal_write_record('learning_registry', $data);
       }
-      return $result_array->document_results[0]->doc_ID;
+      return $result_array['document_results'][0]['doc_ID'];
     }
     else {
       watchdog('learning_registry', 'Error publishing node ID %nid to the registry.  Full response: %msg', array('%nid' => $nid, '%msg' => $result),   WATCHDOG_ERROR);
@@ -537,15 +555,15 @@ function _learning_registry_parse_result($result, $code) {
     // We have something back from the Learning Registry service.
     $result_array = drupal_json_decode($result);
 
-    if ($result_array->document_results[0]->OK) {
+    if ($result_array['OK']) {
       // Submission okay.
       $submission_result['success'] = TRUE;
-      $submission_result['doc_id'] = $result_array->document_results[0]->doc_ID;
+      $submission_result['doc_id'] = $result_array['document_results'][0]['doc_ID'];
     }
     else {
       $submission_result['success'] = FALSE;
-      if (!is_null($result_array->document_results[0]->error)) {
-        $submission_result['error_message'] = $result_array->document_results[0]->error;
+      if (!is_null($result_array['document_results'][0]['error'])) {
+        $submission_result['error_message'] = $result_array['document_results'][0]['error'];
       }
       else {
         // If the error message comes back in form of a HTML page, let's just
@@ -599,7 +617,7 @@ function _learning_registry_queue_node($nid) {
       'queued' => 1,
     ))
     ->execute();
-  }  
+  }
 }
 
 /**
@@ -634,7 +652,7 @@ function _learning_registry_create_dublincore_payload(&$node) {
   $dc_node->appendChild($element);
 
   // Set the DC description to the node body.
-  $element = $xml_document->createElementNS('http://purl.org/dc/elements/1.1/', 'description', $node->body);
+  $element = $xml_document->createElementNS('http://purl.org/dc/elements/1.1/', 'description', $node->body['und'][0]['value']);
   $dc_node->appendChild($element);
 
   // Set the DC date to the node create date.
