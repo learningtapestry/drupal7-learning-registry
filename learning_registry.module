@@ -266,10 +266,12 @@ function _learning_registry_publish(&$node, $headless = FALSE) {
  *   reference allows us to edit the node content.
  */
 function _learning_registry_get_content_info(&$node) {
+  $author_user = user_load($node->uid);
   $content_info = array();
   $content_info['resource_locator'] = _learning_registry_get_node_url($node);
   $content_info['resource_data_type'] = 'metadata';
-  $content_info['submitter'] = variable_get('learning_registry_submitter', NULL);
+  $content_info['submitter'] = $author_user->name;
+  $content_info['owner'] = variable_get('learning_registry_submitter', NULL);
   $content_info['tos'] = variable_get('learning_registry_tos', NULL);
 
   // Currently set curator and submitter the same, once we get a better sense
