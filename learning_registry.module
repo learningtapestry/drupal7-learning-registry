@@ -251,6 +251,7 @@ function _learning_registry_publish(&$node, $headless = FALSE) {
   $empty_submission = _learning_registry_build_envelope();
   $prepared_submission = _learning_registry_add_resource_data_to_submission($empty_submission, $resource_data);
   // @TODO add a alter hook to allow people to modify and add data.
+  drupal_alter('learning_registry_prepared_submission', $prepared_submission);
   $resource_post_payload = drupal_json_encode($prepared_submission);
   $result = _learning_registry_send_to_registry($node->nid, $resource_post_payload, LEARNING_REGISTRY_MODE_PUBLISH, $headless);
   return $result;
@@ -644,7 +645,7 @@ function _learning_registry_queue_node($nid) {
  *    XML document
  */
 function _learning_registry_create_dublincore_payload(&$node) {
-
+  $author_user = user_load($node->uid);
   // Set the initial RDF XML DC envelope body.
   $source = '<?xml version="1.0"?>
     <!DOCTYPE rdf:RDF PUBLIC "-//DUBLIN CORE//DCMES DTD 2002/07/31//EN"
@@ -677,6 +678,10 @@ function _learning_registry_create_dublincore_payload(&$node) {
 
   // Set the DC identifier to the absolute URL of the node.
   $element = $xml_document->createElementNS('http://purl.org/dc/elements/1.1/', 'identifier', _learning_registry_get_node_url($node));
+  $dc_node->appendChild($element);
+
+  // Set the DC creator to the Drupal username.
+  $element = $xml_document->createElementNS('http://purl.org/dc/elements/1.1/', 'creator', $author_user->name);
   $dc_node->appendChild($element);
 
   // Pretty format the XML before sending it to the LR.
