@@ -20,7 +20,7 @@ function learning_registry_admin_settings($form, &$form_state) {
 
   foreach ($options as $option) {
     $type_names[$option->type] = check_plain($option->name);
-     $node_fields[$option->type] = field_info_instances('node', $option->type);
+    $node_fields[$option->type] = field_info_instances('node', $option->type);
   }
 
   $form = array();
@@ -87,7 +87,7 @@ function learning_registry_admin_settings($form, &$form_state) {
   foreach ($type_names as $type_key => $type_name) {
     if (count($node_fields[$type_key])) {
       $checkboxes = array();
-      // loop through and build a list of checkboxes
+      // Loop through and build a list of checkboxes.
       foreach ($node_fields[$type_key] as $field) {
         $checkboxes[$field['field_name']] = check_plain($field['label']);
       }
@@ -135,7 +135,9 @@ function learning_registry_admin_settings_validate($form, $form_state) {
   }
 
 }
-
+/**
+ * Form builder function for OAuth settings.
+ */
 function learning_registry_admin__oauth_settings($form, &$form_state) {
   $consumer = variable_get('lrmi_oauth_consumer', array());
   $token = variable_get('lrmi_oauth_token', array());

@@ -70,7 +70,6 @@ function learning_registry_content_form($form, &$form_state) {
       '#default_value' => isset($form_state['values']['search_until']) ? urldecode($form_state['values']['search_until']) : '',
     );
 
-
     $form['learning_registry']['submit'] = array(
       '#type' => 'submit',
       '#value' => t('Search'),
@@ -210,12 +209,13 @@ function _learning_registry_get_metadata_type($payload_schema_array) {
     switch ($payload_schema) {
       case "LOM":
         return LEARNING_REGISTRY_PAYLOAD_SCHEMA_LOM;
-        break;
+
+      break;
 
       case "DC 1.1":
         return LEARNING_REGISTRY_PAYLOAD_SCHEMA_DC11;
-        break;
 
+      break;
     }
   }
   return $type;

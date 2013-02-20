@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * A module to publish drupal node metadata to a Learning Registry node.
@@ -29,8 +28,8 @@ define('LEARNING_REGISTRY_URL_NODE_ID', 0);
 define('LEARNING_REGISTRY_URL_ALIAS', 1);
 
 /**
- *  The following constants are defaults set in the JSON metadata envelope sent to
- *  the Learning Registry.
+ *  The following constants are defaults set in the JSON metadata envelope sent
+ *  to the Learning Registry.
  */
 
 define('LEARNING_REGISTRY_DOC_TYPE', 'resource_data');
@@ -40,10 +39,10 @@ define('LEARNING_REGISTRY_PAYLOAD_PLACEMENT', 'inline');
 define('LEARNING_REGISTRY_DEFAULT_SCHEMA', 'DC 1.1');
 
 /**
- * The following constants represent modes of publishing to the Learning Registry.
- * Currently, only LEARNING_REGISTRY_MODE_PUBLISH is implemented and _UPDATE
- * and _DELETE are reserved for future implementations once the Learning Registry
- * establishes those patterns.
+ * The following constants represent modes of publishing to the Learning
+ * Registry. Currently, only LEARNING_REGISTRY_MODE_PUBLISH is implemented and
+ * _UPDATE and _DELETE are reserved for future implementations once the Learning
+ * Registry establishes those patterns.
  */
 
 define('LEARNING_REGISTRY_MODE_PUBLISH', 0);
@@ -52,15 +51,6 @@ define('LEARNING_REGISTRY_MODE_DELETE', 2);
 
 /**
  * Implements hook_help().
- *
- * Display help and module information.
- *
- * @param string $path
- *   A string that specifies which path of the site we're displaying help.
- * @param string $arg
- *   An array that holds that current path as would be returned from arg().
- * @return string $help
- *   A string that contains the help text for the specified path.
  */
 function learning_registry_help($path, $arg) {
   $output = '';
@@ -76,11 +66,6 @@ function learning_registry_help($path, $arg) {
 
 /**
  * Implements hook_permission().
- *
- * Valid permissions for this module
- *
- * @return array
- *   An array of valid permissions for the learning_registry module.
  */
 function learning_registry_permission() {
   return array(
@@ -166,14 +151,14 @@ function learning_registry_node_insert($node) {
  * Implements hook_node_update().
  */
 function learning_registry_node_update($node) {
- // @todo: account for nodes being updated in drupal needing to go to LR
+  // @TODO: account for nodes being updated in drupal needing to go to LR.
 }
 
 /**
  * Implements hook_node_delete().
  */
 function learning_registry_node_delete($node) {
- // @todo: if nodes deleted from drupal, delete from LR
+  // @TODO: if nodes deleted from drupal, delete from LR.
 }
 
 /**
@@ -207,7 +192,10 @@ function learning_registry_node_operations() {
 }
 
 /**
- * Callback function for learning_registry_node_operations()
+ * Callback function for learning_registry_node_operations().
+ *
+ * @param array $nids
+ *   An array of node ids.
  */
 function _learning_registry_bulk_operations_publish($nids) {
   $success = 0;
@@ -242,7 +230,8 @@ function _learning_registry_bulk_operations_publish($nids) {
  *   reference allows us to edit the node content.
  * @param bool $headless
  *   A flag to determine if this is called from cron (non-user session).
- * @return bool $result
+ *
+ * @return bool
  *   Returns TRUE if operation was successful, FALSE if not.
  */
 function _learning_registry_publish(&$node, $headless = FALSE) {
@@ -291,9 +280,10 @@ function _learning_registry_get_content_info(&$node) {
 /**
  * Return the absolute URL to a node.  If alias available,  return alias.
  *
- * @param int $node
+ * @param object $node
  *   The node.
- * @return string $node_url
+ *
+ * @return string
  *   The absolute URL to the node.  If alias available, return alias.
  */
 function _learning_registry_get_node_url(&$node) {
@@ -323,7 +313,8 @@ function _learning_registry_get_node_url(&$node) {
  *   2 - delete  (future impl)
  * @param bool $headless
  *   A flag to determine if this is called from cron (non-user session).
- * @return bool $result
+ *
+ * @return bool
  *   True if operation was successful, false if error.
  */
 function _learning_registry_send_to_registry($nid, $json, $service_num = LEARNING_REGISTRY_MODE_PUBLISH, $headless = FALSE) {
@@ -336,7 +327,6 @@ function _learning_registry_send_to_registry($nid, $json, $service_num = LEARNIN
   }
   else {
     $url .= '/publish';
-    //$result = drupal_http_request($url, array('headers' => array('Content-type: application/json'), 'method' => 'POST', 'data' => $json));
     $consumer = variable_get('lrmi_oauth_consumer', array());
     $token = variable_get('lrmi_oauth_token', array());
 
@@ -371,10 +361,10 @@ function _learning_registry_send_to_registry($nid, $json, $service_num = LEARNIN
  * Define the Learning Registry resource data.
  *
  * @param array $content_info
- *    Metadata information from the node.
+ *   Metadata information from the node.
  *
- * @returns array $resource_data
- *    Formatted array of resource data.
+ * @return array
+ *   Formatted array of resource data.
  */
 function _learning_registry_def_resource_data($content_info) {
   // Values specified as immutable in the LR spec.
@@ -444,7 +434,6 @@ function _learning_registry_def_resource_data($content_info) {
     }
   }
 
-
   $resource_data->doc_type = LEARNING_REGISTRY_DOC_TYPE;
   $resource_data->doc_version = LEARNING_REGISTRY_DOC_VERSION;
   $resource_data->resource_data_type = $content_info['resource_data_type'];
@@ -468,7 +457,7 @@ function _learning_registry_def_resource_data($content_info) {
 /**
  * Return a basic LR submission envelope.
  *
- * @return object $submission
+ * @return object
  *   An empty LR submission envelop.
  */
 function _learning_registry_build_envelope() {
@@ -481,11 +470,12 @@ function _learning_registry_build_envelope() {
  * Adds resource data to a LR submission envelope.
  *
  * @param object $submission
- *    An LR submission object.
+ *   An LR submission object.
  * @param object $resource_data
- *    An LR resource data object.
- * @return object $submission
- *    The submission object with $resource data pushed to the documents array.
+ *   An LR resource data object.
+ *
+ * @return object
+ *   The submission object with $resource data pushed to the documents array.
  */
 function _learning_registry_add_resource_data_to_submission($submission, $resource_data) {
   $submission->documents[] = $resource_data;
@@ -493,12 +483,12 @@ function _learning_registry_add_resource_data_to_submission($submission, $resour
 }
 
 /**
- * Adds a status record in the learning_registry table to record submission
+ * Adds a status record in the learning_registry table to record submission.
  *
  * @param int $nid
- *    Drupal node ID of item to submit.
+ *   Drupal node ID of item to submit.
  * @param string $result
- *    JSON response from Learning Registry.
+ *   JSON response from Learning Registry.
  */
 function _learning_registry_update_submission_status($nid, $result) {
   if ($result) {
@@ -550,22 +540,22 @@ function _learning_registry_update_submission_status($nid, $result) {
       return $result_array['document_results'][0]['doc_ID'];
     }
     else {
-      watchdog('learning_registry', 'Error publishing node ID %nid to the registry.  Full response: %msg', array('%nid' => $nid, '%msg' => $result),   WATCHDOG_ERROR);
+      watchdog('learning_registry', 'Error publishing node ID %nid to the registry.  Full response: %msg', array('%nid' => $nid, '%msg' => $result), WATCHDOG_ERROR);
       return FALSE;
     }
   }
 }
 
 /**
- * Parse out result from Learning Registry submission
+ * Parse out result from Learning Registry submission.
  *
  * @param object $result
- *    JSON array result from Learning Registry submission
+ *   JSON array result from Learning Registry submission
+ * @param string $code
+ *   Error string from curl (if error occured)
  *
- * @param string $error
- *    Error string from curl (if error occured)
- * @return object $submission_result
- *    Array with status information from submission
+ * @return object
+ *   Array with status information from submission
  */
 function _learning_registry_parse_result($result, $code) {
   $submission_result = array();
@@ -609,10 +599,10 @@ function _learning_registry_parse_result($result, $code) {
 }
 
 /**
- * Queues a node for submission to the LR via the learning_registry table
+ * Queues a node for submission to the LR via the learning_registry table.
  *
  * @param int $nid
- *    Drupal node ID of item to submit.
+ *   Drupal node ID of item to submit.
  */
 function _learning_registry_queue_node($nid) {
 
@@ -640,12 +630,13 @@ function _learning_registry_queue_node($nid) {
 }
 
 /**
- * Creates Dublin Core 1.1 XML document with information from node
+ * Creates Dublin Core 1.1 XML document with information from node.
  *
  * @param object $node
- *    Drupal node
- * @return object $returnXML
- *    XML document
+ *   Drupal node
+ *
+ * @return object
+ *   XML document
  */
 function _learning_registry_create_dublincore_payload(&$node) {
   $author_user = user_load($node->uid);
@@ -695,30 +686,14 @@ function _learning_registry_create_dublincore_payload(&$node) {
   $return_xml->loadXML($xml_document->saveXML());
 
   return $return_xml->saveXML();
-
-
-  /* References
-
-   http://dublincore.org/documents/usageguide/elements.shtml
-
-   <dc:title>Dublin Core Metadata Initiative - Home Page</dc:title>
-   <dc:description>The Dublin Core Metadata Initiative Web site.</dc:description>
-   <dc:date>2001-01-16</dc:date>
-   <dc:format>text/html</dc:format>
-   <dc:language>en</dc:language>
-   <dc:contributor>The Dublin Core Metadata Initiative</dc:contributor>
-
-   <!ENTITY % dcmes "dc:title | dc:creator | dc:subject | dc:description |
-   dc:publisher | dc:contributor | dc:date | dc:type | dc:format |
-   dc:identifier | dc:source | dc:language | dc:relation | dc:coverage |
-   dc:rights" >
-   */
 }
+
 /**
  * Fetches term names attached to the node.
  *
- * @param type $node
+ * @param object $node
  *   A fully qualified node object as defined by node_load.
+ *
  * @return array
  *   An array of the term names
  */
