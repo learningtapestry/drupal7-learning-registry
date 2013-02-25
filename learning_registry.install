@@ -109,6 +109,9 @@ function learning_registry_requirements($phase) {
   $requirements['phpdom'] = array(
     'title' => $t('PHP document object model'),
   );
+  $requirements['oauth'] = array(
+    'title' => $t('Oauth Library'),
+  );
 
   if (class_exists('DOMDocument')) {
     $requirements['phpdom']['value'] = $t('Installed');
@@ -118,6 +121,16 @@ function learning_registry_requirements($phase) {
     $requirements['phpdom']['value'] = $t('Not installed');
     $requirements['phpdom']['description'] = $t('External links filter requires PHP <a href="http://php.net/manual/en/book.dom.php">Document Object Model</a>.');
     $requirements['phpdom']['severity'] = REQUIREMENT_ERROR;
+  }
+
+  if (class_exists('OAuth')) {
+    $requirements['oauth']['value'] = $t('Installed');
+    $requirements['oauth`']['severity'] = REQUIREMENT_OK;
+  }
+  else {
+    $requirements['oauth']['value'] = $t('Not installed');
+    $requirements['oauth']['description'] = $t('Learning Registry authentication requires OAuth Library');
+    $requirements['oauth']['severity'] = REQUIREMENT_ERROR;
   }
 
   return $requirements;
