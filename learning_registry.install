@@ -112,6 +112,9 @@ function learning_registry_requirements($phase) {
   $requirements['oauth'] = array(
     'title' => $t('Oauth Library'),
   );
+  $requirements['mcrypt'] = array(
+    'title' => $t('mcrypt'),
+  );
 
   if (class_exists('DOMDocument')) {
     $requirements['phpdom']['value'] = $t('Installed');
@@ -123,14 +126,26 @@ function learning_registry_requirements($phase) {
     $requirements['phpdom']['severity'] = REQUIREMENT_ERROR;
   }
 
+  // Check for OAuth extension.
   if (class_exists('OAuth')) {
     $requirements['oauth']['value'] = $t('Installed');
-    $requirements['oauth`']['severity'] = REQUIREMENT_OK;
+    $requirements['oauth']['severity'] = REQUIREMENT_OK;
   }
   else {
     $requirements['oauth']['value'] = $t('Not installed');
     $requirements['oauth']['description'] = $t('Learning Registry authentication requires OAuth Library');
     $requirements['oauth']['severity'] = REQUIREMENT_ERROR;
+  }
+
+  // Check for mcrypt extension.
+  if (function_exists('mcrypt_encrypt')) {
+    $requirements['mcrypt']['value'] = $t('Installed');
+    $requirements['mcrypt']['severity'] = REQUIREMENT_OK;
+  }
+  else {
+    $requirements['mcrypt']['value'] = $t('Not installed');
+    $requirements['mcrypt']['description'] = $t('Learning Registry authentication requires mcrypt Library');
+    $requirements['mcrypt']['severity'] = REQUIREMENT_ERROR;
   }
 
   return $requirements;
