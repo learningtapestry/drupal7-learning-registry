@@ -133,7 +133,8 @@ function learning_registry_menu() {
  */
 function learning_registry_node_insert($node) {
   $nodes_to_publish = variable_get('learning_registry_node_types', array());
-  if (in_array($node->type, $nodes_to_publish) && $node->nid) {
+  $oauth_consumer = learning_registry_oauth_verify();
+  if (in_array($node->type, $nodes_to_publish) && $node->nid && $oauth_consumer) {
     // Switch case below used to accomodate more methods (update, delete)
     // in the future.
     if ($node->status == 1) {
@@ -327,12 +328,7 @@ function _learning_registry_send_to_registry($nid, $json, $service_num = LEARNIN
   }
   else {
     $url .= '/publish';
-    $consumer = variable_get('lrmi_oauth_consumer', array());
-    $token = variable_get('lrmi_oauth_token', array());
-
-    $oauth_consumer = new OAuth($consumer['key'], $consumer['secret']);
-    $oauth_consumer->setToken($token['key'], $token['secret']);
-    $oauth_consumer->disableSSLChecks();
+    $oauth_consumer = learning_registry_oauth_verify();
     $oauth_consumer->fetch($url, $json, OAUTH_HTTP_METHOD_POST, array('Content-Type' => 'application/json'));
     $result = $oauth_consumer->getLastResponse();
     $response_info = $oauth_consumer->getLastResponseInfo();
@@ -730,4 +726,36 @@ function learning_registry_extract_keys($node) {
     }
   }
   return $keys;
+}
+
+/**
+ * Verifies the OAuth connection.
+ *
+ * @return OAuth
+ *   Returns the OAuth consumer if it authenticates.
+ */
+function learning_registry_oauth_verify() {
+  module_load_include('inc', 'learning_registry', 'learning_registry.admin');
+  $consumer = learning_registry_admin_var_get('lrmi_oauth_consumer', array());
+  $token = learning_registry_admin_var_get('lrmi_oauth_token', array());
+  $test_url = variable_get('learning_registry_node_url', NULL);
+  static $oauth_consumer;
+
+  if ($oauth_consumer) {
+    return $oauth_consumer;
+  }
+
+  if (isset($test_url)) {
+    $oauth_consumer = new OAuth($consumer['key'], $consumer['secret']);
+    $oauth_consumer->setToken($token['key'], $token['secret']);
+    $oauth_consumer->disableSSLChecks();
+    try {
+      $oauth_consumer->fetch($test_url . '/auth/oauth_verify', array(), OAUTH_HTTP_METHOD_POST, array('Content-Type' => 'application/json'));
+      $result = $oauth_consumer->getLastResponse();
+    }
+    catch (OAuthException $e) {
+      watchdog('learning_registry', $e->getMessage(), WATCHDOG_ERROR);
+    }
+  }
+  return $oauth_consumer;
 }
