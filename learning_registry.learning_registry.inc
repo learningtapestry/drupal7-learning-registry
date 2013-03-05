@@ -232,7 +232,7 @@ function _learning_registry_def_resource_data($content_info) {
 
   $resource_data->resource_locator = $content_info['resource_locator'];
   $resource_data->payload_placement = LEARNING_REGISTRY_PAYLOAD_PLACEMENT;
-  $resource_data->payload_schema = array($content_info['payload_schema']);
+  $resource_data->payload_schema = $content_info['payload_schema'];
   $resource_data->resource_data = $content_info['resource_data'];
 
   return $resource_data;
@@ -419,7 +419,7 @@ function _learning_registry_queue_node($nid) {
  * @param object $node
  *   Drupal node
  *
- * @return object
+ * @return string
  *   XML document
  */
 function _learning_registry_create_dublincore_payload(&$node) {
@@ -470,4 +470,42 @@ function _learning_registry_create_dublincore_payload(&$node) {
   $return_xml->loadXML($xml_document->saveXML());
 
   return $return_xml->saveXML();
+}
+
+/**
+ * Creates a document based on the LRMI schema.
+ *
+ * @param object $node
+ *   A full node object as defined by node_load.
+ *
+ * @return string
+ *   A JSON string representing the document.
+ */
+function _learning_registry_create_lrmi_payload($node) {
+  $node_author = user_load($node->uid);
+
+  $resource_data['items']['type'][] = 'http://schema.org/CreativeWork';
+  $resource_data['items']['id'] = $node->nid;
+  $resource_data['items']['properties']['name'] = $node->title;
+  $resource_data['items']['properties']['url'] = _learning_registry_get_node_url($node);
+  // $resource_data['items']['properties']['about']
+  $resource_data['items']['properties']['dateCreated'] = $node->created;
+  $resource_data['items']['properties']['author'] = array(
+    'type' => array(
+      'http://schema.org/Person',
+    ),
+    'properties' => array(
+      'name' => $node_author->name,
+    ),
+  );
+  $resource_data['items']['properties']['publisher'] = array(
+    'type' => array(
+      'http://schema.org/Organization',
+    ),
+    'properties' => array(
+      // @TODO Global publisher field.
+      // 'name' => 'Publisher Field',
+    ),
+  );
+  return $resource_data;
 }

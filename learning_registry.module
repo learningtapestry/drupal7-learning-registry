@@ -160,7 +160,10 @@ function learning_registry_node_update($node) {
  * Implements hook_node_delete().
  */
 function learning_registry_node_delete($node) {
-  // @TODO: if nodes deleted from drupal, delete from LR.
+  // Deletion from LR is impossible, however, we still remove from Drupal db.
+  db_delete('learning_registry')
+    ->condition('nid', $node->nid)
+    ->execute();
 }
 
 /**
@@ -307,7 +310,16 @@ function learning_registry_learning_registry_schema_info() {
   $schemas['dublin_core'] = array(
     'name' => t('Dublin Core 1.1'),
     'resource_data_callback' => '_learning_registry_create_dublincore_payload',
-    'payload_schema' => LEARNING_REGISTRY_DEFAULT_SCHEMA,
+    'payload_schema' => array(LEARNING_REGISTRY_DEFAULT_SCHEMA),
+  );
+  $schemas['lrmi'] = array(
+    'name' => t('LRMI'),
+    'resource_data_callback' => '_learning_registry_create_lrmi_payload',
+    'payload_schema' => array(
+      'schema.org',
+      'LRMI',
+      'application/microdata+json',
+    ),
   );
   return $schemas;
 }

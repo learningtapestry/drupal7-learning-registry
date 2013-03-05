@@ -19,6 +19,7 @@ function learning_registry_admin_settings($form, &$form_state) {
   $node_fields = array();
   $schemas = learning_registry_admin_retrieve_schemas();
   $schema_options = array();
+  $default_schema_option = variable_get('learning_registry_schema_type_default_value', '');
 
   foreach ($schemas as $machine_name => $schema) {
     $schema_options[$machine_name] = $schema['name'];
@@ -87,6 +88,7 @@ function learning_registry_admin_settings($form, &$form_state) {
     '#default_value' => variable_get('learning_registry_schema_type', ''),
     '#required' => TRUE,
     '#options' => $schema_options,
+    '#default_value' => $default_schema_option,
   );
 
   $form['learning_registry_node_types'] = array(
@@ -134,6 +136,7 @@ function learning_registry_admin_settings_validate($form, &$form_state) {
   }
 
   $schema = $form_state['values']['learning_registry_schema_type'];
+  $form_state['values']['learning_registry_schema_type_default_value'] = $schema;
   $form_state['values']['learning_registry_schema_type'] = $schemas[$schema];
 }
 /**
@@ -221,11 +224,11 @@ function learning_registry_admin_var_get($name, $default = '') {
  * Retrieves all schema implementations.
  *
  * @return array
- *  An array of information about each schema.
+ *   An array of information about each schema.
  */
 function learning_registry_admin_retrieve_schemas() {
   $schemas = cache_get('learning_registry_schemas');
-  if (isset($schemas) && !is_null($schemas->data)) {
+  if (isset($schemas, $schemas->data)) {
     return $schemas->data;
   }
   $schemas = module_invoke_all('learning_registry_schema_info');
