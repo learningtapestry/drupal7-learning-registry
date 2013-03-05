@@ -282,6 +282,8 @@ function _learning_registry_get_content_info(&$node) {
   $resource_data = _learning_registry_create_dublincore_payload($node);
 
   $content_info['resource_data'] = $resource_data;
+  $keys = learning_registry_extract_keys($node);
+  $content_info['keys'] = $keys;
 
   return $content_info;
 }
@@ -705,4 +707,46 @@ function _learning_registry_create_dublincore_payload(&$node) {
    dc:identifier | dc:source | dc:language | dc:relation | dc:coverage |
    dc:rights" >
    */
+}
+/**
+ * Fetches term names attached to the node.
+ *
+ * @param type $node
+ *   A fully qualified node object as defined by node_load.
+ * @return array
+ *   An array of the term names
+ */
+function learning_registry_extract_keys($node) {
+  $keys = array();
+  foreach (field_info_instances('node', $node->type) as $instance) {
+    $field_name = $instance['field_name'];
+    $field = field_info_field($field_name);
+    if ($field['module'] == 'taxonomy' && $field['storage']['type'] == 'field_sql_storage') {
+      // If a field value is not set in the node object when node_save() is
+      // called, the old value from $node->original is used.
+      if (isset($node->{$field_name})) {
+        $items = $node->{$field_name};
+      }
+      elseif (isset($node->original->{$field_name})) {
+        $items = $node->original->{$field_name};
+      }
+      else {
+        continue;
+      }
+      foreach (field_available_languages('node', $field) as $langcode) {
+        if (!empty($items[$langcode])) {
+          foreach ($items[$langcode] as $item) {
+            if (isset($item['name'])) {
+              $keys[] = $item['name'];
+            }
+            else {
+              $term = taxonomy_term_load($item['tid']);
+              $keys[] = $term->name;
+            }
+          }
+        }
+      }
+    }
+  }
+  return $keys;
 }
