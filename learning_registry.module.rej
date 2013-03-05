@@ -1,0 +1,22 @@
+***************
+*** 327,338 ****
+    }
+    else {
+      $url .= '/publish';
+-     $consumer = variable_get('lrmi_oauth_consumer', array());
+-     $token = variable_get('lrmi_oauth_token', array());
+- 
+-     $oauth_consumer = new OAuth($consumer['key'], $consumer['secret']);
+-     $oauth_consumer->setToken($token['key'], $token['secret']);
+-     $oauth_consumer->disableSSLChecks();
+      $oauth_consumer->fetch($url, $json, OAUTH_HTTP_METHOD_POST, array('Content-Type' => 'application/json'));
+      $result = $oauth_consumer->getLastResponse();
+      $response_info = $oauth_consumer->getLastResponseInfo();
+--- 328,334 ----
+    }
+    else {
+      $url .= '/publish';
++     $oauth_consumer = learning_registry_oauth_verify();
+      $oauth_consumer->fetch($url, $json, OAUTH_HTTP_METHOD_POST, array('Content-Type' => 'application/json'));
+      $result = $oauth_consumer->getLastResponse();
+      $response_info = $oauth_consumer->getLastResponseInfo();
