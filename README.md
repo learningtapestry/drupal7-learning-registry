@@ -1,3 +1,4 @@
+# Background
 The Learning Registry is a new approach to capturing, sharing, and analyzing
 learning resource data to broaden the usefulness of digital content to benefit
 educators and learners. Not a website or repository… not a search engine…
