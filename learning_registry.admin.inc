@@ -17,7 +17,13 @@ function learning_registry_admin_settings($form, &$form_state) {
   $options = node_type_get_types();
   $type_names = array();
   $node_fields = array();
+  $schemas = learning_registry_admin_retrieve_schemas();
+  $schema_options = array();
+  $default_schema_option = variable_get('learning_registry_schema_type_default_value', '');
 
+  foreach ($schemas as $machine_name => $schema) {
+    $schema_options[$machine_name] = $schema['name'];
+  }
   foreach ($options as $option) {
     $type_names[$option->type] = check_plain($option->name);
     $node_fields[$option->type] = field_info_instances('node', $option->type);
@@ -76,6 +82,15 @@ function learning_registry_admin_settings($form, &$form_state) {
     '#required' => TRUE,
   );
 
+  $form['learning_registry_schema_type'] = array(
+    '#type' => 'radios',
+    '#title' => t('Schema Type'),
+    '#default_value' => variable_get('learning_registry_schema_type', ''),
+    '#required' => TRUE,
+    '#options' => $schema_options,
+    '#default_value' => $default_schema_option,
+  );
+
   $form['learning_registry_node_types'] = array(
     '#type' => 'checkboxes',
     '#title' => t('Publish metadata for these content types'),
@@ -93,21 +108,6 @@ function learning_registry_admin_settings($form, &$form_state) {
       }
 
       $type_name = check_plain($type_name);
-
-      $form['learning_registry_node_type_fieldset_' . $type_key] = array(
-        '#type' => 'fieldset',
-        '#title' => t($type_name),
-        '#description' => t('Metadata for these CCK fields will be published to the specified Learning Registry node.'),
-        '#collapsible' => TRUE,
-        '#collapsed' => TRUE,
-      );
-
-      $form['learning_registry_node_type_fieldset_' . $type_key]['learning_registry_node_type_option_' . $type_key] = array(
-        '#type' => 'checkboxes',
-        '#title' => t('Publish these CCK fields for !type', array('!type' => $type_name)),
-        '#options' => $checkboxes,
-        '#default_value' => variable_get('learning_registry_node_type_option_' . $type_key, array()),
-      );
     }
   }
 
@@ -123,7 +123,8 @@ function learning_registry_admin_settings($form, &$form_state) {
  * @param array $form_state
  *   The values of the array.
  */
-function learning_registry_admin_settings_validate($form, $form_state) {
+function learning_registry_admin_settings_validate($form, &$form_state) {
+  $schemas = learning_registry_admin_retrieve_schemas();
   $lr_node_url = $form_state['values']['learning_registry_node_url'];
   if (!valid_url($lr_node_url, TRUE)) {
     form_set_error('learning_registry_node_url', t('Please provide a valid Learning Registry node URL.'));
@@ -134,6 +135,106 @@ function learning_registry_admin_settings_validate($form, $form_state) {
     form_set_error('learning_registry_node_url', t('Please provide a valid Terms of Service URL.'));
   }
 
+  $schema = $form_state['values']['learning_registry_schema_type'];
+  $form_state['values']['learning_registry_schema_type_default_value'] = $schema;
+  $form_state['values']['learning_registry_schema_type'] = $schemas[$schema];
+}
+/**
+ * Form builder function for OAuth settings.
+ */
+function learning_registry_admin__oauth_settings($form, &$form_state) {
+  $salt = variable_get('lrmi_oauth_salt', '');
+
+  $form['lrmi_oauth_consumer']['#tree'] = TRUE;
+  $form['lrmi_oauth_token']['#tree'] = TRUE;
+
+  $form['lrmi_oauth_consumer']['key'] = array(
+    '#title' => t('Consumer Key'),
+    '#type' => 'textfield',
+  );
+  $form['lrmi_oauth_consumer']['secret'] = array(
+    '#title' => t('Consumer Secret'),
+    '#type' => 'textfield',
+  );
+  $form['lrmi_oauth_token']['key'] = array(
+    '#title' => t('Token Key'),
+    '#type' => 'textfield',
+  );
+  $form['lrmi_oauth_token']['secret'] = array(
+    '#title' => t('Token Secret'),
+    '#type' => 'textfield',
+  );
+  $form['lrmi_oauth_salt'] = array(
+    '#title' => t('Salt'),
+    '#type' => 'textfield',
+    '#required' => TRUE,
+    '#default_value' => ($salt) ? $salt : '',
+    '#description' => t('This is a salt for the encryption and decryption of keys.'),
+  );
+  return system_settings_form($form);
+}
+
+/**
+ * Validation handler for OAuth settings form.
+ */
+function learning_registry_admin__oauth_settings_validate($form, &$form_state) {
+  $form_values = $form_state['values'];
+  $consumer = $form_values['lrmi_oauth_consumer'];
+  $token = $form_values['lrmi_oauth_token'];
+  $salt = md5($form_values['lrmi_oauth_salt']);
+
+  // Encrypt the consumer key and secret.
+  $lrmi_oauth_consumer_key = mcrypt_encrypt(MCRYPT_RIJNDAEL_256, $salt, $consumer['key'], MCRYPT_MODE_ECB);
+  $lrmi_oauth_consumer_secret = mcrypt_encrypt(MCRYPT_RIJNDAEL_256, $salt, $consumer['secret'], MCRYPT_MODE_ECB);
+
+  // Encrypt the token key and secret.
+  $lrmi_oauth_token_key = mcrypt_encrypt(MCRYPT_RIJNDAEL_256, $salt, $token['key'], MCRYPT_MODE_ECB);
+  $lrmi_oauth_token_secret = mcrypt_encrypt(MCRYPT_RIJNDAEL_256, $salt, $token['secret'], MCRYPT_MODE_ECB);
+
+  $form_state['values']['lrmi_oauth_consumer'] = array(
+    'key' => $lrmi_oauth_consumer_key,
+    'secret' => $lrmi_oauth_consumer_secret,
+  );
+
+  $form_state['values']['lrmi_oauth_token'] = array(
+    'key' => $lrmi_oauth_token_key,
+    'secret' => $lrmi_oauth_token_secret,
+  );
+}
+/**
+ * Wrapper for the variable_get function.
+ *
+ * @param string $name
+ *   The name of the variable to fetch
+ * @param string $default
+ *   A default value if the variable does not exist
+ *
+ * @return mixed
+ *   Returns the variable.
+ */
+function learning_registry_admin_var_get($name, $default = '') {
+  $variable = variable_get($name, $default);
+  $salt = md5(variable_get('lrmi_oauth_salt', ''));
+  $variable['key'] = rtrim(mcrypt_decrypt(MCRYPT_RIJNDAEL_256, $salt, $variable['key'], MCRYPT_MODE_ECB));
+  $variable['secret'] = rtrim(mcrypt_decrypt(MCRYPT_RIJNDAEL_256, $salt, $variable['secret'], MCRYPT_MODE_ECB));
+  return $variable;
+}
+
+/**
+ * Retrieves all schema implementations.
+ *
+ * @return array
+ *   An array of information about each schema.
+ */
+function learning_registry_admin_retrieve_schemas() {
+  $schemas = cache_get('learning_registry_schemas');
+  if (isset($schemas, $schemas->data)) {
+    return $schemas->data;
+  }
+  $schemas = module_invoke_all('learning_registry_schema_info');
+  drupal_alter('learning_registry_schema_info', $schemas);
+  cache_set('learning_registry_schemas', $schemas);
+  return $schemas;
 }
 /**
  * Form builder function for OAuth settings.

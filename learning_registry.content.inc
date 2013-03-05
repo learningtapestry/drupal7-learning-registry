@@ -74,6 +74,7 @@ function learning_registry_content_form($form, &$form_state) {
       '#type' => 'submit',
       '#value' => t('Search'),
     );
+
     if (isset($form_state['storage']['results'])) {
       $form['learning_registry']['results'] = array(
         '#markup' => $form_state['storage']['results'],
@@ -132,7 +133,6 @@ function learning_registry_content_form_submit($form, &$form_state) {
 
     $rows = array();
     $docs = $result_array['documents'];
-
     foreach ($docs as $row) {
       $doc_type = $row['resource_data_description']['doc_type'];
 
@@ -150,9 +150,7 @@ function learning_registry_content_form_submit($form, &$form_state) {
         if (gettype($payload) == 'string') {
           // Load XML, surpress errors.
           $xml = simplexml_load_string($payload, 'SimpleXMLElement', LIBXML_NOERROR);
-
           if (gettype($xml) == 'object') {
-
             switch (_learning_registry_get_metadata_type($payload_schema)) {
               case LEARNING_REGISTRY_PAYLOAD_SCHEMA_DC11:
                 if (array_key_exists('dc', $xml->getNameSpaces(TRUE))) {
@@ -185,7 +183,6 @@ function learning_registry_content_form_submit($form, &$form_state) {
             $submitter = check_plain($submitter);
             $desc = check_plain($desc);
             $create_date = check_plain($create_date);
-
             $rows[] = array($link, $submitter, $desc, $create_date);
           }
         }
@@ -193,8 +190,10 @@ function learning_registry_content_form_submit($form, &$form_state) {
     }
 
     $output = theme('table', array('header' => $header, 'rows' => $rows));
-    $form_state['rebuild'] = TRUE;
+
     $form_state['storage']['results'] = $output;
+
+    $form_state["rebuild"] = TRUE;
     return;
   }
 }
