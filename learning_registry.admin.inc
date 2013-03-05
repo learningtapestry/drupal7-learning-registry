@@ -17,7 +17,12 @@ function learning_registry_admin_settings($form, &$form_state) {
   $options = node_type_get_types();
   $type_names = array();
   $node_fields = array();
+  $schemas = learning_registry_admin_retrieve_schemas();
+  $schema_options = array();
 
+  foreach ($schemas as $machine_name => $schema) {
+    $schema_options[$machine_name] = $schema['name'];
+  }
   foreach ($options as $option) {
     $type_names[$option->type] = check_plain($option->name);
     $node_fields[$option->type] = field_info_instances('node', $option->type);
@@ -76,6 +81,14 @@ function learning_registry_admin_settings($form, &$form_state) {
     '#required' => TRUE,
   );
 
+  $form['learning_registry_schema_type'] = array(
+    '#type' => 'radios',
+    '#title' => t('Schema Type'),
+    '#default_value' => variable_get('learning_registry_schema_type', ''),
+    '#required' => TRUE,
+    '#options' => $schema_options,
+  );
+
   $form['learning_registry_node_types'] = array(
     '#type' => 'checkboxes',
     '#title' => t('Publish metadata for these content types'),
@@ -93,21 +106,6 @@ function learning_registry_admin_settings($form, &$form_state) {
       }
 
       $type_name = check_plain($type_name);
-
-      $form['learning_registry_node_type_fieldset_' . $type_key] = array(
-        '#type' => 'fieldset',
-        '#title' => t($type_name),
-        '#description' => t('Metadata for these CCK fields will be published to the specified Learning Registry node.'),
-        '#collapsible' => TRUE,
-        '#collapsed' => TRUE,
-      );
-
-      $form['learning_registry_node_type_fieldset_' . $type_key]['learning_registry_node_type_option_' . $type_key] = array(
-        '#type' => 'checkboxes',
-        '#title' => t('Publish these CCK fields for !type', array('!type' => $type_name)),
-        '#options' => $checkboxes,
-        '#default_value' => variable_get('learning_registry_node_type_option_' . $type_key, array()),
-      );
     }
   }
 
@@ -123,7 +121,8 @@ function learning_registry_admin_settings($form, &$form_state) {
  * @param array $form_state
  *   The values of the array.
  */
-function learning_registry_admin_settings_validate($form, $form_state) {
+function learning_registry_admin_settings_validate($form, &$form_state) {
+  $schemas = learning_registry_admin_retrieve_schemas();
   $lr_node_url = $form_state['values']['learning_registry_node_url'];
   if (!valid_url($lr_node_url, TRUE)) {
     form_set_error('learning_registry_node_url', t('Please provide a valid Learning Registry node URL.'));
@@ -134,6 +133,8 @@ function learning_registry_admin_settings_validate($form, $form_state) {
     form_set_error('learning_registry_node_url', t('Please provide a valid Terms of Service URL.'));
   }
 
+  $schema = $form_state['values']['learning_registry_schema_type'];
+  $form_state['values']['learning_registry_schema_type'] = $schemas[$schema];
 }
 /**
  * Form builder function for OAuth settings.
@@ -214,4 +215,21 @@ function learning_registry_admin_var_get($name, $default = '') {
   $variable['key'] = rtrim(mcrypt_decrypt(MCRYPT_RIJNDAEL_256, $salt, $variable['key'], MCRYPT_MODE_ECB));
   $variable['secret'] = rtrim(mcrypt_decrypt(MCRYPT_RIJNDAEL_256, $salt, $variable['secret'], MCRYPT_MODE_ECB));
   return $variable;
+}
+
+/**
+ * Retrieves all schema implementations.
+ *
+ * @return array
+ *  An array of information about each schema.
+ */
+function learning_registry_admin_retrieve_schemas() {
+  $schemas = cache_get('learning_registry_schemas');
+  if (isset($schemas) && !is_null($schemas->data)) {
+    return $schemas->data;
+  }
+  $schemas = module_invoke_all('learning_registry_schema_info');
+  drupal_alter('learning_registry_schema_info', $schemas);
+  cache_set('learning_registry_schemas', $schemas);
+  return $schemas;
 }

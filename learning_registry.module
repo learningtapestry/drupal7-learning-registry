@@ -267,9 +267,15 @@ function _learning_registry_get_content_info(&$node) {
   // of what each field means, this will change.
   $content_info['curator'] = $content_info['submitter'];
   $content_info['active'] = TRUE;
-  $content_info['payload_schema'] = LEARNING_REGISTRY_DEFAULT_SCHEMA;
 
-  $resource_data = _learning_registry_create_dublincore_payload($node);
+  // Determine the current schema to be used.
+  $schema = variable_get('learning_registry_schema_type', '');
+  if (isset($schema['name'])) {
+    $content_info['payload_schema'] = $schema['payload_schema'];
+    if (function_exists($schema['resource_data_callback'])) {
+      $resource_data = call_user_func($schema['resource_data_callback'], $node);
+    }
+  }
 
   $content_info['resource_data'] = $resource_data;
   $keys = learning_registry_extract_keys($node);
@@ -751,4 +757,17 @@ function learning_registry_oauth_verify() {
     }
   }
   return $oauth_consumer;
+}
+
+/**
+ * Implements hook_learning_registry_schema_info().
+ */
+function learning_registry_learning_registry_schema_info() {
+  $schemas = array();
+  $schemas['dublin_core'] = array(
+    'name' => t('Dublin Core 1.1'),
+    'resource_data_callback' => '_learning_registry_create_dublincore_payload',
+    'payload_schema' => LEARNING_REGISTRY_DEFAULT_SCHEMA,
+  );
+  return $schemas;
 }
