@@ -109,6 +109,16 @@ function learning_registry_menu() {
     'file' => 'learning_registry.admin.inc',
   );
 
+  $items['admin/config/services/learning_registry/settings'] = array(
+    'title' => 'Learning Registry settings',
+    'description' => 'Settings for publishing and receiving metadata to a Learning Registry node.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('learning_registry_admin_settings'),
+    'access arguments' => array('administer learning_registry'),
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'file' => 'learning_registry.admin.inc',
+  );
+
   $items['admin/content/learning_registry'] = array(
     'title' => 'Learning Registry',
     'description' => 'Search metadata in the Learning Registry.',
@@ -117,6 +127,17 @@ function learning_registry_menu() {
     'access arguments' => array('access learning_registry'),
     'type' => MENU_LOCAL_TASK,
     'file' => 'learning_registry.content.inc',
+  );
+
+  $items['admin/config/services/learning_registry/oauth'] = array(
+    'title' => 'Learning Registry OAuth settings',
+    'description' => 'Settings for OAuth for the LRMI.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('learning_registry_admin__oauth_settings'),
+    'access arguments' => array('administer learning_registry'),
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'learning_registry.admin.inc',
+    'weight' => 10,
   );
 
   return $items;
@@ -229,8 +250,8 @@ function _learning_registry_publish(&$node, $headless = FALSE) {
   $resource_data = _learning_registry_def_resource_data($content_info);
   $empty_submission = _learning_registry_build_envelope();
   $prepared_submission = _learning_registry_add_resource_data_to_submission($empty_submission, $resource_data);
+  // @TODO add a alter hook to allow people to modify and add data.
   $resource_post_payload = drupal_json_encode($prepared_submission);
-
   $result = _learning_registry_send_to_registry($node->nid, $resource_post_payload, LEARNING_REGISTRY_MODE_PUBLISH, $headless);
   return $result;
 }
@@ -311,7 +332,13 @@ function _learning_registry_send_to_registry($nid, $json, $service_num = LEARNIN
   }
   else {
     $url .= '/publish';
-    $result = drupal_http_request($url, array('headers' => array('Content-type: application/json'), 'method' => 'POST', 'data' => $json));
+    // $result = drupal_http_request($url, array('headers' => array('Content-type: application/json'), 'method' => 'POST', 'data' => $json));
+    $consumer = variable_get('lrmi_oauth_consumer', array());
+    $token = variable_get('lrmi_oauth_token', array());
+
+    $oauth_consumer = new OAuth($consumer['key'], $consumer['secret']);
+    $oauth_consumer->setToken($token['key'], $token['secret']);
+    $oauth_consumer->disableSSLChecks();
 
     $submission_result = _learning_registry_parse_result($result->data, $result->code);
 
@@ -599,7 +626,7 @@ function _learning_registry_queue_node($nid) {
       'queued' => 1,
     ))
     ->execute();
-  }  
+  }
 }
 
 /**

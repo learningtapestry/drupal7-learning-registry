@@ -135,3 +135,37 @@ function learning_registry_admin_settings_validate($form, $form_state) {
   }
 
 }
+
+function learning_registry_admin__oauth_settings($form, &$form_state) {
+  $consumer = variable_get('lrmi_oauth_consumer', array());
+  $token = variable_get('lrmi_oauth_token', array());
+
+  $form['lrmi_oauth_consumer']['#tree'] = TRUE;
+  $form['lrmi_oauth_token']['#tree'] = TRUE;
+
+  $form['lrmi_oauth_consumer']['key'] = array(
+    '#title' => t('Consumer Key'),
+    '#type' => 'textfield',
+    '#required' => TRUE,
+    '#default_value' => (isset($consumer['key'])) ? $consumer['key'] : '',
+  );
+  $form['lrmi_oauth_consumer']['secret'] = array(
+    '#title' => t('Consumer Secret'),
+    '#type' => 'textfield',
+    '#required' => TRUE,
+    '#default_value' => (isset($consumer['secret'])) ? $consumer['secret'] : '',
+  );
+  $form['lrmi_oauth_token']['key'] = array(
+    '#title' => t('Token Key'),
+    '#type' => 'textfield',
+    '#required' => TRUE,
+    '#default_value' => (isset($token['key'])) ? $token['key'] : '',
+  );
+  $form['lrmi_oauth_token']['secret'] = array(
+    '#title' => t('Token Secret'),
+    '#type' => 'textfield',
+    '#required' => TRUE,
+    '#default_value' => (isset($token['secret'])) ? $token['secret'] : '',
+  );
+  return system_settings_form($form);
+}
