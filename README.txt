@@ -22,3 +22,22 @@ the search interface complete. Please email if you are looking to be part of
  the project team. We have a developer's mailing list at
 http://groups.google.com/forum/#!forum/learningregistry-drupal to ask
 any questions or report feedback.
+
+
+
+  ## References
+
+   http://dublincore.org/documents/usageguide/elements.shtml
+
+   <dc:title>Dublin Core Metadata Initiative - Home Page</dc:title>
+   <dc:description>The Dublin Core Metadata Initiative Web site.</dc:description>
+   <dc:date>2001-01-16</dc:date>
+   <dc:format>text/html</dc:format>
+   <dc:language>en</dc:language>
+   <dc:contributor>The Dublin Core Metadata Initiative</dc:contributor>
+
+   <!ENTITY % dcmes "dc:title | dc:creator | dc:subject | dc:description |
+   dc:publisher | dc:contributor | dc:date | dc:type | dc:format |
+   dc:identifier | dc:source | dc:language | dc:relation | dc:coverage |
+   dc:rights" >
+
