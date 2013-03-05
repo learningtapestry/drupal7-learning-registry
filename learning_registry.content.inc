@@ -77,7 +77,7 @@ function learning_registry_content_form($form, &$form_state) {
 
     if (isset($form_state['storage']['results'])) {
       $form['learning_registry']['results'] = array(
-        '#value' => $form_state['storage']['results'],
+        '#markup' => $form_state['storage']['results'],
       );
     }
   }
@@ -132,17 +132,16 @@ function learning_registry_content_form_submit($form, &$form_state) {
     $header[] = 'Create date';
 
     $rows = array();
-    $docs = $result_array->documents;
-
+    $docs = $result_array['documents'];
     foreach ($docs as $row) {
-      $doc_type = $row->resource_data_description->doc_type;
+      $doc_type = $row['resource_data_description']['doc_type'];
 
       if ($doc_type == 'resource_data') {
-        $payload_schema = $row->resource_data_description->payload_schema;
-        $url = $row->resource_data_description->resource_locator;
-        $payload = $row->resource_data_description->resource_data;
-        $submitter = $row->resource_data_description->identity->submitter;
-        $create_date = $row->resource_data_description->create_timestamp;
+        $payload_schema = $row['resource_data_description']['payload_schema'];
+        $url = $row['resource_data_description']['resource_locator'];
+        $payload = $row['resource_data_description']['resource_data'];
+        $submitter = $row['resource_data_description']['identity']['submitter'];
+        $create_date = $row['resource_data_description']['create_timestamp'];
         $create_date = drupal_substr($create_date, 0, 10);
 
         $title = '[unknown]';
@@ -151,9 +150,7 @@ function learning_registry_content_form_submit($form, &$form_state) {
         if (gettype($payload) == 'string') {
           // Load XML, surpress errors.
           $xml = simplexml_load_string($payload, 'SimpleXMLElement', LIBXML_NOERROR);
-
           if (gettype($xml) == 'object') {
-
             switch (_learning_registry_get_metadata_type($payload_schema)) {
               case LEARNING_REGISTRY_PAYLOAD_SCHEMA_DC11:
                 if (array_key_exists('dc', $xml->getNameSpaces(TRUE))) {
@@ -186,7 +183,6 @@ function learning_registry_content_form_submit($form, &$form_state) {
             $submitter = check_plain($submitter);
             $desc = check_plain($desc);
             $create_date = check_plain($create_date);
-
             $rows[] = array($link, $submitter, $desc, $create_date);
           }
         }
@@ -196,6 +192,8 @@ function learning_registry_content_form_submit($form, &$form_state) {
     $output = theme('table', array('header' => $header, 'rows' => $rows));
 
     $form_state['storage']['results'] = $output;
+
+    $form_state["rebuild"] = TRUE;
     return;
   }
 }
