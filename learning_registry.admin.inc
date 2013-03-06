@@ -143,28 +143,28 @@ function learning_registry_admin_settings_validate($form, &$form_state) {
  * Form builder function for OAuth settings.
  */
 function learning_registry_admin__oauth_settings($form, &$form_state) {
-  $salt = variable_get('lrmi_oauth_salt', '');
+  $salt = variable_get('learning_registry_oauth_salt', '');
 
-  $form['lrmi_oauth_consumer']['#tree'] = TRUE;
-  $form['lrmi_oauth_token']['#tree'] = TRUE;
+  $form['learning_registry_oauth_consumer']['#tree'] = TRUE;
+  $form['learning_registry_oauth_token']['#tree'] = TRUE;
 
-  $form['lrmi_oauth_consumer']['key'] = array(
+  $form['learning_registry_oauth_consumer']['key'] = array(
     '#title' => t('Consumer Key'),
     '#type' => 'textfield',
   );
-  $form['lrmi_oauth_consumer']['secret'] = array(
+  $form['learning_registry_oauth_consumer']['secret'] = array(
     '#title' => t('Consumer Secret'),
     '#type' => 'textfield',
   );
-  $form['lrmi_oauth_token']['key'] = array(
+  $form['learning_registry_oauth_token']['key'] = array(
     '#title' => t('Token Key'),
     '#type' => 'textfield',
   );
-  $form['lrmi_oauth_token']['secret'] = array(
+  $form['learning_registry_oauth_token']['secret'] = array(
     '#title' => t('Token Secret'),
     '#type' => 'textfield',
   );
-  $form['lrmi_oauth_salt'] = array(
+  $form['learning_registry_oauth_salt'] = array(
     '#title' => t('Salt'),
     '#type' => 'textfield',
     '#required' => TRUE,
@@ -179,26 +179,26 @@ function learning_registry_admin__oauth_settings($form, &$form_state) {
  */
 function learning_registry_admin__oauth_settings_validate($form, &$form_state) {
   $form_values = $form_state['values'];
-  $consumer = $form_values['lrmi_oauth_consumer'];
-  $token = $form_values['lrmi_oauth_token'];
-  $salt = md5($form_values['lrmi_oauth_salt']);
+  $consumer = $form_values['learning_registry_oauth_consumer'];
+  $token = $form_values['learning_registry_oauth_token'];
+  $salt = md5($form_values['learning_registry_oauth_salt']);
 
   // Encrypt the consumer key and secret.
-  $lrmi_oauth_consumer_key = mcrypt_encrypt(MCRYPT_RIJNDAEL_256, $salt, $consumer['key'], MCRYPT_MODE_ECB);
-  $lrmi_oauth_consumer_secret = mcrypt_encrypt(MCRYPT_RIJNDAEL_256, $salt, $consumer['secret'], MCRYPT_MODE_ECB);
+  $learning_registry_oauth_consumer_key = mcrypt_encrypt(MCRYPT_RIJNDAEL_256, $salt, $consumer['key'], MCRYPT_MODE_ECB);
+  $learning_registry_oauth_consumer_secret = mcrypt_encrypt(MCRYPT_RIJNDAEL_256, $salt, $consumer['secret'], MCRYPT_MODE_ECB);
 
   // Encrypt the token key and secret.
-  $lrmi_oauth_token_key = mcrypt_encrypt(MCRYPT_RIJNDAEL_256, $salt, $token['key'], MCRYPT_MODE_ECB);
-  $lrmi_oauth_token_secret = mcrypt_encrypt(MCRYPT_RIJNDAEL_256, $salt, $token['secret'], MCRYPT_MODE_ECB);
+  $learning_registry_oauth_token_key = mcrypt_encrypt(MCRYPT_RIJNDAEL_256, $salt, $token['key'], MCRYPT_MODE_ECB);
+  $learning_registry_oauth_token_secret = mcrypt_encrypt(MCRYPT_RIJNDAEL_256, $salt, $token['secret'], MCRYPT_MODE_ECB);
 
-  $form_state['values']['lrmi_oauth_consumer'] = array(
-    'key' => $lrmi_oauth_consumer_key,
-    'secret' => $lrmi_oauth_consumer_secret,
+  $form_state['values']['learning_registry_oauth_consumer'] = array(
+    'key' => $learning_registry_oauth_consumer_key,
+    'secret' => $learning_registry_oauth_consumer_secret,
   );
 
-  $form_state['values']['lrmi_oauth_token'] = array(
-    'key' => $lrmi_oauth_token_key,
-    'secret' => $lrmi_oauth_token_secret,
+  $form_state['values']['learning_registry_oauth_token'] = array(
+    'key' => $learning_registry_oauth_token_key,
+    'secret' => $learning_registry_oauth_token_secret,
   );
 }
 /**
@@ -214,7 +214,7 @@ function learning_registry_admin__oauth_settings_validate($form, &$form_state) {
  */
 function learning_registry_admin_var_get($name, $default = '') {
   $variable = variable_get($name, $default);
-  $salt = md5(variable_get('lrmi_oauth_salt', ''));
+  $salt = md5(variable_get('learning_registry_oauth_salt', ''));
   $variable['key'] = rtrim(mcrypt_decrypt(MCRYPT_RIJNDAEL_256, $salt, $variable['key'], MCRYPT_MODE_ECB));
   $variable['secret'] = rtrim(mcrypt_decrypt(MCRYPT_RIJNDAEL_256, $salt, $variable['secret'], MCRYPT_MODE_ECB));
   return $variable;

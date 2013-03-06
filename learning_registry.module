@@ -116,7 +116,7 @@ function learning_registry_menu() {
 
   $items['admin/config/services/learning_registry/oauth'] = array(
     'title' => 'Learning Registry OAuth settings',
-    'description' => 'Settings for OAuth for the LRMI.',
+    'description' => 'Settings for OAuth for the Learning Registry.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('learning_registry_admin__oauth_settings'),
     'access arguments' => array('administer learning_registry'),
@@ -278,8 +278,8 @@ function learning_registry_extract_keys($node) {
  */
 function learning_registry_oauth_verify() {
   module_load_include('inc', 'learning_registry', 'learning_registry.admin');
-  $consumer = learning_registry_admin_var_get('lrmi_oauth_consumer', array());
-  $token = learning_registry_admin_var_get('lrmi_oauth_token', array());
+  $consumer = learning_registry_admin_var_get('learning_registry_oauth_consumer', array());
+  $token = learning_registry_admin_var_get('learning_registry_oauth_token', array());
   $test_url = variable_get('learning_registry_node_url', NULL);
   static $oauth_consumer;
 
@@ -311,15 +311,7 @@ function learning_registry_learning_registry_schema_info() {
     'name' => t('Dublin Core 1.1'),
     'resource_data_callback' => '_learning_registry_create_dublincore_payload',
     'payload_schema' => array(LEARNING_REGISTRY_DEFAULT_SCHEMA),
-  );
-  $schemas['lrmi'] = array(
-    'name' => t('LRMI'),
-    'resource_data_callback' => '_learning_registry_create_lrmi_payload',
-    'payload_schema' => array(
-      'schema.org',
-      'LRMI',
-      'application/microdata+json',
-    ),
+    'slice_callback' => '_learning_registry_dublincore_slice',
   );
   return $schemas;
 }

@@ -104,6 +104,7 @@ function learning_registry_content_form_submit($form, &$form_state) {
   $tags = $form_state['values']['search_tags'];
   $from = $form_state['values']['search_from'];
   $until = $form_state['values']['search_until'];
+  $output = '';
 
   $search = '';
 
@@ -125,71 +126,11 @@ function learning_registry_content_form_submit($form, &$form_state) {
     $result = drupal_http_request($search);
     $result_array = drupal_json_decode($result->data);
 
-    $header = array();
-    $header[] = 'Resource';
-    $header[] = 'Submitter';
-    $header[] = 'Description';
-    $header[] = 'Create date';
+    $schema = variable_get('learning_registry_schema_type', '');
 
-    $rows = array();
-    $docs = $result_array['documents'];
-    foreach ($docs as $row) {
-      $doc_type = $row['resource_data_description']['doc_type'];
-
-      if ($doc_type == 'resource_data') {
-        $payload_schema = $row['resource_data_description']['payload_schema'];
-        $url = $row['resource_data_description']['resource_locator'];
-        $payload = $row['resource_data_description']['resource_data'];
-        $submitter = $row['resource_data_description']['identity']['submitter'];
-        $create_date = $row['resource_data_description']['create_timestamp'];
-        $create_date = drupal_substr($create_date, 0, 10);
-
-        $title = '[unknown]';
-        $desc = '[unknown]';
-
-        if (gettype($payload) == 'string') {
-          // Load XML, surpress errors.
-          $xml = simplexml_load_string($payload, 'SimpleXMLElement', LIBXML_NOERROR);
-          if (gettype($xml) == 'object') {
-            switch (_learning_registry_get_metadata_type($payload_schema)) {
-              case LEARNING_REGISTRY_PAYLOAD_SCHEMA_DC11:
-                if (array_key_exists('dc', $xml->getNameSpaces(TRUE))) {
-                  $result = $xml->xpath('//dc:title');
-                  if (count($result) > 0) {
-                    $title = $result[0][0];
-                  }
-                  $result = $xml->xpath('//dc:description');
-                  if (count($result) > 0) {
-                    $desc = $result[0][0];
-                  }
-                }
-                break;
-
-              case LEARNING_REGISTRY_PAYLOAD_SCHEMA_LOM:
-                $lom = $xml;
-                $title = (string) $lom->description->metadata->lom->general->title->string[0];
-                $desc = (string) $lom->description->metadata->lom->general->description->string[0];
-                break;
-
-              default:
-                break;
-
-            }
-            if (drupal_strlen($title) == 0) {
-              $title = "[not provided]";
-            }
-            $title = check_plain($title);
-            $link = l($title, $url, array('attributes' => array('target' => '_blank')));
-            $submitter = check_plain($submitter);
-            $desc = check_plain($desc);
-            $create_date = check_plain($create_date);
-            $rows[] = array($link, $submitter, $desc, $create_date);
-          }
-        }
-      }
+    if (function_exists($schema['slice_callback'])) {
+      $output = call_user_func($schema['slice_callback'], $result_array);
     }
-
-    $output = theme('table', array('header' => $header, 'rows' => $rows));
 
     $form_state['storage']['results'] = $output;
 
@@ -218,4 +159,81 @@ function _learning_registry_get_metadata_type($payload_schema_array) {
     }
   }
   return $type;
+}
+
+/**
+ * Slice callback to display results.
+ *
+ * @param array $result_array
+ *   Raw array of results from slice method.
+ *
+ * @return string
+ *   HTML reprsentation of data.
+ */
+function _learning_registry_dublincore_slice($result_array) {
+  $header = array();
+  $header[] = 'Resource';
+  $header[] = 'Submitter';
+  $header[] = 'Description';
+  $header[] = 'Create date';
+
+  $rows = array();
+  $docs = $result_array['documents'];
+
+  foreach ($docs as $row) {
+    $doc_type = $row['resource_data_description']['doc_type'];
+
+    if ($doc_type == 'resource_data') {
+      $payload_schema = $row['resource_data_description']['payload_schema'];
+      $url = $row['resource_data_description']['resource_locator'];
+      $payload = $row['resource_data_description']['resource_data'];
+      $submitter = $row['resource_data_description']['identity']['submitter'];
+      $create_date = $row['resource_data_description']['create_timestamp'];
+      $create_date = drupal_substr($create_date, 0, 10);
+
+      $title = '[unknown]';
+      $desc = '[unknown]';
+
+      if (gettype($payload) == 'string') {
+        // Load XML, surpress errors.
+        $xml = simplexml_load_string($payload, 'SimpleXMLElement', LIBXML_NOERROR);
+        if (gettype($xml) == 'object') {
+          switch (_learning_registry_get_metadata_type($payload_schema)) {
+            case LEARNING_REGISTRY_PAYLOAD_SCHEMA_DC11:
+              if (array_key_exists('dc', $xml->getNameSpaces(TRUE))) {
+                $result = $xml->xpath('//dc:title');
+                if (count($result) > 0) {
+                  $title = $result[0][0];
+                }
+                $result = $xml->xpath('//dc:description');
+                if (count($result) > 0) {
+                  $desc = $result[0][0];
+                }
+              }
+              break;
+
+            case LEARNING_REGISTRY_PAYLOAD_SCHEMA_LOM:
+              $lom = $xml;
+              $title = (string) $lom->description->metadata->lom->general->title->string[0];
+              $desc = (string) $lom->description->metadata->lom->general->description->string[0];
+              break;
+
+            default:
+              break;
+
+          }
+          if (drupal_strlen($title) == 0) {
+            $title = "[not provided]";
+          }
+          $title = check_plain($title);
+          $link = l($title, $url, array('attributes' => array('target' => '_blank')));
+          $submitter = check_plain($submitter);
+          $desc = check_plain($desc);
+          $create_date = check_plain($create_date);
+          $rows[] = array($link, $submitter, $desc, $create_date);
+        }
+      }
+    }
+  }
+  return theme('table', array('header' => $header, 'rows' => $rows));
 }
