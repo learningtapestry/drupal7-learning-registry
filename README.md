@@ -31,3 +31,6 @@ http://dublincore.org/documents/usageguide/elements.shtml
 
 ## LRMI
 http://www.lrmi.net/the-specification
+
+## OAuth
+https://node01.public.learningregistry.net/apps/oauth-key-management/
