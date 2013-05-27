@@ -91,6 +91,22 @@ function learning_registry_admin_settings($form, &$form_state) {
     '#default_value' => $default_schema_option,
   );
 
+  $form['learning_registry_key_location'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Key Location'),
+    '#default_value' => variable_get('learning_registry_key_location', ''),
+    '#required' => TRUE,
+    '#description' => t('The public location of the PGP key used to sign the document'),
+  );
+
+  $form['learning_registry_signing_method'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Signing Method'),
+    '#default_value' => variable_get('learning_registry_signing_method', 'LR-PGP.1.0'),
+    '#description' => t('The signing method used if something other than PGP'),
+    '#required' => TRUE,
+  );
+
   $form['learning_registry_node_types'] = array(
     '#type' => 'checkboxes',
     '#title' => t('Publish metadata for these content types'),
