@@ -63,6 +63,10 @@ function _learning_registry_get_content_info(&$node) {
   $keys = learning_registry_extract_keys($node);
   $content_info['keys'] = $keys;
 
+  // Digital signature.
+  $content_info['key_location'][] = 'http://foobar.com/gpg.txt';
+  $content_info['signing_method'] = 'LR-PGP.1.0';
+  $content_info['signature'] = 'TEST SIGNATURE';
   return $content_info;
 }
 
@@ -121,8 +125,7 @@ function _learning_registry_send_to_registry($nid, $json, $service_num = LEARNIN
     $result = $oauth_consumer->getLastResponse();
     $response_info = $oauth_consumer->getLastResponseInfo();
     $submission_result = _learning_registry_parse_result($result, $response_info['http_code']);
-
-    if ($result) {
+    if (isset($submission_result['success'], $submission_result['doc_id']) && $submission_result['success'] === TRUE) {
       $result = _learning_registry_update_submission_status($nid, $result);
       if (!$headless) {
         $submission_url = variable_get('learning_registry_node_url', NULL) . '/harvest/getrecord?by_doc_ID=TRUE&request_ID=' . $result;
@@ -174,7 +177,7 @@ function _learning_registry_def_resource_data($content_info) {
   $opt_sig_fields = array(
     'signature',
     'key_server',
-    'key_locations',
+    'key_location',
     'key_owner',
     'signing_method',
   );
