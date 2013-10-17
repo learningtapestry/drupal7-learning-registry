@@ -206,7 +206,7 @@ function _learning_registry_bulk_operations_publish($nids) {
   module_load_include('inc', 'learning_registry', 'learning_registry.learning_registry');
   $success = 0;
   $failure = 0;
-
+  $oauth_consumer = learning_registry_oauth_verify();
   foreach ($nids as $nid) {
     // Load the node.
     $node = node_load($nid);
