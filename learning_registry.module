@@ -203,6 +203,7 @@ function learning_registry_node_operations() {
  *   An array of node ids.
  */
 function _learning_registry_bulk_operations_publish($nids) {
+  module_load_include('inc', 'learning_registry', 'learning_registry.learning_registry');
   $success = 0;
   $failure = 0;
 
