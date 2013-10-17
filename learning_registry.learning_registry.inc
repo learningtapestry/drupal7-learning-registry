@@ -21,7 +21,7 @@ function _learning_registry_publish(&$node, $headless = FALSE) {
   $content_info = _learning_registry_get_content_info($node);
   $resource_data = _learning_registry_def_resource_data($content_info);
   $empty_submission = _learning_registry_build_envelope();
-  drupal_alter('learning_registry_prepared_submission', $resource_data);
+  drupal_alter('learning_registry_prepared_submission', $resource_data, $node);
   $prepared_submission = _learning_registry_add_resource_data_to_submission($empty_submission, $resource_data);
   $resource_post_payload = drupal_json_encode($prepared_submission);
   $result = _learning_registry_send_to_registry($node->nid, $resource_post_payload, LEARNING_REGISTRY_MODE_PUBLISH, $headless);
