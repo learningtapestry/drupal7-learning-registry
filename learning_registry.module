@@ -135,7 +135,7 @@ function learning_registry_node_insert($node) {
   module_load_include('inc', 'learning_registry', 'learning_registry.learning_registry');
   $nodes_to_publish = variable_get('learning_registry_node_types', array());
   $oauth_consumer = learning_registry_oauth_verify();
-  if (in_array($node->type, $nodes_to_publish) && $node->nid && $oauth_consumer) {
+  if (isset($nodes_to_publish[$node->type]) && $nodes_to_publish[$node->type] && $node->nid && $oauth_consumer) {
     // Switch case below used to accomodate more methods (update, delete)
     // in the future.
     if ($node->status == 1) {
