@@ -34,9 +34,10 @@ define('LEARNING_REGISTRY_URL_ALIAS', 1);
 
 define('LEARNING_REGISTRY_DOC_TYPE', 'resource_data');
 define('LEARNING_REGISTRY_DOC_VERSION', '0.49.0');
-define('LEARNING_REGISTRY_SUBMITTER_TYPE', 'agent');
+define('LEARNING_REGISTRY_SUBMITTER_TYPE', 'organization');
 define('LEARNING_REGISTRY_PAYLOAD_PLACEMENT', 'inline');
 define('LEARNING_REGISTRY_DEFAULT_SCHEMA', 'DC 1.1');
+define('LEARNING_REGISTRY_PUBLISH_TAXONOMY_TAGS', 'true');
 
 /**
  * The following constants represent modes of publishing to the Learning
