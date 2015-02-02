@@ -146,18 +146,22 @@ function learning_registry_admin__oauth_settings($form, &$form_state) {
   $form['learning_registry_oauth_consumer']['key'] = array(
     '#title' => t('Consumer Key'),
     '#type' => 'textfield',
+    '#required' => TRUE,
   );
   $form['learning_registry_oauth_consumer']['secret'] = array(
     '#title' => t('Consumer Secret'),
     '#type' => 'textfield',
+    '#required' => TRUE,
   );
   $form['learning_registry_oauth_token']['key'] = array(
     '#title' => t('Token Key'),
     '#type' => 'textfield',
+    '#required' => TRUE,
   );
   $form['learning_registry_oauth_token']['secret'] = array(
     '#title' => t('Token Secret'),
     '#type' => 'textfield',
+    '#required' => TRUE,
   );
   $form['learning_registry_oauth_salt'] = array(
     '#title' => t('Salt'),
