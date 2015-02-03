@@ -17,18 +17,12 @@ function learning_registry_admin_settings($form, &$form_state) {
   $options = node_type_get_types();
   $type_names = array();
   $node_fields = array();
-  $schemas = learning_registry_admin_retrieve_schemas();
-  $schema_options = array();
-  $default_schema_option = variable_get('learning_registry_schema_type_default_value', '');
 
-  foreach ($schemas as $machine_name => $schema) {
-    $schema_options[$machine_name] = $schema['name'];
-  }
   foreach ($options as $option) {
     $type_names[$option->type] = check_plain($option->name);
     $node_fields[$option->type] = field_info_instances('node', $option->type);
   }
-
+  
   $form = array();
 
   $form['learning_registry_node_url'] = array(
@@ -82,31 +76,6 @@ function learning_registry_admin_settings($form, &$form_state) {
     '#required' => TRUE,
   );
 
-  $form['learning_registry_schema_type'] = array(
-    '#type' => 'radios',
-    '#title' => t('Schema Type'),
-    '#default_value' => variable_get('learning_registry_schema_type', ''),
-    '#required' => TRUE,
-    '#options' => $schema_options,
-    '#default_value' => $default_schema_option,
-  );
-
-  $form['learning_registry_key_location'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Key Location'),
-    '#default_value' => variable_get('learning_registry_key_location', ''),
-    '#required' => TRUE,
-    '#description' => t('The public location of the PGP key used to sign the document'),
-  );
-
-  $form['learning_registry_signing_method'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Signing Method'),
-    '#default_value' => variable_get('learning_registry_signing_method', 'LR-PGP.1.0'),
-    '#description' => t('The signing method used if something other than PGP'),
-    '#required' => TRUE,
-  );
-
   $form['learning_registry_node_types'] = array(
     '#type' => 'checkboxes',
     '#title' => t('Publish metadata for these content types'),
@@ -114,7 +83,21 @@ function learning_registry_admin_settings($form, &$form_state) {
     '#default_value' => variable_get('learning_registry_node_types', array()),
     '#description' => t('Metadata for these node types will be published to the specified Learning Registry node.'),
   );
-
+  
+  $form['learning_registry_submitter_type'] = array(
+    '#type' => 'radios',
+    '#title' => t('Submitter Type'),
+    '#options' => drupal_map_assoc(array(t('Person'), t('Organization'))),
+    '#default_value' => variable_get('learning_registry_submitter_type', 0),
+  );
+  
+   $form['learning_registry_allow_keywords'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Publish Taxonomy Tags as keywords'),
+    '#default_value' => variable_get('learning_registry_allow_keywords', 1),
+//  '#description' => t(''),
+  );
+  
   foreach ($type_names as $type_key => $type_name) {
     if (count($node_fields[$type_key])) {
       $checkboxes = array();
@@ -140,7 +123,6 @@ function learning_registry_admin_settings($form, &$form_state) {
  *   The values of the array.
  */
 function learning_registry_admin_settings_validate($form, &$form_state) {
-  $schemas = learning_registry_admin_retrieve_schemas();
   $lr_node_url = $form_state['values']['learning_registry_node_url'];
   if (!valid_url($lr_node_url, TRUE)) {
     form_set_error('learning_registry_node_url', t('Please provide a valid Learning Registry node URL.'));
@@ -151,9 +133,6 @@ function learning_registry_admin_settings_validate($form, &$form_state) {
     form_set_error('learning_registry_node_url', t('Please provide a valid Terms of Service URL.'));
   }
 
-  $schema = $form_state['values']['learning_registry_schema_type'];
-  $form_state['values']['learning_registry_schema_type_default_value'] = $schema;
-  $form_state['values']['learning_registry_schema_type'] = $schemas[$schema];
 }
 /**
  * Form builder function for OAuth settings.
@@ -167,18 +146,22 @@ function learning_registry_admin__oauth_settings($form, &$form_state) {
   $form['learning_registry_oauth_consumer']['key'] = array(
     '#title' => t('Consumer Key'),
     '#type' => 'textfield',
+    '#required' => TRUE,
   );
   $form['learning_registry_oauth_consumer']['secret'] = array(
     '#title' => t('Consumer Secret'),
     '#type' => 'textfield',
+    '#required' => TRUE,
   );
   $form['learning_registry_oauth_token']['key'] = array(
     '#title' => t('Token Key'),
     '#type' => 'textfield',
+    '#required' => TRUE,
   );
   $form['learning_registry_oauth_token']['secret'] = array(
     '#title' => t('Token Secret'),
     '#type' => 'textfield',
+    '#required' => TRUE,
   );
   $form['learning_registry_oauth_salt'] = array(
     '#title' => t('Salt'),
@@ -234,21 +217,4 @@ function learning_registry_admin_var_get($name, $default = '') {
   $variable['key'] = rtrim(mcrypt_decrypt(MCRYPT_RIJNDAEL_256, $salt, $variable['key'], MCRYPT_MODE_ECB));
   $variable['secret'] = rtrim(mcrypt_decrypt(MCRYPT_RIJNDAEL_256, $salt, $variable['secret'], MCRYPT_MODE_ECB));
   return $variable;
-}
-
-/**
- * Retrieves all schema implementations.
- *
- * @return array
- *   An array of information about each schema.
- */
-function learning_registry_admin_retrieve_schemas() {
-  $schemas = cache_get('learning_registry_schemas');
-  if (isset($schemas, $schemas->data)) {
-    return $schemas->data;
-  }
-  $schemas = module_invoke_all('learning_registry_schema_info');
-  drupal_alter('learning_registry_schema_info', $schemas);
-  cache_set('learning_registry_schemas', $schemas);
-  return $schemas;
 }
