@@ -301,16 +301,3 @@ function learning_registry_oauth_verify() {
   return $oauth_consumer;
 }
 
-/**
- * Implements hook_learning_registry_schema_info().
- */
-function learning_registry_learning_registry_schema_info() {
-  $schemas = array();
-  $schemas['dublin_core'] = array(
-    'name' => t('Dublin Core 1.1'),
-    'resource_data_callback' => '_learning_registry_create_dublincore_payload',
-    'payload_schema' => array(LEARNING_REGISTRY_DEFAULT_SCHEMA),
-    'slice_callback' => '_learning_registry_dublincore_slice',
-  );
-  return $schemas;
-}

@@ -22,7 +22,7 @@ function learning_registry_content_form($form, &$form_state) {
     $search = variable_get('learning_registry_node_url', NULL) . '/slice?';
     $result = drupal_http_request($search);
     $result_array = drupal_json_decode($result->data);
-    $output = call_user_func('_learning_registry_dublincore_slice', $result_array);
+    $output = call_user_func('_learning_registry_slice', $result_array);
 
     $form_state['storage']['results'] = $output;
 	}	
@@ -44,7 +44,7 @@ function learning_registry_content_form($form, &$form_state) {
  * @return string
  *   HTML reprsentation of data.
  */
-function _learning_registry_dublincore_slice($result_array) {
+function _learning_registry_slice($result_array) {
   $header = array();
   $header[] = 'Node ID';
   $header[] = 'Title'; 
@@ -54,7 +54,7 @@ function _learning_registry_dublincore_slice($result_array) {
   $header[] = 'Date deleted';
   $header[] = 'Queued';
 
-  $rows = array();
+  $response_rows = array();
   $docs = $result_array['documents'];
   foreach ($docs as $row) {
     if ($row['resource_data_description']['doc_type'] == 'resource_data') {
@@ -70,25 +70,38 @@ function _learning_registry_dublincore_slice($result_array) {
 	  $doc_id = $row['resource_data_description']['doc_ID'];
 	  $q = db_select('learning_registry','l');
 		$q->condition('l.docid',$doc_id,'=');
-		$q->fields('l',array('nid','queued'));
+		$q->fields('l',array('nid', 'queued'));
 		$result = $q->execute();
 		$record = $result->fetchAssoc();
 	  $nid = $record['nid'];
-	  $queued = ($record['queued'] == 1) ? "True" : "False";
+	  $queued = "False";
       $title = (isset($row['resource_data_description']['resource_data']['name'])) ? $row['resource_data_description']['resource_data']['name'] : "";
 	  
 
-      if (gettype($payload_schema) == 'array') {
+      if (gettype($payload_schema) == 'array' && $record['queued'] === "0") {
           if (drupal_strlen($title) == 0) {
             $title = "[not provided]";
           }
           $title = check_plain($title);
-          $link = l($title, $url, array('attributes' => array('target' => '_blank')));
+          $link = l($doc_id, $url, array('attributes' => array('target' => '_blank')));
           $create_date = check_plain($create_date);
-          $rows[] = array($nid, $link, $doc_id, $create_date, $update_date, $delete_date, $queued);
+          $response_rows[] = array($nid, $title, $link, $create_date, $update_date, $delete_date, $queued);
        }
       }
     }
-  
+	$query_rows = array();
+	$q = db_select('learning_registry','l');
+		$q->condition('l.queued',1,'=');
+		$q->leftjoin('node','n','n.nid=l.nid');
+		$q->fields('l',array('nid'));
+		$q->fields('n',array('title'));
+		$result = $q->execute();
+	while($record = $result->fetchAssoc()){
+		$query_rows[$record['nid']] = array($record['nid'], $record['title'], '', '', '', '',  "True");
+	}
+	$rows = array_merge($response_rows, $query_rows);
+	usort($rows, function($a, $b){
+		return ($a[0] - $b[0]);
+	});
   return theme('table', array('header' => $header, 'rows' => $rows));
 }
