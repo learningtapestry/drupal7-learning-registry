@@ -62,12 +62,6 @@ function _learning_registry_get_content_info(&$node) {
   $content_info['resource_data'] = $resource_data;
   $keys = learning_registry_extract_keys($node);
   $content_info['keys'] = $keys;
-
-  // Add key location and signature.
-  $content_info['key_location'] = explode(',', variable_get('learning_registry_key_location', ''));
-  $content_info['signing_method'] = variable_get('learning_registry_signing_method', 'LR-PGP.1.0');
-  $content_info['signature'] = strip_tags(file_get_contents($content_info['key_location'][0]));
-
   return $content_info;
 }
 
