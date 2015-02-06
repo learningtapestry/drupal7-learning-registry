@@ -16,19 +16,18 @@ function learning_registry_content_form($form, &$form_state) {
         Please visit Site Configuration -> Learning Registry settings to configure a URL before continuing.'), 'error');
   }
   else {
-  $output = '';
-
-  $search = '';
-    $search = variable_get('learning_registry_node_url', NULL) . '/slice?';
-    $result = drupal_http_request($search);
-    $result_array = drupal_json_decode($result->data);
-    $output = call_user_func('_learning_registry_slice', $result_array);
-    $form_state['storage']['results'] = $output;
-	}	
+	$output = '';
+	$submitter = variable_get('learning_registry_submitter', NULL);
+	$search = variable_get('learning_registry_node_url', NULL) . '/slice?identity='.$submitter;
+	$result = drupal_http_request($search);
+	$result_array = drupal_json_decode($result->data);
+	$output = call_user_func('_learning_registry_slice', $result_array);
+	$form_state['storage']['results'] = $output;
+ }	
     
-      $form['learning_registry']['results'] = array(
-        '#markup' => $form_state['storage']['results'],
-      );
+	$form['learning_registry']['results'] = array(
+		'#markup' => $form_state['storage']['results'],
+	);
 
   return $form;
 }

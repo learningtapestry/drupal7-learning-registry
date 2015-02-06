@@ -33,7 +33,6 @@ function _learning_registry_publish(&$node, $headless = FALSE, $op = LEARNING_RE
  *   reference allows us to edit the node content.
  */
 function _learning_registry_get_content_info(&$node) {
-  $author_user = user_load($node->uid);
   $keywords = learning_registry_extract_keywords($node);
   array_unshift($keywords, "Drupal7LR");
   $resource_data = _learning_registry_get_resource_data($node);
@@ -50,6 +49,9 @@ function _learning_registry_get_content_info(&$node) {
   $content_info['active'] = TRUE;
   $content_info['doc_type'] = "resource_data";
   $content_info['doc_version'] = "0.49.0";
+  $content_info['identity'] = array(
+	"owner" => variable_get('learning_registry_submitter', NULL),
+  );
   $doc = array();
   $doc['documents'][] = $content_info;
   return $doc;
@@ -127,23 +129,6 @@ function _learning_registry_send_to_registry($nid, $json, $service_num = LEARNIN
   }
 }
 
-
-
-/**
- * Adds resource data to a LR submission envelope.
- *
- * @param object $submission
- *   An LR submission object.
- * @param object $resource_data
- *   An LR resource data object.
- *
- * @return object
- *   The submission object with $resource data pushed to the documents array.
- */
-function _learning_registry_add_resource_data_to_submission($submission, $resource_data) {
-  $submission['resource_data'] = $resource_data;
-  return $submission;
-}
 
 /**
  * Adds a status record in the learning_registry table to record submission.
