@@ -23,7 +23,6 @@ function learning_registry_content_form($form, &$form_state) {
     $result = drupal_http_request($search);
     $result_array = drupal_json_decode($result->data);
     $output = call_user_func('_learning_registry_slice', $result_array);
-
     $form_state['storage']['results'] = $output;
 	}	
     
@@ -75,7 +74,7 @@ function _learning_registry_slice($result_array) {
 		$record = $result->fetchAssoc();
 	  $nid = $record['nid'];
 	  $queued = "False";
-      $title = (isset($row['resource_data_description']['resource_data']['name'])) ? $row['resource_data_description']['resource_data']['name'] : "";
+      $title = (isset($row['resource_data_description']['resource_data']['items']['properties']['name'])) ? $row['resource_data_description']['resource_data']['items']['properties']['name'] : "";
 	  
 
       if (gettype($payload_schema) == 'array' && $record['queued'] === "0") {

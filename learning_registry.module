@@ -235,7 +235,7 @@ function _learning_registry_bulk_operations_publish($nids) {
  * @return array
  *   An array of the term names
  */
-function learning_registry_extract_keys($node) {
+function learning_registry_extract_keywords($node) {
   $keys = array();
   foreach (field_info_instances('node', $node->type) as $instance) {
     $field_name = $instance['field_name'];

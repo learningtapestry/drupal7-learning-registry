@@ -19,11 +19,7 @@
  */
 function _learning_registry_publish(&$node, $headless = FALSE, $op = LEARNING_REGISTRY_MODE_PUBLISH) {
   $content_info = _learning_registry_get_content_info($node);
-  $resource_data = _learning_registry_def_resource_data($content_info);
-  $empty_submission = _learning_registry_build_envelope();
-  drupal_alter('learning_registry_prepared_submission', $resource_data, $node, $op);
-  $prepared_submission = _learning_registry_add_resource_data_to_submission($empty_submission, $resource_data);
-  $resource_post_payload = drupal_json_encode($prepared_submission);
+  $resource_post_payload = drupal_json_encode($content_info);
   $result = _learning_registry_send_to_registry($node->nid, $resource_post_payload, $op, $headless);
   return $result;
 }
@@ -38,31 +34,25 @@ function _learning_registry_publish(&$node, $headless = FALSE, $op = LEARNING_RE
  */
 function _learning_registry_get_content_info(&$node) {
   $author_user = user_load($node->uid);
+  $keywords = learning_registry_extract_keywords($node);
+  array_unshift($keywords, "Drupal7LR");
+  $resource_data = _learning_registry_get_resource_data($node);
   $content_info = array();
   $content_info['resource_locator'] = _learning_registry_get_node_url($node);
-  $content_info['resource_data_type'] = 'metadata';
-  $content_info['submitter'] = $author_user->name;
-  $content_info['owner'] = variable_get('learning_registry_submitter', NULL);
-  $content_info['tos'] = variable_get('learning_registry_tos', NULL);
-
-  // Currently set curator and submitter the same, once we get a better sense
-  // of what each field means, this will change.
-  $content_info['curator'] = $content_info['submitter'];
-  $content_info['active'] = TRUE;
-
-  // Determine the current schema to be used.
-  $schema = variable_get('learning_registry_schema_type', '');
-  if (isset($schema['name'])) {
-    $content_info['payload_schema'] = $schema['payload_schema'];
-    if (function_exists($schema['resource_data_callback'])) {
-      $resource_data = call_user_func($schema['resource_data_callback'], $node);
-    }
-  }
-
   $content_info['resource_data'] = $resource_data;
-  $keys = learning_registry_extract_keys($node);
-  $content_info['keys'] = $keys;
-  return $content_info;
+  $content_info['keys'] = $keywords;
+  $content_info['TOS'] = array(
+		"submission_TOS" => variable_get('learning_registry_tos', NULL),
+	);
+  $content_info['resource_data_type'] = 'metadata';
+  $content_info['payload_placement']  = "inline";
+  $content_info['payload_schema'] = array("schema.org", "lrmi");
+  $content_info['active'] = TRUE;
+  $content_info['doc_type'] = "resource_data";
+  $content_info['doc_version'] = "0.49.0";
+  $doc = array();
+  $doc['documents'][] = $content_info;
+  return $doc;
 }
 
 /**
@@ -137,114 +127,7 @@ function _learning_registry_send_to_registry($nid, $json, $service_num = LEARNIN
   }
 }
 
-/**
- * Define the Learning Registry resource data.
- *
- * @param array $content_info
- *   Metadata information from the node.
- *
- * @return array
- *   Formatted array of resource data.
- */
-function _learning_registry_def_resource_data($content_info) {
-  // Values specified as immutable in the LR spec.
-  $identity = new stdClass();
-  $resource_data = new stdClass();
-  $tos = new stdClass();
 
-  $opt_id_fields = array(
-    'curator',
-    'owner',
-    'signer',
-  );
-
-  $opt_res_fields = array(
-    'submitter_timestamp',
-    'submitter_TTL',
-    'keys',
-    'resource_TTL',
-    'payload_schema_locator',
-    'payload_schema_format',
-  );
-
-  $opt_sig_fields = array(
-    'signature',
-    'key_server',
-    'key_location',
-    'key_owner',
-    'signing_method',
-  );
-
-  $opt_tos_fields = array(
-    'tos_submission_attribution',
-  );
-  $identity->submitter_type = LEARNING_REGISTRY_SUBMITTER_TYPE;
-  $identity->submitter = $content_info['submitter'];
-
-  $tos->submission_TOS = $content_info['tos'];
-
-  // Optional identity values.
-  foreach ($opt_id_fields as $field) {
-    if (array_key_exists($field, $content_info)) {
-      $identity->$field = $content_info[$field];
-    }
-  }
-
-  // Optional resource_data values.
-  foreach ($opt_res_fields as $field) {
-    if (array_key_exists($field, $content_info)) {
-      $resource_data->$field = $content_info[$field];
-    }
-  }
-
-  // Create an empty stdClass since the digital_signature is completely
-  // optional.
-  $digital_signature = new stdClass();
-  // Optional digital signature values.
-  foreach ($opt_sig_fields as $field) {
-    if (array_key_exists($field, $content_info)) {
-      $digital_signature->$field = $content_info[$field];
-    }
-  }
-
-  // Optional TOS values.
-  foreach ($opt_tos_fields as $field) {
-    if (array_key_exists($field, $content_info)) {
-      $tos->$field = $content_info[$field];
-    }
-  }
-
-  $resource_data->doc_type = LEARNING_REGISTRY_DOC_TYPE;
-  $resource_data->doc_version = LEARNING_REGISTRY_DOC_VERSION;
-  $resource_data->resource_data_type = $content_info['resource_data_type'];
-  $resource_data->active = $content_info['active'];
-  $resource_data->identity = $identity;
-  $resource_data->TOS = $tos;
-
-  // Only add the signature key if signature data are defined.
-  if (!empty($digital_signature)) {
-    $resource_data->digital_signature = $digital_signature;
-  }
-
-  $resource_data->resource_locator = $content_info['resource_locator'];
-  $resource_data->payload_placement = LEARNING_REGISTRY_PAYLOAD_PLACEMENT;
-  $resource_data->payload_schema = $content_info['payload_schema'];
-  $resource_data->resource_data = $content_info['resource_data'];
-
-  return $resource_data;
-}
-
-/**
- * Return a basic LR submission envelope.
- *
- * @return object
- *   An empty LR submission envelop.
- */
-function _learning_registry_build_envelope() {
-  $submission = new stdClass();
-  $submission->documents = array();
-  return $submission;
-}
 
 /**
  * Adds resource data to a LR submission envelope.
@@ -258,7 +141,7 @@ function _learning_registry_build_envelope() {
  *   The submission object with $resource data pushed to the documents array.
  */
 function _learning_registry_add_resource_data_to_submission($submission, $resource_data) {
-  $submission->documents[] = $resource_data;
+  $submission['resource_data'] = $resource_data;
   return $submission;
 }
 
@@ -410,60 +293,59 @@ function _learning_registry_queue_node($nid) {
 }
 
 /**
- * Creates Dublin Core 1.1 XML document with information from node.
+ * Creates resource_data array with information from node.
  *
  * @param object $node
  *   Drupal node
  *
- * @return string
- *   XML document
+ * @return array
  */
-function _learning_registry_create_dublincore_payload(&$node) {
+function _learning_registry_get_resource_data(&$node) {
+
   $author_user = user_load($node->uid);
-  // Set the initial RDF XML DC envelope body.
-  $source = '<?xml version="1.0"?>
-    <!DOCTYPE rdf:RDF PUBLIC "-//DUBLIN CORE//DCMES DTD 2002/07/31//EN"
-      "http://dublincore.org/documents/2002/07/31/dcmes-xml/dcmes-xml-dtd.dtd">
-    <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-      xmlns:dc ="http://purl.org/dc/elements/1.1/">
-      <rdf:Description rdf:about="http://dublincore.org/">
-      </rdf:Description>
-    </rdf:RDF>';
 
-  $xml_document = new DOMDocument();
-  $xml_document->loadXML($source);
+  // Set the title to the node title.
+  $title = $node->title;
 
-  // Retrieve just the DC node.
-  $node_list = $xml_document->getElementsByTagNameNS('http://www.w3.org/1999/02/22-rdf-syntax-ns#', 'Description');
-  $dc_node = $node_list->item(0);
+  // Set the description to the node body.
+  $description = $node->body['und'][0]['value'];
 
-  // Set the DC title to the node title.
-  $element = $xml_document->createElementNS('http://purl.org/dc/elements/1.1/', 'title', $node->title);
-  $dc_node->appendChild($element);
-
-  // Set the DC description to the node body.
-  $element = $xml_document->createElementNS('http://purl.org/dc/elements/1.1/', 'description', $node->body['und'][0]['value']);
-  $dc_node->appendChild($element);
-
-  // Set the DC date to the node create date.
+  // Set the date to the node create date.
   $date_created = format_date($node->created, 'custom', 'Y-m-d');
-  $element = $xml_document->createElementNS('http://purl.org/dc/elements/1.1/', 'date', $date_created);
-  $dc_node->appendChild($element);
 
-  // Set the DC identifier to the absolute URL of the node.
-  $element = $xml_document->createElementNS('http://purl.org/dc/elements/1.1/', 'identifier', _learning_registry_get_node_url($node));
-  $dc_node->appendChild($element);
+  // Set the identifier to the absolute URL of the node.
+  $identifier = _learning_registry_get_node_url($node);
 
-  // Set the DC creator to the Drupal username.
-  $element = $xml_document->createElementNS('http://purl.org/dc/elements/1.1/', 'creator', $author_user->name);
-  $dc_node->appendChild($element);
+  // Set the creator to the Drupal username.
+  $creator = $author_user->name;
+  
+  $keywords = learning_registry_extract_keywords($node);
 
-  // Pretty format the XML before sending it to the LR.
-  // Must be reloaded, won't work if just set on $xmlDoc.
-  $return_xml = new DOMDocument();
-  $return_xml->preserveWhiteSpace = FALSE;
-  $return_xml->formatOutput = TRUE;
-  $return_xml->loadXML($xml_document->saveXML());
+  $resource_data = array(
+	"items"  =>  array(
+		"type" => "http://schema.org/CreativeWork",
+		"id" => $identifier,
+		"properties" => array(
+			"publisher"  => array(
+				"type"  => "http://schema.org/" . variable_get('learning_registry_submitter_type'),
+				"properties"  => array(
+					"name" => $creator,
+				),
+			),
+			"name" => $title,
+			"author" => array(
+				"type" => "http://schema.org/" . variable_get('learning_registry_submitter_type'),
+				"properties" => array(
+					"name" => "Chicago STEM Pathways Cooperative",
+				),
+			),
+			"url" => $identifier,
+			"dateCreated" => $date_created,
+			"keywords" => $keywords,
+			"description" => $description,
+		),
+	),
+  );
 
-  return $return_xml->saveXML();
+  return $resource_data;
 }
