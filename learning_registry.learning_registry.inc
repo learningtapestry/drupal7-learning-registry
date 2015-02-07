@@ -17,8 +17,11 @@
  * @return bool
  *   Returns TRUE if operation was successful, FALSE if not.
  */
-function _learning_registry_publish(&$node, $headless = FALSE, $op = LEARNING_REGISTRY_MODE_PUBLISH) {
+function _learning_registry_publish(&$node, $headless = FALSE, $op = LEARNING_REGISTRY_MODE_PUBLISH, $docid = FALSE) {
   $content_info = _learning_registry_get_content_info($node);
+  if($docid){
+	$content_info['documents'][0]['replaces'] = array($docid);
+  }
   $resource_post_payload = drupal_json_encode($content_info);
   $result = _learning_registry_send_to_registry($node->nid, $resource_post_payload, $op, $headless);
   return $result;
@@ -49,6 +52,8 @@ function _learning_registry_get_content_info(&$node) {
   $content_info['active'] = TRUE;
   $content_info['doc_type'] = "resource_data";
   $content_info['doc_version'] = "0.49.0";
+  $content_info['create_timestamp'] = format_date($node->created, 'custom', 'Y-m-d\TG:i:s.Z\Z');
+  $content_info['update_timestamp'] = format_date($node->changed, 'custom', 'Y-m-d\TG:i:s.Z\Z');
   $content_info['identity'] = array(
 	"owner" => variable_get('learning_registry_submitter', NULL),
   );
