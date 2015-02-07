@@ -22,6 +22,13 @@ function _learning_registry_publish(&$node, $headless = FALSE, $op = LEARNING_RE
   if($docid){
 	$content_info['documents'][0]['replaces'] = array($docid);
   }
+  if($op == LEARNING_REGISTRY_MODE_DELETE){
+	$content_info['documents'][0]['TOS'] = array(
+		"submission_TOS" => "http://www.learningregistry.org/tos/cc0/v0-5/",
+	);
+	$content_info['documents'][0]['payload_placement'] = "none";
+	unset($content_info['documents'][0]['resource_data']);
+  }
   $resource_post_payload = drupal_json_encode($content_info);
   $result = _learning_registry_send_to_registry($node->nid, $resource_post_payload, $op, $headless);
   return $result;
@@ -298,7 +305,7 @@ function _learning_registry_get_resource_data(&$node) {
   $title = $node->title;
 
   // Set the description to the node body.
-  $description = $node->body['und'][0]['value'];
+  $description = (isset($node->body['und'][0]['value'])) ? $node->body['und'][0]['value'] : "";
 
   // Set the date to the node create date.
   $date_created = format_date($node->created, 'custom', 'Y-m-d');

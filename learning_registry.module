@@ -38,10 +38,7 @@ define('LEARNING_REGISTRY_SUBMITTER_TYPE', 'organization');
 define('LEARNING_REGISTRY_PUBLISH_TAXONOMY_TAGS', 'true');
 
 /**
- * The following constants represent modes of publishing to the Learning
- * Registry. Currently, only LEARNING_REGISTRY_MODE_PUBLISH is implemented and
- * _UPDATE and _DELETE are reserved for future implementations once the Learning
- * Registry establishes those patterns.
+ * The following constants represent modes of publishing to the Learning Registry.
  */
 
 define('LEARNING_REGISTRY_MODE_PUBLISH', 0);
@@ -161,10 +158,8 @@ function learning_registry_node_update($node) {
  * Implements hook_node_delete().
  */
 function learning_registry_node_delete($node) {
-  // Deletion from LR is impossible, however, we still remove from Drupal db.
-  db_delete('learning_registry')
-    ->condition('nid', $node->nid)
-    ->execute();
+  module_load_include('inc', 'learning_registry', 'learning_registry.learning_registry');
+  learning_registry_delete_from_lr($node);
 }
 
 /**
@@ -303,11 +298,23 @@ function learning_registry_oauth_verify() {
   }
   return $oauth_consumer;
 }
+
+
+function learning_registry_delete_from_lr($node){
+  $nid = $node->nid;
+  $docid = learning_registry_get_docid($nid);
+  if($docid){
+	_learning_registry_publish($node, FALSE, LEARNING_REGISTRY_MODE_DELETE, $docid);
+  };
+}
+
+
 /*
 * Check if the node in the LR
 * @param $nid - ID of the drupal node;
 * @return docid or FALSE
 */
+
 function learning_registry_get_docid($nid){
   $q = db_select('learning_registry','l');
 		$q->condition('l.nid',$nid,'=');
@@ -317,3 +324,5 @@ function learning_registry_get_docid($nid){
 		$docid = (isset($record['docid'])) ? $record['docid'] : false;
   return $docid;
 }
+
+
