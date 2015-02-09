@@ -185,16 +185,21 @@ function learning_registry_cron() {
  * Allows for publishing using the bulk operations content page.
  */
 function learning_registry_node_operations() {
-  return array(
+  $operations = array(
     'process_orders' => array(
       'label' => t('Publish to Learning Registry'),
       'callback' => '_learning_registry_bulk_operations_publish',
     ),
+	'delete_orders' => array(
+      'label' => t('Delete from Learning Registry'),
+      'callback' => '_learning_registry_bulk_operations_delete',
+    ),
   );
+  return $operations;
 }
 
 /**
- * Callback function for learning_registry_node_operations().
+ * Publish callback function for learning_registry_node_operations().
  *
  * @param array $nids
  *   An array of node ids.
@@ -214,6 +219,9 @@ function _learning_registry_bulk_operations_publish($nids) {
     if ($result) {
       $success++;
     }
+	else{
+	  $failure++;
+	}
   }
 
   if (variable_get('learning_registry_queuing', LEARNING_REGISTRY_QUEUE_IMMEDIATE) == LEARNING_REGISTRY_QUEUE_QUEUED) {
@@ -222,6 +230,33 @@ function _learning_registry_bulk_operations_publish($nids) {
   else {
     drupal_set_message(t('@success nodes published to the registry.  @failure nodes failed.', array('@success' => $success, '@failure' => $failure)));
   }
+}
+
+/**
+ * Delete callback function for learning_registry_node_operations().
+ *
+ * @param array $nids
+ *   An array of node ids.
+ */
+function _learning_registry_bulk_operations_delete($nids) {
+  module_load_include('inc', 'learning_registry', 'learning_registry.learning_registry');
+  $success = 0;
+  $failure = 0;
+  $oauth_consumer = learning_registry_oauth_verify();
+  foreach ($nids as $nid) {
+    // Load the node.
+    $node = node_load($nid);
+    // Send it to the Learning Registry.
+    $result = learning_registry_delete_from_lr($node);
+    // If successful, update the count.
+    if ($result) {
+      $success++;
+    }
+	else{
+	  $failure++;
+	}
+  }
+    drupal_set_message(t('@success nodes deleted from registry.  @failure nodes failed.', array('@success' => $success, '@failure' => $failure)));
 }
 
 /**
@@ -305,7 +340,9 @@ function learning_registry_delete_from_lr($node){
   $docid = learning_registry_get_docid($nid);
   if($docid){
 	_learning_registry_publish($node, FALSE, LEARNING_REGISTRY_MODE_DELETE, $docid);
+	return true;
   };
+  return false;
 }
 
 

@@ -27,6 +27,7 @@ function _learning_registry_publish(&$node, $headless = FALSE, $op = LEARNING_RE
 		"submission_TOS" => "http://www.learningregistry.org/tos/cc0/v0-5/",
 	);
 	$content_info['documents'][0]['payload_placement'] = "none";
+	$content_info['documents'][0]['update_timestamp'] = format_date(time(), 'custom', 'Y-m-d\TG:i:s.Z\Z');
 	unset($content_info['documents'][0]['resource_data']);
   }
   $resource_post_payload = drupal_json_encode($content_info);
