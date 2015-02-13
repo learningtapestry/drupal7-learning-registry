@@ -21,8 +21,13 @@ function learning_registry_content_form($form, &$form_state) {
 	$search = variable_get('learning_registry_node_url', NULL) . '/slice?identity='.$submitter;
 	$result = drupal_http_request($search);
 	$result_array = drupal_json_decode($result->data);
-	$output = call_user_func('_learning_registry_slice', $result_array);
-	$form_state['storage']['results'] = $output;
+	if(isset($result_array['documents'])){
+		$output = call_user_func('_learning_registry_slice', $result_array);
+		$form_state['storage']['results'] = $output;
+	}
+	else{
+		$form_state['storage']['results'] = "";
+	}
  }	
     
 	$form['learning_registry']['results'] = array(
