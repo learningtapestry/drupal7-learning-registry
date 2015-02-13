@@ -59,7 +59,7 @@ function _learning_registry_get_content_info(&$node) {
   $content_info['payload_schema'] = array("schema.org", "lrmi");
   $content_info['active'] = TRUE;
   $content_info['doc_type'] = "resource_data";
-  $content_info['doc_version'] = "0.49.0";
+  $content_info['doc_version'] = LEARNING_REGISTRY_DOC_VERSION;
   $content_info['create_timestamp'] = format_date($node->created, 'custom', 'Y-m-d\TG:i:s.Z\Z');
   $content_info['update_timestamp'] = format_date($node->changed, 'custom', 'Y-m-d\TG:i:s.Z\Z');
   $content_info['identity'] = array(

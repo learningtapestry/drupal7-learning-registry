@@ -138,36 +138,42 @@ function learning_registry_admin_settings_validate($form, &$form_state) {
  * Form builder function for OAuth settings.
  */
 function learning_registry_admin__oauth_settings($form, &$form_state) {
-  $salt = variable_get('learning_registry_oauth_salt', '');
 
+  $salt = variable_get('learning_registry_oauth_salt', '');
+  $oauth_consumer = learning_registry_admin_var_get('learning_registry_oauth_consumer');
+  $oauth_token = learning_registry_admin_var_get('learning_registry_oauth_token');
+  
   $form['learning_registry_oauth_consumer']['#tree'] = TRUE;
   $form['learning_registry_oauth_token']['#tree'] = TRUE;
-
   $form['learning_registry_oauth_consumer']['key'] = array(
     '#title' => t('Consumer Key'),
     '#type' => 'textfield',
+	'#default_value' => $oauth_consumer['key'],
     '#required' => TRUE,
   );
   $form['learning_registry_oauth_consumer']['secret'] = array(
     '#title' => t('Consumer Secret'),
     '#type' => 'textfield',
+	'#default_value' => $oauth_consumer['secret'],
     '#required' => TRUE,
   );
   $form['learning_registry_oauth_token']['key'] = array(
     '#title' => t('Token Key'),
     '#type' => 'textfield',
+	'#default_value' => $oauth_token['key'],
     '#required' => TRUE,
   );
   $form['learning_registry_oauth_token']['secret'] = array(
     '#title' => t('Token Secret'),
     '#type' => 'textfield',
+	'#default_value' => $oauth_token['secret'],
     '#required' => TRUE,
   );
   $form['learning_registry_oauth_salt'] = array(
     '#title' => t('Salt'),
     '#type' => 'textfield',
     '#required' => TRUE,
-    '#default_value' => ($salt) ? $salt : '',
+    '#default_value' => $salt,
     '#description' => t('This is a salt for the encryption and decryption of keys.'),
   );
   return system_settings_form($form);
@@ -181,7 +187,7 @@ function learning_registry_admin__oauth_settings_validate($form, &$form_state) {
   $consumer = $form_values['learning_registry_oauth_consumer'];
   $token = $form_values['learning_registry_oauth_token'];
   $salt = md5($form_values['learning_registry_oauth_salt']);
-
+  
   // Encrypt the consumer key and secret.
   $learning_registry_oauth_consumer_key = mcrypt_encrypt(MCRYPT_RIJNDAEL_256, $salt, $consumer['key'], MCRYPT_MODE_ECB);
   $learning_registry_oauth_consumer_secret = mcrypt_encrypt(MCRYPT_RIJNDAEL_256, $salt, $consumer['secret'], MCRYPT_MODE_ECB);
