@@ -268,8 +268,11 @@ function _learning_registry_parse_result($result, $code) {
 function _learning_registry_queue_node($nid) {
 
   // Check if this record exists in submission table.
-  $submission_check_result = db_query('SELECT * FROM {learning_registry} WHERE nid = :nid', array(':nid' => $nid));
-  $submission_record = $submission_check_result->fetch();
+  $submission_check_result = db_select('learning_registry','l');
+		$q->condition('l.nid',$nid,'=');
+		$q->fields('l',array('docid'));
+		$result = $q->execute();
+		$submission_record = $result->fetchAssoc();
 
   // If exists, update, else insert new record.
   if ($submission_record) {

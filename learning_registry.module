@@ -133,10 +133,13 @@ function learning_registry_node_insert($node) {
   if (isset($nodes_to_publish[$node->type]) && $nodes_to_publish[$node->type] != FALSE && $node->nid) {
     $oauth_consumer = learning_registry_oauth_verify();
     if ($oauth_consumer) {
-      // Switch case below used to accomodate more methods (update, delete)
-      // in the future.
       if ($node->status == 1) {
-        _learning_registry_queue_node($node->nid);
+			if (variable_get('learning_registry_queuing', LEARNING_REGISTRY_QUEUE_IMMEDIATE) == LEARNING_REGISTRY_QUEUE_QUEUED) {
+			 _learning_registry_queue_node($node->nid);
+		   }
+		   else {	
+			 _learning_registry_publish($node);
+		   }
       }
     }
   }
@@ -204,6 +207,7 @@ function learning_registry_node_operations() {
  * @param array $nids
  *   An array of node ids.
  */
+ 
 function _learning_registry_bulk_operations_publish($nids) {
   module_load_include('inc', 'learning_registry', 'learning_registry.learning_registry');
   $success = 0;
