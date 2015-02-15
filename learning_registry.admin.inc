@@ -142,7 +142,9 @@ function learning_registry_admin__oauth_settings($form, &$form_state) {
   $salt = variable_get('learning_registry_oauth_salt', '');
   $oauth_consumer = learning_registry_admin_var_get('learning_registry_oauth_consumer');
   $oauth_token = learning_registry_admin_var_get('learning_registry_oauth_token');
-  
+  if($oauth_consumer['key'] == 0 || $oauth_consumer['secret'] == 0 || $oauth_token['key'] == 0 || $oauth_token['secret'] == 0){
+    drupal_set_message(t('Warning: the Learning Registry module cannot publish until the settings below are configured. To obtain these values, visit http://[Learning Registry node URL]/auth.'), 'warning', TRUE);
+  }
   $form['learning_registry_oauth_consumer']['#tree'] = TRUE;
   $form['learning_registry_oauth_token']['#tree'] = TRUE;
   $form['learning_registry_oauth_consumer']['key'] = array(
@@ -220,7 +222,9 @@ function learning_registry_admin__oauth_settings_validate($form, &$form_state) {
 function learning_registry_admin_var_get($name, $default = '') {
   $variable = variable_get($name, $default);
   $salt = md5(variable_get('learning_registry_oauth_salt', ''));
-  $variable['key'] = rtrim(mcrypt_decrypt(MCRYPT_RIJNDAEL_256, $salt, $variable['key'], MCRYPT_MODE_ECB));
-  $variable['secret'] = rtrim(mcrypt_decrypt(MCRYPT_RIJNDAEL_256, $salt, $variable['secret'], MCRYPT_MODE_ECB));
+  $key = (isset($variable['key'])) ? $variable['key'] : '';
+  $secret = (isset($variable['secret'])) ? $variable['secret'] : '';
+  $variable['key'] = rtrim(mcrypt_decrypt(MCRYPT_RIJNDAEL_256, $salt, $key, MCRYPT_MODE_ECB));
+  $variable['secret'] = rtrim(mcrypt_decrypt(MCRYPT_RIJNDAEL_256, $salt, $secret, MCRYPT_MODE_ECB));
   return $variable;
 }
