@@ -60,8 +60,8 @@ function _learning_registry_get_content_info(&$node) {
   $content_info['active'] = TRUE;
   $content_info['doc_type'] = "resource_data";
   $content_info['doc_version'] = LEARNING_REGISTRY_DOC_VERSION;
-  $content_info['create_timestamp'] = gmdate('Y-m-d\TH:i:s.u\Z');
-  $content_info['update_timestamp'] = gmdate('Y-m-d\TH:i:s.u\Z');
+  $content_info['create_timestamp'] = gmdate('Y-m-d\TH:i:s.u\Z', $node->created);
+  $content_info['update_timestamp'] = gmdate('Y-m-d\TH:i:s.u\Z', $node->changed);
   
   $content_info['identity'] = array(
 	"owner" => variable_get('learning_registry_submitter', NULL),
