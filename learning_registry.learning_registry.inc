@@ -318,8 +318,9 @@ function _learning_registry_get_resource_data(&$node) {
   // Set the identifier to the absolute URL of the node.
   $identifier = _learning_registry_get_node_url($node);
 
-  // Set the creator to the Drupal username.
-  $creator = $author_user->name;
+  // Set the submitter.
+  $submitter = variable_get('learning_registry_submitter', NULL);
+  
   
   $keywords = learning_registry_extract_keywords($node);
 
@@ -331,14 +332,14 @@ function _learning_registry_get_resource_data(&$node) {
 			"publisher"  => array(
 				"type"  => "http://schema.org/" . variable_get('learning_registry_submitter_type'),
 				"properties"  => array(
-					"name" => $creator,
+					"name" => $submitter,
 				),
 			),
 			"name" => $title,
 			"author" => array(
 				"type" => "http://schema.org/" . variable_get('learning_registry_submitter_type'),
 				"properties" => array(
-					"name" => "Chicago STEM Pathways Cooperative",
+					"name" => $submitter,
 				),
 			),
 			"url" => $identifier,
