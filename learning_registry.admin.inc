@@ -142,7 +142,7 @@ function learning_registry_admin__oauth_settings($form, &$form_state) {
   $salt = variable_get('learning_registry_oauth_salt', '');
   $oauth_consumer = learning_registry_admin_var_get('learning_registry_oauth_consumer');
   $oauth_token = learning_registry_admin_var_get('learning_registry_oauth_token');
-  if($oauth_consumer['key'] == 0 || $oauth_consumer['secret'] == 0 || $oauth_token['key'] == 0 || $oauth_token['secret'] == 0){
+  if((!$salt)){
     drupal_set_message(t('Warning: the Learning Registry module cannot publish until the settings below are configured. To obtain these values, visit http://[Learning Registry node URL]/auth.'), 'warning', TRUE);
   }
   $form['learning_registry_oauth_consumer']['#tree'] = TRUE;
