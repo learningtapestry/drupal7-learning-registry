@@ -27,7 +27,7 @@ function _learning_registry_publish(&$node, $headless = FALSE, $op = LEARNING_RE
 		"submission_TOS" => "http://www.learningregistry.org/tos/cc0/v0-5/",
 	);
 	$content_info['documents'][0]['payload_placement'] = "none";
-	$content_info['documents'][0]['update_timestamp'] = format_date(time(), 'custom', 'Y-m-d\TH:i:s.Z\Z');
+	$content_info['documents'][0]['update_timestamp'] = gmdate('Y-m-d\TH:i:s.u\Z');
 	unset($content_info['documents'][0]['resource_data']);
   }
   $resource_post_payload = drupal_json_encode($content_info);
@@ -60,10 +60,9 @@ function _learning_registry_get_content_info(&$node) {
   $content_info['active'] = TRUE;
   $content_info['doc_type'] = "resource_data";
   $content_info['doc_version'] = LEARNING_REGISTRY_DOC_VERSION;
+  $content_info['create_timestamp'] = gmdate('Y-m-d\TH:i:s.u\Z');
+  $content_info['update_timestamp'] = gmdate('Y-m-d\TH:i:s.u\Z');
   
-  $content_info['create_timestamp'] = format_date($node->created, 'custom', 'Y-m-d\TH:i:s.Z\Z');
-  $content_info['update_timestamp'] = format_date($node->changed, 'custom', 'Y-m-d\TH:i:s.Z\Z');
- 
   $content_info['identity'] = array(
 	"owner" => variable_get('learning_registry_submitter', NULL),
   );
