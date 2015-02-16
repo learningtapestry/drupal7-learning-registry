@@ -41,7 +41,7 @@ function learning_registry_admin_settings($form, &$form_state) {
     '#size' => 128,
     '#maxlength' => 1024,
     '#default_value' => variable_get('learning_registry_submitter', NULL),
-    '#description' => t('Identifies the submitter of a Learning Registry resource document.'),
+    '#description' => t('Identifies the submitter, publisher and author of a Learning Registry resource document.'),
     '#required' => TRUE,
   );
 
