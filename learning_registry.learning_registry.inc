@@ -269,7 +269,7 @@ function _learning_registry_parse_result($result, $code) {
 function _learning_registry_queue_node($nid) {
 
   // Check if this record exists in submission table.
-  $submission_check_result = db_select('learning_registry','l');
+  $q = db_select('learning_registry','l');
 		$q->condition('l.nid',$nid,'=');
 		$q->fields('l',array('docid'));
 		$result = $q->execute();
