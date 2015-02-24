@@ -56,7 +56,7 @@ function _learning_registry_get_content_info(&$node) {
 	);
   $content_info['resource_data_type'] = 'metadata';
   $content_info['payload_placement']  = "inline";
-  $content_info['payload_schema'] = array("schema.org", "lrmi");
+  $content_info['payload_schema'] = array("schema.org", "lrmi", "json-ld");
   $content_info['active'] = TRUE;
   $content_info['doc_type'] = "resource_data";
   $content_info['doc_version'] = LEARNING_REGISTRY_DOC_VERSION;
