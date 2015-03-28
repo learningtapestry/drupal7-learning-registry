@@ -24,7 +24,7 @@ function learning_registry_admin_settings($form, &$form_state) {
   }
   
   $form = array();
-  $alignment_options = array(t("Taxonomy Term"), t("Constant Variable"), t("Field"), t("None"));
+  $alignment_options = array(t("Taxonomy Term"), t("Constant Variable"), t("None"));
   $form['learning_registry_node_url'] = array(
     '#type' => 'textfield',
     '#title' => t('Learning Registry node URL'),
@@ -90,90 +90,6 @@ function learning_registry_admin_settings($form, &$form_state) {
     '#options' => drupal_map_assoc(array(t('Person'), t('Organization'))),
     '#default_value' => variable_get('learning_registry_submitter_type', 0),
   );
-  $form['learning_registry_lrmi_alignment'] = array(
-    '#type' => 'fieldset', 
-    '#title' => t('LRMI/DCMI Alignment'),
-  );
-  $form['learning_registry_lrmi_alignment']['standarts'] = array(
-	'#title' => t('Standards'),
-    '#type' => 'fieldset', 
-	'#prefix' => '<div id="lrmi-standarts">',
-    '#suffix' => '</div>',
-  );
-  $form['learning_registry_lrmi_alignment']['standarts']['learning_registry_standarts-select'] = array(
-    '#type' => 'select',
-    '#title' => t('Standards'),
-    '#options' => $alignment_options,
-	'#default_value' => 3,
-    '#ajax' => array(
-      'callback' => 'learning_registry_form_lrmi_alignment_standarts',
-      'wrapper' => 'lrmi-standarts',
-      'method' => 'replace',
-      'effect' => 'none',
-    ),
-	'#prefix' => '<div style="float:left;margin-right:20px;">',
-    '#suffix' => '</div>',
-  );
-  $form['learning_registry_lrmi_alignment']['levels'] = array(
-	'#title' => t('Grade Levels'),
-    '#type' => 'fieldset', 
-	'#prefix' => '<div id="lrmi-levels">',
-    '#suffix' => '</div>',
-  );
-  $form['learning_registry_lrmi_alignment']['levels']['learning_registry_levels-select'] = array(
-    '#type' => 'select',
-    '#title' => t('Grade Levels'),
-    '#options' => $alignment_options,
-	'#default_value' => 3,
-    '#ajax' => array(
-      'callback' => 'learning_registry_form_lrmi_alignment_levels',
-      'wrapper' => 'lrmi-levels',
-      'method' => 'replace',
-      'effect' => 'none',
-    ),
-	'#prefix' => '<div style="float:left;margin-right:20px;">',
-    '#suffix' => '</div>',
-  );
-  $form['learning_registry_lrmi_alignment']['subjects'] = array(
-	'#title' => t('Subjects'),
-    '#type' => 'fieldset', 
-	'#prefix' => '<div id="lrmi-subjects">',
-    '#suffix' => '</div>',
-  );
-  $form['learning_registry_lrmi_alignment']['subjects']['learning_registry_subjects-select'] = array(
-    '#type' => 'select',
-    '#title' => t('Subjects'),
-    '#options' => $alignment_options,
-	'#default_value' => 3,
-    '#ajax' => array(
-      'callback' => 'learning_registry_form_lrmi_alignment_subjects',
-      'wrapper' => 'lrmi-subjects',
-      'method' => 'replace',
-      'effect' => 'none',
-    ),
-	'#prefix' => '<div style="float:left;margin-right:20px;">',
-    '#suffix' => '</div>',
-  );
-  $form['learning_registry_lrmi_alignment']['type'] = array(
-	'#title' => t('Learning Resource Type'),
-    '#type' => 'fieldset', 
-	'#prefix' => '<div id="lrmi-type">',
-    '#suffix' => '</div>',
-  );
-  $form['learning_registry_lrmi_alignment']['type']['learning_registry_type-select'] = array(
-    '#type' => 'select',
-    '#title' => t('Subjects'),
-    '#options' => $alignment_options,
-	'#default_value' => 3,
-    '#ajax' => array(
-      'callback' => 'learning_registry_form_lrmi_alignment_type',
-      'wrapper' => 'lrmi-type',
-      'method' => 'replace',
-      'effect' => 'none',
-    ),
-	'#prefix' => '<div style="float:left;margin-right:20px;">',
-    '#suffix' => '</div>',
-  );
   foreach ($type_names as $type_key => $type_name) {
     if (count($node_fields[$type_key])) {
       $checkboxes = array();
@@ -184,16 +100,133 @@ function learning_registry_admin_settings($form, &$form_state) {
 
       $type_name = check_plain($type_name);
     }
-  }
+   }
+  $form['learning_registry_lrmi_alignment'] = array(
+    '#type' => 'fieldset', 
+    '#title' => t('LRMI/DCMI Alignment'),
+  );
+  $form['learning_registry_lrmi_alignment']['standarts'] = array(
+	'#title' => t('Standards'),
+    '#type' => 'fieldset', 
+	'#prefix' => '<div id="lrmi-standarts">',
+    '#suffix' => '</div>',
+  );
+  $option = variable_get('learning_registry_standarts-select', 2);
+  $form['learning_registry_lrmi_alignment']['standarts']['learning_registry_standarts-select'] = array(
+    '#type' => 'select',
+    '#title' => t('Standards'),
+    '#options' => $alignment_options,
+	'#default_value' => $option,
+    '#ajax' => array(
+      'callback' => 'learning_registry_form_lrmi_alignment_standarts_ajax_callback',
+      'wrapper' => 'lrmi-standarts',
+      'method' => 'replace',
+      'effect' => 'none',
+    ),
+	'#prefix' => '<div style="float:left;margin-right:20px;">',
+    '#suffix' => '</div>',
+  );
+  learning_registry_form_lrmi_alignment_standarts($form, $form_state, $option);
+  $form['learning_registry_lrmi_alignment']['levels'] = array(
+	'#title' => t('Grade Levels'),
+    '#type' => 'fieldset', 
+	'#prefix' => '<div id="lrmi-levels">',
+    '#suffix' => '</div>',
+  );
+  $option = variable_get('learning_registry_levels-select', 2);
+  $form['learning_registry_lrmi_alignment']['levels']['learning_registry_levels-select'] = array(
+    '#type' => 'select',
+    '#title' => t('Grade Levels'),
+    '#options' => $alignment_options,
+	'#default_value' => $option,
+    '#ajax' => array(
+      'callback' => 'learning_registry_form_lrmi_alignment_levels_ajax_callback',
+      'wrapper' => 'lrmi-levels',
+      'method' => 'replace',
+      'effect' => 'none',
+    ),
+	'#prefix' => '<div style="float:left;margin-right:20px;">',
+    '#suffix' => '</div>',
+  );
+  learning_registry_form_lrmi_alignment_levels($form, $form_state, $option);
+  $form['learning_registry_lrmi_alignment']['subjects'] = array(
+	'#title' => t('Subjects'),
+    '#type' => 'fieldset', 
+	'#prefix' => '<div id="lrmi-subjects">',
+    '#suffix' => '</div>',
+  );
+  $option = variable_get('learning_registry_subjects-select', 2);
+  $form['learning_registry_lrmi_alignment']['subjects']['learning_registry_subjects-select'] = array(
+    '#type' => 'select',
+    '#title' => t('Subjects'),
+    '#options' => $alignment_options,
+	'#default_value' => $option,
+    '#ajax' => array(
+      'callback' => 'learning_registry_form_lrmi_alignment_subjects_ajax_callback',
+      'wrapper' => 'lrmi-subjects',
+      'method' => 'replace',
+      'effect' => 'none',
+    ),
+	'#prefix' => '<div style="float:left;margin-right:20px;">',
+    '#suffix' => '</div>',
+  );
+  learning_registry_form_lrmi_alignment_subjects($form, $form_state, $option);
+  $form['learning_registry_lrmi_alignment']['type'] = array(
+	'#title' => t('Learning Resource Type'),
+    '#type' => 'fieldset', 
+	'#prefix' => '<div id="lrmi-type">',
+    '#suffix' => '</div>',
+  );
+  $option = variable_get('learning_registry_type-select', 2);
+  $form['learning_registry_lrmi_alignment']['type']['learning_registry_type-select'] = array(
+    '#type' => 'select',
+    '#title' => t('Subjects'),
+    '#options' => $alignment_options,
+	'#default_value' => $option,
+    '#ajax' => array(
+      'callback' => 'learning_registry_form_lrmi_alignment_type_ajax_callback',
+      'wrapper' => 'lrmi-type',
+      'method' => 'replace',
+      'effect' => 'none',
+    ),
+	'#prefix' => '<div style="float:left;margin-right:20px;">',
+    '#suffix' => '</div>',
+  );
+  learning_registry_form_lrmi_alignment_type($form, $form_state, $option);
+  $form['#submit'][] = 'learning_registry_form_submit_callback';
   return system_settings_form($form);
 }
 
 /**
- * "LRMI/DCMI Alignment" callbacks
+ * learning_registry_content_form() submit callback.
+ * @param array $form
+ *   The array that describes the configuration form.
+ * @param array $form_state
+ *   The values of the array.
  *
  */
-function learning_registry_form_lrmi_alignment_standarts($form, $form_state){
-	$option = $form_state["complete form"]["learning_registry_lrmi_alignment"]["standarts"]["learning_registry_standarts-select"]["#value"];
+ 
+function learning_registry_form_submit_callback(&$form, &$form_state){
+  $form_state['rebuild'] = TRUE;
+}
+
+/**
+ * Helper functions for each "LRMI/DCMI Alignment" fieldset in the learning_registry_content_form().
+ *
+ * @param array $form
+ *   The array that describes the configuration form.
+ * @param array $form_state
+ *   The values of the array.
+ * @param $option
+ *   option from the left dropdown of current fieldset.
+ */
+ 
+ /*
+ *	"Sandarts" feldset:
+ */
+ 
+ function learning_registry_form_lrmi_alignment_standarts(&$form, $form_state, $option = null){
+	$option = isset($form_state['values']['learning_registry_standarts-select']) ? $form_state['values']['learning_registry_standarts-select'] : $option;
 	switch ($option){
 	  case '0':
 		$vocabularies = taxonomy_get_vocabularies();
@@ -215,6 +248,7 @@ function learning_registry_form_lrmi_alignment_standarts($form, $form_state){
 			'#title' => t('Framework:'),
 			'#size' => 30,
 			'#maxlength' => 30,
+			'#default_value' => variable_get('learning_registry_standarts-framework', NULL),
 			'#prefix' => '<div style="width:200px;display:inline-block;">',
 			'#suffix' => '</div>',
 		);
@@ -225,28 +259,23 @@ function learning_registry_form_lrmi_alignment_standarts($form, $form_state){
 			'#title' => t("Variable"),
 			'#size' => 30,
 			'#maxlength' => 30,
+			'#default_value' => variable_get('learning_registry_standarts-variable', NULL),
 			'#prefix' => '<div style="width:200px;display:inline-block;">',
 			'#suffix' => '</div>',
 		);
 	  break;
 	  case '2':
-		$form['learning_registry_lrmi_alignment']['standarts']['learning_registry_standarts-field'] = array(
-			'#type' => 'textfield',
-			'#title' => t("Field"),
-			'#size' => 30,
-			'#maxlength' => 30,
-			'#prefix' => '<div style="width:200px;display:inline-block;">',
-			'#suffix' => '</div>',
-		);
-	  break;
-	  case '3':
 	  break;
 	}
-	return render($form['learning_registry_lrmi_alignment']['standarts']);
+	return $form['learning_registry_lrmi_alignment']['standarts'];
 }
 
-function learning_registry_form_lrmi_alignment_levels($form, $form_state){
-	$option = $form_state['complete form']['learning_registry_lrmi_alignment']['levels']['learning_registry_levels-select']['#value'];
+ /*
+ *	"Levels" feldset:
+ */
+ 
+function learning_registry_form_lrmi_alignment_levels(&$form, $form_state, $option = null){
+	$option = isset($form_state['complete form']['learning_registry_lrmi_alignment']['levels']['learning_registry_levels-select']['#value']) ? $form_state['complete form']['learning_registry_lrmi_alignment']['levels']['learning_registry_levels-select']['#value'] : $option;
 	switch ($option){
 	  case '0':
 		$vocabularies = taxonomy_get_vocabularies();
@@ -268,6 +297,7 @@ function learning_registry_form_lrmi_alignment_levels($form, $form_state){
 			'#title' => t('Framework:'),
 			'#size' => 30,
 			'#maxlength' => 30,
+			'#default_value' => variable_get('learning_registry_levels-framework', null),
 			'#prefix' => '<div style="width:200px;display:inline-block;">',
 			'#suffix' => '</div>',
 		);
@@ -278,28 +308,23 @@ function learning_registry_form_lrmi_alignment_levels($form, $form_state){
 			'#title' => t("Variable"),
 			'#size' => 30,
 			'#maxlength' => 30,
+			'#default_value' => variable_get('learning_registry_levels-variable', null),
 			'#prefix' => '<div style="width:200px;display:inline-block;">',
 			'#suffix' => '</div>',
 		);
 	  break;
 	  case '2':
-		$form['learning_registry_lrmi_alignment']['levels']['learning_registry_levels-field'] = array(
-			'#type' => 'textfield',
-			'#title' => t("Field"),
-			'#size' => 30,
-			'#maxlength' => 30,
-			'#prefix' => '<div style="width:200px;display:inline-block;">',
-			'#suffix' => '</div>',
-		);
-	  break;
-	  case '3':
 	  break;
 	}
-	return render($form['learning_registry_lrmi_alignment']['levels']);
+	return $form['learning_registry_lrmi_alignment']['levels'];
 }
 
-function learning_registry_form_lrmi_alignment_subjects($form, $form_state){
-	$option = $form_state['complete form']['learning_registry_lrmi_alignment']['subjects']['learning_registry_subjects-select']['#value'];
+ /*
+ *	"Subjects" feldset:
+ */
+
+function learning_registry_form_lrmi_alignment_subjects(&$form, $form_state, $option = null){
+	$option = isset($form_state['complete form']['learning_registry_lrmi_alignment']['subjects']['learning_registry_subjects-select']['#value']) ? $form_state['complete form']['learning_registry_lrmi_alignment']['subjects']['learning_registry_subjects-select']['#value'] : $option;
 	switch ($option){
 	  case '0':
 		$vocabularies = taxonomy_get_vocabularies();
@@ -323,28 +348,23 @@ function learning_registry_form_lrmi_alignment_subjects($form, $form_state){
 			'#title' => t("Variable"),
 			'#size' => 30,
 			'#maxlength' => 30,
+			'#default_value' => variable_get('learning_registry_subjects-variable', null),
 			'#prefix' => '<div style="width:200px;display:inline-block;">',
 			'#suffix' => '</div>',
 		);
 	  break;
 	  case '2':
-		$form['learning_registry_lrmi_alignment']['subjects']['learning_registry_subjects-field'] = array(
-			'#type' => 'textfield',
-			'#title' => t("Field"),
-			'#size' => 30,
-			'#maxlength' => 30,
-			'#prefix' => '<div style="width:200px;display:inline-block;">',
-			'#suffix' => '</div>',
-		);
-	  break;
-	  case '3':
 	  break;
 	}
-	return render($form['learning_registry_lrmi_alignment']['subjects']);
+	return $form['learning_registry_lrmi_alignment']['subjects'];
 }
 
-function learning_registry_form_lrmi_alignment_type($form, $form_state){
-	$option = $form_state['complete form']['learning_registry_lrmi_alignment']['type']['learning_registry_type-select']['#value'];
+ /*
+ *	"Type" feldset:
+ */
+
+function learning_registry_form_lrmi_alignment_type(&$form, $form_state, $option = null){
+	$option = isset($form_state['complete form']['learning_registry_lrmi_alignment']['type']['learning_registry_type-select']['#value']) ? $form_state['complete form']['learning_registry_lrmi_alignment']['type']['learning_registry_type-select']['#value'] : $option;
 	switch ($option){
 	  case '0':
 		$vocabularies = taxonomy_get_vocabularies();
@@ -368,25 +388,46 @@ function learning_registry_form_lrmi_alignment_type($form, $form_state){
 			'#title' => t("Variable"),
 			'#size' => 30,
 			'#maxlength' => 30,
+			'#default_value' => variable_get('learning_registry_type-variable', null),
 			'#prefix' => '<div style="width:200px;display:inline-block;">',
 			'#suffix' => '</div>',
 		);
 	  break;
 	  case '2':
-		$form['learning_registry_lrmi_alignment']['type']['learning_registry_type-field'] = array(
-			'#type' => 'textfield',
-			'#title' => t("Field"),
-			'#size' => 30,
-			'#maxlength' => 30,
-			'#prefix' => '<div style="width:200px;display:inline-block;">',
-			'#suffix' => '</div>',
-		);
-	  break;
-	  case '3':
 	  break;
 	}
-	return render($form['learning_registry_lrmi_alignment']['type']);
+	return $form['learning_registry_lrmi_alignment']['type'];
 }
+
+
+ 
+
+/**
+ * "LRMI/DCMI Alignment" ajax callbacks for learning_registry_content_form().
+ *
+ * @param array $form
+ *   The array that describes the configuration form.
+ * @param array $form_state
+ *   The values of the array.
+ */
+ 
+
+function learning_registry_form_lrmi_alignment_standarts_ajax_callback(&$form, $form_state){
+	return $form['learning_registry_lrmi_alignment']['standarts'];
+}
+
+function learning_registry_form_lrmi_alignment_levels_ajax_callback(&$form, $form_state){
+	return $form['learning_registry_lrmi_alignment']['levels'];
+}
+
+function learning_registry_form_lrmi_alignment_subjects_ajax_callback(&$form, $form_state){
+	return $form['learning_registry_lrmi_alignment']['subjects'];
+}
+
+function learning_registry_form_lrmi_alignment_type_ajax_callback(&$form, $form_state){
+	return $form['learning_registry_lrmi_alignment']['type'];
+}
+
 /**
  * Form validation handler for learning_registry_content_form().
  *
