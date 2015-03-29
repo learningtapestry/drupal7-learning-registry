@@ -231,14 +231,11 @@ function learning_registry_form_submit_callback(&$form, &$form_state){
 	  case '0':
 		$vocabularies = taxonomy_get_vocabularies();
 		foreach ($vocabularies as $vocab) {
-			$terms = taxonomy_get_tree($vocab->vid);
-			foreach($terms as $term){
-               $items[]= $term->name;
-           }
+            $items[$vocab->vid]= $vocab->name;
 		}
 		$form['learning_registry_lrmi_alignment']['standarts']['learning_registry_standarts-term-select'] = array(
 			'#type' => 'select',
-			'#title' => t("Taxonomy Term"),
+			'#title' => t("Vocabulary"),
 			'#options' => $items,
 			'#prefix' => '<div style="float:left;margin-right:20px;">',
 			'#suffix' => '</div>',
@@ -280,14 +277,11 @@ function learning_registry_form_lrmi_alignment_levels(&$form, $form_state, $opti
 	  case '0':
 		$vocabularies = taxonomy_get_vocabularies();
 		foreach ($vocabularies as $vocab) {
-			$terms = taxonomy_get_tree($vocab->vid);
-			foreach($terms as $term){
-               $items[]= $term->name;
-           }
+            $items[$vocab->vid]= $vocab->name;
 		}
 		$form['learning_registry_lrmi_alignment']['levels']['learning_registry_levels-term-select'] = array(
 			'#type' => 'select',
-			'#title' => t("Taxonomy Term"),
+			'#title' => t("Vocabulary"),
 			'#options' => $items,
 			'#prefix' => '<div style="float:left;margin-right:20px;">',
 			'#suffix' => '</div>',
@@ -329,14 +323,11 @@ function learning_registry_form_lrmi_alignment_subjects(&$form, $form_state, $op
 	  case '0':
 		$vocabularies = taxonomy_get_vocabularies();
 		foreach ($vocabularies as $vocab) {
-			$terms = taxonomy_get_tree($vocab->vid);
-			foreach($terms as $term){
-               $items[]= $term->name;
-           }
+            $items[$vocab->vid]= $vocab->name;
 		}
 		$form['learning_registry_lrmi_alignment']['subjects']['learning_registry_subjects-term-select'] = array(
 			'#type' => 'select',
-			'#title' => t("Taxonomy Term"),
+			'#title' => t("Vocabulary"),
 			'#options' => $items,
 			'#prefix' => '<div style="float:left;margin-right:20px;">',
 			'#suffix' => '</div>',
@@ -369,14 +360,11 @@ function learning_registry_form_lrmi_alignment_type(&$form, $form_state, $option
 	  case '0':
 		$vocabularies = taxonomy_get_vocabularies();
 		foreach ($vocabularies as $vocab) {
-			$terms = taxonomy_get_tree($vocab->vid);
-			foreach($terms as $term){
-               $items[]= $term->name;
-           }
+            $items[$vocab->vid]= $vocab->name;
 		}
 		$form['learning_registry_lrmi_alignment']['type']['learning_registry_type-term-select'] = array(
 			'#type' => 'select',
-			'#title' => t("Taxonomy Term"),
+			'#title' => t("Vocabulary"),
 			'#options' => $items,
 			'#prefix' => '<div style="float:left;margin-right:20px;">',
 			'#suffix' => '</div>',
