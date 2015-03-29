@@ -114,7 +114,7 @@ function learning_registry_admin_settings($form, &$form_state) {
   $option = variable_get('learning_registry_standarts-select', 2);
   $form['learning_registry_lrmi_alignment']['standarts']['learning_registry_standarts-select'] = array(
     '#type' => 'select',
-    '#title' => t('Standards'),
+    '#title' => t('Standards:'),
     '#options' => $alignment_options,
 	'#default_value' => $option,
     '#ajax' => array(
@@ -136,7 +136,7 @@ function learning_registry_admin_settings($form, &$form_state) {
   $option = variable_get('learning_registry_levels-select', 2);
   $form['learning_registry_lrmi_alignment']['levels']['learning_registry_levels-select'] = array(
     '#type' => 'select',
-    '#title' => t('Grade Levels'),
+    '#title' => t('Grade Levels:'),
     '#options' => $alignment_options,
 	'#default_value' => $option,
     '#ajax' => array(
@@ -158,7 +158,7 @@ function learning_registry_admin_settings($form, &$form_state) {
   $option = variable_get('learning_registry_subjects-select', 2);
   $form['learning_registry_lrmi_alignment']['subjects']['learning_registry_subjects-select'] = array(
     '#type' => 'select',
-    '#title' => t('Subjects'),
+    '#title' => t('Subjects:'),
     '#options' => $alignment_options,
 	'#default_value' => $option,
     '#ajax' => array(
@@ -180,7 +180,7 @@ function learning_registry_admin_settings($form, &$form_state) {
   $option = variable_get('learning_registry_type-select', 2);
   $form['learning_registry_lrmi_alignment']['type']['learning_registry_type-select'] = array(
     '#type' => 'select',
-    '#title' => t('Subjects'),
+    '#title' => t('Learning Resource Type:'),
     '#options' => $alignment_options,
 	'#default_value' => $option,
     '#ajax' => array(
@@ -207,7 +207,7 @@ function learning_registry_admin_settings($form, &$form_state) {
  */
  
 function learning_registry_form_submit_callback(&$form, &$form_state){
-  $form_state['rebuild'] = TRUE;
+	$form_state['rebuild'] = TRUE;
 }
 
 /**
@@ -235,7 +235,7 @@ function learning_registry_form_submit_callback(&$form, &$form_state){
 		}
 		$form['learning_registry_lrmi_alignment']['standarts']['learning_registry_standarts-term-select'] = array(
 			'#type' => 'select',
-			'#title' => t("Vocabulary"),
+			'#title' => t("Vocabulary:"),
 			'#options' => $items,
 			'#prefix' => '<div style="float:left;margin-right:20px;">',
 			'#suffix' => '</div>',
@@ -253,7 +253,7 @@ function learning_registry_form_submit_callback(&$form, &$form_state){
 	  case '1':
 		$form['learning_registry_lrmi_alignment']['standarts']['learning_registry_standarts-variable'] = array(
 			'#type' => 'textfield',
-			'#title' => t("Variable"),
+			'#title' => t("Variable:"),
 			'#size' => 30,
 			'#maxlength' => 30,
 			'#default_value' => variable_get('learning_registry_standarts-variable', NULL),
@@ -281,7 +281,7 @@ function learning_registry_form_lrmi_alignment_levels(&$form, $form_state, $opti
 		}
 		$form['learning_registry_lrmi_alignment']['levels']['learning_registry_levels-term-select'] = array(
 			'#type' => 'select',
-			'#title' => t("Vocabulary"),
+			'#title' => t("Vocabulary:"),
 			'#options' => $items,
 			'#prefix' => '<div style="float:left;margin-right:20px;">',
 			'#suffix' => '</div>',
@@ -299,7 +299,7 @@ function learning_registry_form_lrmi_alignment_levels(&$form, $form_state, $opti
 	  case '1':
 		$form['learning_registry_lrmi_alignment']['levels']['learning_registry_levels-variable'] = array(
 			'#type' => 'textfield',
-			'#title' => t("Variable"),
+			'#title' => t("Variable:"),
 			'#size' => 30,
 			'#maxlength' => 30,
 			'#default_value' => variable_get('learning_registry_levels-variable', null),
@@ -327,7 +327,7 @@ function learning_registry_form_lrmi_alignment_subjects(&$form, $form_state, $op
 		}
 		$form['learning_registry_lrmi_alignment']['subjects']['learning_registry_subjects-term-select'] = array(
 			'#type' => 'select',
-			'#title' => t("Vocabulary"),
+			'#title' => t("Vocabulary:"),
 			'#options' => $items,
 			'#prefix' => '<div style="float:left;margin-right:20px;">',
 			'#suffix' => '</div>',
@@ -336,7 +336,7 @@ function learning_registry_form_lrmi_alignment_subjects(&$form, $form_state, $op
 	  case '1':
 		$form['learning_registry_lrmi_alignment']['subjects']['learning_registry_subjects-variable'] = array(
 			'#type' => 'textfield',
-			'#title' => t("Variable"),
+			'#title' => t("Variable:"),
 			'#size' => 30,
 			'#maxlength' => 30,
 			'#default_value' => variable_get('learning_registry_subjects-variable', null),
@@ -364,7 +364,7 @@ function learning_registry_form_lrmi_alignment_type(&$form, $form_state, $option
 		}
 		$form['learning_registry_lrmi_alignment']['type']['learning_registry_type-term-select'] = array(
 			'#type' => 'select',
-			'#title' => t("Vocabulary"),
+			'#title' => t("Vocabulary:"),
 			'#options' => $items,
 			'#prefix' => '<div style="float:left;margin-right:20px;">',
 			'#suffix' => '</div>',
@@ -373,7 +373,7 @@ function learning_registry_form_lrmi_alignment_type(&$form, $form_state, $option
 	  case '1':
 		$form['learning_registry_lrmi_alignment']['type']['learning_registry_type-variable'] = array(
 			'#type' => 'textfield',
-			'#title' => t("Variable"),
+			'#title' => t("Variable:"),
 			'#size' => 30,
 			'#maxlength' => 30,
 			'#default_value' => variable_get('learning_registry_type-variable', null),
