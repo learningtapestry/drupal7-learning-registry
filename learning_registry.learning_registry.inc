@@ -319,11 +319,11 @@ function _learning_registry_get_resource_data(&$node) {
   $identifier = _learning_registry_get_node_url($node);
 
   // Set the submitter.
-  $submitter = variable_get('learning_registry_submitter', NULL);
+  $submitter = variable_get('learning_registry_submitter', null);
   $keywords = learning_registry_extract_keywords($node); 
   $educational_alignment = array(); 
   if(variable_get('learning_registry_standarts-select', "none") == 0){
-	$vocab_st = variable_get('learning_registry_standarts-term-select', null) ? taxonomy_vocabulary_load(variable_get('learning_registry_standarts-term-select', "")) : "";
+	$vocab_st = variable_get('learning_registry_standarts-term-select', null) ? taxonomy_vocabulary_load(variable_get('learning_registry_standarts-term-select', null)) : "";
 	$terms = taxonomy_get_tree($vocab_st->vid);
 	$target_name_st = is_object($vocab_st) ? $vocab_st->name : "";
 	$educational_alignment[] = array(
@@ -345,7 +345,7 @@ function _learning_registry_get_resource_data(&$node) {
 	);
   }
   if(variable_get('learning_registry_levels-select', "none") == 0){
-	$vocab_lev = variable_get('learning_registry_levels-term-select', null) ? taxonomy_vocabulary_load(variable_get('learning_registry_levels-term-select', "")) : "";
+	$vocab_lev = variable_get('learning_registry_levels-term-select', null) ? taxonomy_vocabulary_load(variable_get('learning_registry_levels-term-select', null)) : "";
 	$target_name_lev = is_object($vocab_lev) ? $vocab_lev->name : "";
 	$educational_alignment[] = array(
 				"type" => "http://schema.org/CreativeWork",
@@ -364,6 +364,30 @@ function _learning_registry_get_resource_data(&$node) {
 					"targetName" => variable_get('learning_registry_levels-variable', ""),
 				),
 	); 
+  }
+  
+  $subjects = array();
+  if(variable_get('learning_registry_subjects-select', "none") == 0){
+	$vocab_subj = variable_get('learning_registry_subjects-term-select', null) ? taxonomy_vocabulary_load(variable_get('learning_registry_subjects-term-select', null)) : "";
+	$terms = taxonomy_get_tree($vocab_subj->vid);
+	foreach($terms as $term){
+		$subjects[] = $term->name;
+	}
+  }
+  else if(variable_get('learning_registry_subjects-select', "none") == 1){
+	$subjects[] = variable_get('learning_registry_subjects-variable', "");
+  }
+  
+  $resourse_type = array();
+  if(variable_get('learning_registry_type-select', "none") == 0){
+	$vocab_type = variable_get('learning_registry_type-term-select', null) ? taxonomy_vocabulary_load(variable_get('learning_registry_type-term-select', null)) : "";
+	$terms = taxonomy_get_tree($vocab_type->vid);
+	foreach($terms as $term){
+		$resourse_type[] = $term->name;
+	}
+  }
+  else if(variable_get('learning_registry_type-select', "none") == 1){
+	$resourse_type[] = variable_get('learning_registry_type-variable', "");
   }
   
   $resource_data = array(
@@ -388,7 +412,9 @@ function _learning_registry_get_resource_data(&$node) {
 			"dateCreated" => $date_created,
 			"keywords" => $keywords,
 			"description" => $description,
-			"educationalAlignment" =>  $educational_alignment,
+			"educationalAlignment" => $educational_alignment,
+			"subjects" => $subjects,
+			"learningResourceType" => $resourse_type,
 		),
 	),
   );
