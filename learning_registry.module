@@ -275,6 +275,11 @@ function _learning_registry_bulk_operations_delete($nids) {
  *   An array of the term names
  */
 function learning_registry_extract_keywords($node) {
+	$vocabularies = array();
+	$vocab_st = variable_get('learning_registry_standarts-term-select', null) ? taxonomy_vocabulary_load(variable_get('learning_registry_standarts-term-select', "")) : "";
+	$vocabularies[] = is_object($vocab_st) ? $vocab_st->vid : "";
+	$vocab_lev = variable_get('learning_registry_levels-term-select', null) ? taxonomy_vocabulary_load(variable_get('learning_registry_levels-term-select', "")) : "";
+	$vocabularies[] = is_object($vocab_lev) ? $vocab_lev->vid : "";
   $keys = array();
   foreach (field_info_instances('node', $node->type) as $instance) {
     $field_name = $instance['field_name'];
@@ -306,7 +311,17 @@ function learning_registry_extract_keywords($node) {
       }
     }
   }
-  return $keys;
+  $result = array();
+  foreach($vocabularies as $vid){
+	  $terms = taxonomy_get_tree($vid);
+		foreach($terms as $term){
+		 if(in_array($term->name, $keys)){
+			$result[] = $term->name;
+		 }
+		}
+	  }
+  $keywords = array_unique($result);
+  return $keywords;
 }
 
 /**

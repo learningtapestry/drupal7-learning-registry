@@ -320,10 +320,52 @@ function _learning_registry_get_resource_data(&$node) {
 
   // Set the submitter.
   $submitter = variable_get('learning_registry_submitter', NULL);
+  $keywords = learning_registry_extract_keywords($node); 
+  $educational_alignment = array(); 
+  if(variable_get('learning_registry_standarts-select', "none") == 0){
+	$vocab_st = variable_get('learning_registry_standarts-term-select', null) ? taxonomy_vocabulary_load(variable_get('learning_registry_standarts-term-select', "")) : "";
+	$terms = taxonomy_get_tree($vocab_st->vid);
+	$target_name_st = is_object($vocab_st) ? $vocab_st->name : "";
+	$educational_alignment[] = array(
+				"type" => "http://schema.org/CreativeWork",
+				"properties" => array(
+					"alignmentType" => "teaches",
+					"educationalFramework" => variable_get('learning_registry_standarts-framework', ""),
+					"targetName" => $target_name_st,
+				),
+	); 
+  }
+  else if(variable_get('learning_registry_standarts-select', "none") == 1){
+	$educational_alignment[] = array(
+				"type" => "http://schema.org/CreativeWork",
+				"properties" => array(
+					"alignmentType" => "teaches",
+					"targetName" => variable_get('learning_registry_standarts-variable', ""),
+				),
+	);
+  }
+  if(variable_get('learning_registry_levels-select', "none") == 0){
+	$vocab_lev = variable_get('learning_registry_levels-term-select', null) ? taxonomy_vocabulary_load(variable_get('learning_registry_levels-term-select', "")) : "";
+	$target_name_lev = is_object($vocab_lev) ? $vocab_lev->name : "";
+	$educational_alignment[] = array(
+				"type" => "http://schema.org/CreativeWork",
+				"properties" => array(
+					"alignmentType" => "teaches",
+					"educationalFramework" => variable_get('learning_registry_levels-framework', ""),
+					"targetName" => $target_name_lev,
+				),
+	); 
+  }
+  else if(variable_get('learning_registry_levels-select', "none") == 1){
+	$educational_alignment[] = array(
+				"type" => "http://schema.org/CreativeWork",
+				"properties" => array(
+					"alignmentType" => "teaches",
+					"targetName" => variable_get('learning_registry_levels-variable', ""),
+				),
+	); 
+  }
   
-  
-  $keywords = learning_registry_extract_keywords($node);
-
   $resource_data = array(
 	"items"  =>  array(
 		"type" => "http://schema.org/CreativeWork",
@@ -346,6 +388,7 @@ function _learning_registry_get_resource_data(&$node) {
 			"dateCreated" => $date_created,
 			"keywords" => $keywords,
 			"description" => $description,
+			"educationalAlignment" =>  $educational_alignment,
 		),
 	),
   );
