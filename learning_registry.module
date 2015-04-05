@@ -313,13 +313,15 @@ function learning_registry_extract_keywords($node) {
   }
   $result = array();
   foreach($vocabularies as $vid){
-	  $terms = taxonomy_get_tree($vid);
+	if(is_int($vid)){
+	    $terms = taxonomy_get_tree($vid);
 		foreach($terms as $term){
 		 if(in_array($term->name, $keys)){
 			$result[] = $term->name;
 		 }
 		}
-	  }
+	}
+  }
   $keywords = array_unique($result);
   return $keywords;
 }

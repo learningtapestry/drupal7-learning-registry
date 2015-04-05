@@ -324,7 +324,6 @@ function _learning_registry_get_resource_data(&$node) {
   $educational_alignment = array(); 
   if(variable_get('learning_registry_standarts-select', "none") == 0){
 	$vocab_st = variable_get('learning_registry_standarts-term-select', null) ? taxonomy_vocabulary_load(variable_get('learning_registry_standarts-term-select', null)) : "";
-	$terms = taxonomy_get_tree($vocab_st->vid);
 	$target_name_st = is_object($vocab_st) ? $vocab_st->name : "";
 	$educational_alignment[] = array(
 				"type" => "http://schema.org/CreativeWork",
